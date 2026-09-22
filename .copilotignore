@@ -1,0 +1,5 @@
+# Ngăn chặn AI Agent lập chỉ mục và đọc các mã bí mật hoặc môi trường
+.env*
+src/main/resources/application-dev.yml
+src/main/resources/application-prod.yml
+secrets/
