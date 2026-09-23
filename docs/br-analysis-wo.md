@@ -1,6 +1,6 @@
 # Phân tích Yêu cầu Nghiệp vụ (BR Analysis) - Outage Work Order
 
-Dịch vụ Outage Work Order là một microservice cốt lõi thuộc phân hệ Outage Management System (OMS)[cite: 6]. API này cung cấp các giao thức RESTful để tạo, quản lý và theo dõi vòng đời của các sự kiện mất điện trên lưới điện. Tài liệu này bóc tách yêu cầu thô từ Product Owner (PO) thành các đặc tả kỹ thuật có thể thực thi.
+Dịch vụ Outage Work Order là một microservice cốt lõi thuộc phân hệ Outage Management System (OMS). API này cung cấp các giao thức RESTful để tạo, quản lý và theo dõi vòng đời của các sự kiện mất điện trên lưới điện. Tài liệu này bóc tách yêu cầu thô từ Product Owner (PO) thành các đặc tả kỹ thuật có thể thực thi.
 
 ## Yêu cầu thô ban đầu (Raw Business Requirement)
 
@@ -10,14 +10,14 @@ Dịch vụ Outage Work Order là một microservice cốt lõi thuộc phân h�
 
 ## 1. Danh sách Thực thể (Entities & Properties)
 
-Dựa trên yêu cầu nghiệp vụ, hệ thống OMS quản lý thực thể chính sau[cite: 6, 7]:
+Dựa trên yêu cầu nghiệp vụ, hệ thống OMS quản lý thực thể chính sau:
 
 **Thực thể `OutageWorkOrder`:**
 - `id` (UUID): Định danh duy nhất của phiếu sự cố.
 - `equipment_id` (String): Mã định danh thiết bị lưới điện (ví dụ: máy biến áp, đường dây).
 - `description` (String): Mô tả chi tiết về sự kiện mất điện.
-- `priority` (Enum): Mức độ nghiêm trọng (`LOW`, `MEDIUM`, `HIGH`, `CRITICAL`)[cite: 4].
-- `status` (Enum): Vòng đời xử lý (`Open` -> `InProgress` -> `Done`)[cite: 4].
+- `priority` (Enum): Mức độ nghiêm trọng (`LOW`, `MEDIUM`, `HIGH`, `CRITICAL`).
+- `status` (Enum): Vòng đời xử lý (`Open` -> `InProgress` -> `Done`).
 - `created_at` (Timestamp): Thời điểm ghi nhận sự cố.
 - `resolved_at` (Timestamp): Thời điểm khắc phục xong (dùng để tính toán thời gian mất điện).
 
@@ -28,11 +28,11 @@ Dựa trên yêu cầu nghiệp vụ, hệ thống OMS quản lý thực thể c
 > [!WARNING]
 > **Rủi ro Đồng bộ Dữ liệu (Data Integration Risk):**
 > PO yêu cầu dữ liệu phải được đồng bộ liên tục về Nền tảng Dữ liệu trung tâm để tính toán SAIDI/SAIFI. 
-> **Câu hỏi cho PO & Data Team:** Độ trễ (latency) tối đa cho phép từ khi phiếu cập nhật trạng thái đến khi dữ liệu có mặt trên Kafka là bao nhiêu? (Đề xuất: Sử dụng Debezium CDC để đảm bảo độ trễ dưới 10 giây)[cite: 6].
+> **Câu hỏi cho PO & Data Team:** Độ trễ (latency) tối đa cho phép từ khi phiếu cập nhật trạng thái đến khi dữ liệu có mặt trên Kafka là bao nhiêu? (Đề xuất: Sử dụng Debezium CDC để đảm bảo độ trễ dưới 10 giây).
 
 > [!IMPORTANT]
 > **Quy tắc Chuyển trạng thái (State Transition):**
-> **Xác nhận với PO:** Vòng đời phiếu sự cố có cho phép chuyển ngược trạng thái (ví dụ từ `Done` quay lại `InProgress` nếu phát hiện lỗi chưa khắc phục triệt để) hay bắt buộc tuân thủ luồng một chiều (One-way)[cite: 4]?
+> **Xác nhận với PO:** Vòng đời phiếu sự cố có cho phép chuyển ngược trạng thái (ví dụ từ `Done` quay lại `InProgress` nếu phát hiện lỗi chưa khắc phục triệt để) hay bắt buộc tuân thủ luồng một chiều (One-way)?
 
 > [!NOTE]
 > **Phân quyền Truy cập (RBAC):**
@@ -43,10 +43,10 @@ Dựa trên yêu cầu nghiệp vụ, hệ thống OMS quản lý thực thể c
 
 ## 3. Phân rã Kiến trúc 3 Tầng (Architectural Decomposition)
 
-Phân rã hệ thống thành 3 lớp để định hướng quá trình sinh mã cho AI Copilot[cite: 7].
+Phân rã hệ thống thành 3 lớp để định hướng quá trình sinh mã cho AI Copilot.
 
 | Tầng (Layer) | Bóc tách Chi tiết (Decomposition details) |
 | :--- | :--- |
 | **UI Layer** | - **Outage Reporting Form:** Form nhập liệu cho thiết bị di động (nhập mã thiết bị, chọn mức độ ưu tiên).<br>- **Dispatcher Dashboard:** Bảng theo dõi thời gian thực dành cho điều độ viên, hiển thị danh sách các sự cố đang `Open` và `InProgress`. |
-| **Data Layer** | - Cơ sở dữ liệu: PostgreSQL lưu trữ bảng `outage_work_orders`[cite: 6].<br>- Change Data Capture: Cấu hình Debezium lắng nghe bảng này để phát ra (emit) các sự kiện thay đổi dữ liệu lên Apache Kafka[cite: 6]. |
-| **API Layer** | - `POST /api/v1/workorders`: Tiếp nhận báo cáo sự cố mất điện mới.<br>- `PATCH /api/v1/workorders/{id}/status`: Cập nhật trạng thái vòng đời.<br>- Bắt buộc tuân thủ chuẩn lỗi RFC 7807[cite: 5]. |
+| **Data Layer** | - Cơ sở dữ liệu: PostgreSQL lưu trữ bảng `outage_work_orders`.<br>- Change Data Capture: Cấu hình Debezium lắng nghe bảng này để phát ra (emit) các sự kiện thay đổi dữ liệu lên Apache Kafka. |
+| **API Layer** | - `POST /api/v1/workorders`: Tiếp nhận báo cáo sự cố mất điện mới.<br>- `PATCH /api/v1/workorders/{id}/status`: Cập nhật trạng thái vòng đời.<br>- Bắt buộc tuân thủ chuẩn lỗi RFC 7807. |

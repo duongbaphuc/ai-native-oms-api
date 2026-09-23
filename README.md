@@ -4,18 +4,18 @@
 [![Java Version](https://img.shields.io/badge/Java-17%2B-blue)](#)
 [![Spring Boot](https://img.shields.io/badge/Spring%20Boot-3.3-success)](#)
 
-Dịch vụ Outage Work Order là một microservice cốt lõi thuộc phân hệ Outage Management System (OMS)[cite: 6]. API này cung cấp các giao thức RESTful để tạo, quản lý và theo dõi vòng đời của các sự kiện mất điện trên lưới điện.
+Dịch vụ Outage Work Order là một microservice cốt lõi thuộc phân hệ Outage Management System (OMS). API này cung cấp các giao thức RESTful để tạo, quản lý và theo dõi vòng đời của các sự kiện mất điện trên lưới điện.
 
-Dự án áp dụng phương pháp luận **AI-Native SDLC**, sử dụng GitHub Copilot dưới sự ràng buộc chặt chẽ của kỹ thuật thiết kế ngữ cảnh (Context Engineering)[cite: 1, 5].
+Dự án áp dụng phương pháp luận **AI-Native SDLC**, sử dụng GitHub Copilot dưới sự ràng buộc chặt chẽ của kỹ thuật thiết kế ngữ cảnh (Context Engineering).
 
 ## Kiến trúc Tổng quan (Architecture Overview)
 
-- **Framework:** Java 17, Spring Boot 3.3[cite: 8].
+- **Framework:** Java 17, Spring Boot 3.3.
 - **Data Store:** H2 Database (In-memory) - Tối ưu cho môi trường Lab/Demo.
-- **Thiết kế API:** RESTful tuân thủ chuẩn RFC 7807 (Problem Details)[cite: 5, 8].
+- **Thiết kế API:** RESTful tuân thủ chuẩn RFC 7807 (Problem Details).
 
 > [!IMPORTANT]
-> **Chính sách Phát triển (Spec-Driven):** Dự án tuân thủ nguyên tắc không sinh mã nguồn tính năng nếu chưa phê duyệt tài liệu đặc tả (Domain Model & API Spec)[cite: 4].
+> **Chính sách Phát triển (Spec-Driven):** Dự án tuân thủ nguyên tắc không sinh mã nguồn tính năng nếu chưa phê duyệt tài liệu đặc tả (Domain Model & API Spec).
 
 ## Yêu cầu Hệ thống (Prerequisites)
 
