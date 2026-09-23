@@ -48,5 +48,34 @@ public class GlobalExceptionHandler {
         
         return problem;
     }
+    / 403 — @PreAuthorize fail
+    @ExceptionHandler(AccessDeniedException.class)
+    public ProblemDetail handleAccessDenied(AccessDeniedException ex) {
+        log.warn("Access denied");
+        ProblemDetail problem = ProblemDetail.forStatusAndDetail(HttpStatus.FORBIDDEN, "Access Denied");
+        problem.setType(URI.create("https://api.oms.gpc.com/errors/forbidden"));
+        return problem;
+    }
+
+    // 400 — JSON malformed hoặc enum value không hợp lệ (vd. priority: "SUPER_HIGH")
+    @ExceptionHandler(HttpMessageNotReadableException.class)
+    public ProblemDetail handleMalformedJson(HttpMessageNotReadableException ex) {
+        log.warn("Malformed request body");
+        ProblemDetail problem = ProblemDetail.forStatusAndDetail(HttpStatus.BAD_REQUEST, "Malformed Request Body");
+        problem.setType(URI.create("https://api.oms.gpc.com/errors/validation"));
+        problem.setProperty("invalidParams",
+            List.of(Map.of("name", "body", "reason", "Request body is malformed or contains an invalid enum value")));
+        return problem;
+    }
+
+    // 500 — fallback cuối cùng, không lộ chi tiết nội bộ
+    @ExceptionHandler(Exception.class)
+    public ProblemDetail handleUnexpected(Exception ex) {
+        log.error("Unexpected error", ex); // full stacktrace CHỈ ở server log
+        ProblemDetail problem = ProblemDetail.forStatusAndDetail(
+            HttpStatus.INTERNAL_SERVER_ERROR, "An unexpected error occurred");
+        problem.setType(URI.create("https://api.oms.gpc.com/errors/internal"));
+        return problem;
+    }
 }
 ```
