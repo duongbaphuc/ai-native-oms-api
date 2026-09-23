@@ -48,7 +48,7 @@ public class GlobalExceptionHandler {
         
         return problem;
     }
-    / 403 — @PreAuthorize fail
+    // 403 — @PreAuthorize fail
     @ExceptionHandler(AccessDeniedException.class)
     public ProblemDetail handleAccessDenied(AccessDeniedException ex) {
         log.warn("Access denied");
