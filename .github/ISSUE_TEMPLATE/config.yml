@@ -1,0 +1,5 @@
+blank_issues_enabled: false
+contact_links:
+  - name: 📖 Tài liệu Dự án (Documentation)
+    url: https://github.com/duongbaphuc/ai-native-oms-api/tree/main/docs
+    about: Xem tài liệu đặc tả Domain Model, API Spec, và các quy tắc phát triển.

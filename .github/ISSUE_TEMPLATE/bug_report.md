@@ -3,6 +3,7 @@ name: Bug Report
 about: Report unintended behavior
 title: '[BUG] '
 labels: 'bug'
+assignees: ''
 ---
 
 ### 1. Problem Description
@@ -16,5 +17,15 @@ labels: 'bug'
 ### 3. Expected vs Actual
 <!-- Expected: ... / Actual: ... kèm log, RFC 7807 body nếu là API lỗi -->
 
-### 4. RCA Link / Notes
-<!-- Link spec liên quan: docs/domain-model.md, docs/api-spec.md. Ghi chú môi trường: Java/Maven/H2 hay PostgreSQL -->
+### 4. Environment
+- **Java Version:**
+- **Maven Version:**
+- **OS:**
+- **Database:** H2 (dev) / PostgreSQL (prod)
+- **Branch/Commit:**
+
+### 5. RCA Link / Notes
+<!-- Link spec liên quan: docs/domain-model.md, docs/api-spec.md -->
+
+### 6. Screenshots / Logs
+<!-- Đính kèm screenshot hoặc log output nếu có -->
