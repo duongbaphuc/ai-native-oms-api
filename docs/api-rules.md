@@ -10,3 +10,5 @@
 
 ## 3. Xác thực Dữ liệu
 - Mọi payload đi vào Controller phải được kiểm tra bằng các annotation tiêu chuẩn (`@Valid`, `@NotNull`)[cite: 8].
+- Strict schema: `@JsonIgnoreProperties(ignoreUnknown = false)` hoặc `additionalProperties: false` — reject field lạ, không silently bỏ qua.
+- Auth per endpoint: mọi endpoint khai báo rõ `permitAll` hay `hasRole(...)` trong spec + code `@PreAuthorize`. Không endpoint "ngầm" public.

@@ -15,3 +15,10 @@ Các nguyên tắc này thiết lập ranh giới phòng thủ (Guardrails) ch�
 ## 3. Kiểm soát Truy cập (RBAC)
 - Xác minh tính toàn vẹn của mọi payload từ client[cite: 8].
 - Định nghĩa rõ các role truy cập bằng các annotation bảo mật (ví dụ: `@PreAuthorize("hasRole('TECHNICIAN')")`)[cite: 8].
+
+## 4. PII & Log hygiene
+- Không log email/phone/password/toàn bộ payload. Log chỉ id + status + correlation id.
+- Lỗi trả client theo RFC 7807, không lộ stack trace / SQL message.
+
+## 5. Prompt hygiene
+- Không paste credentials, PII khách hàng, secret vào prompt Copilot. Secret chỉ sống trong env / Secret Manager, exclusion file chỉ là convenience client-side.

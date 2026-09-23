@@ -3,6 +3,7 @@
 
 # Log files
 *.log
+*.pdf
 
 # Package Files #
 *.jar
