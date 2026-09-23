@@ -16,7 +16,7 @@ Toàn bộ AI prompt phải trích dẫn trực tiếp các đường dẫn (pat
 - **Phản hồi Thành công (201 Created):**
   ```json
   {
-    "id": "WO-10432",
+    "id": "550e8400-e29b-41d4-a716-446655440000",
     "equipmentId": "EQ-77",
     "description": "Máy biến áp T3 khu vực Bình Thạnh bị quá tải, mất điện toàn bộ tuyến",
     "priority": "HIGH",
@@ -33,7 +33,7 @@ Toàn bộ AI prompt phải trích dẫn trực tiếp các đường dẫn (pat
   ```json
   [
     {
-      "id": "WO-10432",
+      "id": "550e8400-e29b-41d4-a716-446655440000",
       "equipmentId": "EQ-77",
       "description": "Máy biến áp T3 khu vực Bình Thạnh bị quá tải",
       "priority": "HIGH",

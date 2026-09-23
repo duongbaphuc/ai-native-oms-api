@@ -17,6 +17,16 @@ DRAFT ONLY — scoring target, chưa được wire vào application.
 Tài liệu này định nghĩa toàn bộ Data Transfer Objects (DTOs) sẽ được implement cho dự án.
 Mọi field, kiểu dữ liệu và annotation phải khớp với [`docs/api-spec.md`](../api-spec.md) và [`docs/domain-model.md`](../domain-model.md).
 
+## Target Files
+
+| # | File | Path | Action |
+|---|---|---|---|
+| 1 | `Priority.java` | `src/main/java/com/gpc/oms/domain/Priority.java` | NEW |
+| 2 | `WorkOrderStatus.java` | `src/main/java/com/gpc/oms/domain/WorkOrderStatus.java` | NEW |
+| 3 | `WorkOrderRequest.java` | `src/main/java/com/gpc/oms/dto/WorkOrderRequest.java` | NEW |
+| 4 | `WorkOrderStatusRequest.java` | `src/main/java/com/gpc/oms/dto/WorkOrderStatusRequest.java` | NEW |
+| 5 | `WorkOrderResponse.java` | `src/main/java/com/gpc/oms/dto/WorkOrderResponse.java` | NEW |
+
 ---
 
 ## 1. Domain Enums (Shared)
@@ -44,6 +54,11 @@ public enum Priority {
 Khai báo trong `domain-model.md` — máy trạng thái đơn hướng (one-way state machine).
 `@JsonValue` serialise ra chuỗi khớp api-spec.md (ví dụ: `"Open"` thay vì `"OPEN"`).
 
+**State Machine (strict linear):**
+1. `OPEN` → `IN_PROGRESS` ✅
+2. `IN_PROGRESS` → `DONE` ✅
+3. Mọi chuyển đổi khác → ❌ return `false`
+
 ```java
 // AI Provenance: generated from docs/domain-model.md §Invariants, docs/api-spec.md §4
 package com.gpc.oms.domain;
@@ -64,7 +79,7 @@ public enum WorkOrderStatus {
 
     /**
      * Kiểm tra tính hợp lệ của chuyển trạng thái.
-     * Bắt buộc: Open → InProgress → Done. Lùi trạng thái bị cấm tuyệt đối.
+     * Bắt buộc: OPEN → IN_PROGRESS → DONE. Lùi hoặc nhảy cóc bị cấm tuyệt đối.
      */
     public boolean canTransitionTo(WorkOrderStatus next) {
         return switch (this) {
@@ -77,7 +92,7 @@ public enum WorkOrderStatus {
 ```
 
 > [!IMPORTANT]
-> `canTransitionTo()` được gọi tại **domain/service layer**, không phải controller. Vi phạm → ném `InvalidStateTransitionException` → handler trả về **422 Unprocessable Entity** (RFC 7807).
+> `canTransitionTo()` là **source-of-truth** duy nhất cho state machine logic. Được gọi bởi `WorkOrder.advanceStatus()` tại **domain/entity layer**, không phải controller. Vi phạm → ném `IllegalStateException` → Service catch → `ResponseStatusException(422)` → `GlobalExceptionHandler` trả **422 Unprocessable Entity** (RFC 7807).
 
 ---
 
@@ -85,7 +100,16 @@ public enum WorkOrderStatus {
 
 ### 2.1 `WorkOrderRequest` — `POST /api/v1/workorders`
 
+**Target file:** `src/main/java/com/gpc/oms/dto/WorkOrderRequest.java`  
 Nguồn spec: [`api-spec.md §1`](../api-spec.md).
+
+**Schema Table:**
+
+| Field | Type | Annotation | Description |
+|---|---|---|---|
+| `equipmentId` | `String` | `@NotBlank`, `@Size(max=50)` | Mã thiết bị lưới điện |
+| `description` | `String` | `@NotBlank`, `@Size(max=500)` | Mô tả sự cố |
+| `priority` | `Priority` | `@NotNull` | Mức độ: LOW, MEDIUM, HIGH, CRITICAL |
 
 **Ràng buộc:**
 - `@JsonIgnoreProperties(ignoreUnknown = false)` → field lạ bị reject với 400.
@@ -143,13 +167,20 @@ public record WorkOrderRequest(
 
 ### 2.2 `WorkOrderStatusRequest` — `PATCH /api/v1/workorders/{id}/status`
 
+**Target file:** `src/main/java/com/gpc/oms/dto/WorkOrderStatusRequest.java`  
 Nguồn spec: [`api-spec.md §4`](../api-spec.md).
+
+**Schema Table:**
+
+| Field | Type | Annotation | Description |
+|---|---|---|---|
+| `status` | `WorkOrderStatus` | `@NotNull` | Trạng thái mới: Open, InProgress, Done |
 
 **Ràng buộc:**
 - Chỉ có 1 field duy nhất: `status`.
 - `@JsonIgnoreProperties(ignoreUnknown = false)` — field lạ bị reject.
 - `@NotNull` — thiếu field → 400.
-- Validation logic chuyển trạng thái (one-way) nằm ở **service layer**, không phải DTO.
+- Validation logic chuyển trạng thái (one-way) nằm ở **Entity layer** (`advanceStatus()`), không phải DTO.
 
 ```java
 // AI Provenance: generated from docs/api-spec.md §4, docs/domain-model.md §Invariants
@@ -181,12 +212,25 @@ public record WorkOrderStatusRequest(
 
 ### 3.1 `WorkOrderResponse` — Dùng chung cho tất cả endpoints
 
+**Target file:** `src/main/java/com/gpc/oms/dto/WorkOrderResponse.java`  
 Nguồn spec: [`api-spec.md §1–§4`](../api-spec.md).
+
+**Schema Table:**
+
+| Field | Type | Nullable | Description |
+|---|---|---|---|
+| `id` | `UUID` | No | Định danh hệ thống |
+| `equipmentId` | `String` | No | Mã thiết bị |
+| `description` | `String` | No | Mô tả sự cố |
+| `priority` | `Priority` | No | Mức độ ưu tiên |
+| `status` | `WorkOrderStatus` | No | Trạng thái vòng đời (serialize: "Open"/"InProgress"/"Done") |
+| `createdAt` | `Instant` | No | Thời điểm tạo |
+| `resolvedAt` | `Instant` | Yes | Thời điểm giải quyết (null nếu chưa Done) |
 
 **Ràng buộc:**
 - Immutable record — không có setter.
 - Fields khớp 1:1 với api-spec.md response schema.
-- `resolvedAt` là `Instant` (nullable) — tự động gán khi `status = Done`.
+- `resolvedAt` là `Instant` (nullable) — tự động gán khi `status = DONE`.
 - Không expose JPA entity trực tiếp ra ngoài — luôn convert sang DTO này.
 
 ```java
@@ -194,6 +238,7 @@ Nguồn spec: [`api-spec.md §1–§4`](../api-spec.md).
 package com.gpc.oms.dto;
 
 import com.gpc.oms.domain.Priority;
+import com.gpc.oms.domain.WorkOrder;
 import com.gpc.oms.domain.WorkOrderStatus;
 
 import java.time.Instant;
@@ -206,8 +251,30 @@ public record WorkOrderResponse(
     Priority         priority,
     WorkOrderStatus  status,
     Instant          createdAt,
-    Instant          resolvedAt   // null cho đến khi status = Done
-) {}
+    Instant          resolvedAt   // null cho đến khi status = DONE
+) {
+
+    /**
+     * Factory method: convert JPA Entity → Response DTO.
+     * Được gọi bởi WorkOrderService sau mỗi thao tác CRUD.
+     * 
+     * Step-by-step:
+     * 1. Nhận WorkOrder entity
+     * 2. Extract tất cả 7 fields qua getter
+     * 3. Return new WorkOrderResponse record
+     */
+    public static WorkOrderResponse from(WorkOrder entity) {
+        return new WorkOrderResponse(
+            entity.getId(),
+            entity.getEquipmentId(),
+            entity.getDescription(),
+            entity.getPriority(),
+            entity.getStatus(),
+            entity.getCreatedAt(),
+            entity.getResolvedAt()
+        );
+    }
+}
 ```
 
 **Ví dụ response (201 Created):**
@@ -235,7 +302,7 @@ public record WorkOrderResponse(
 | `WorkOrderRequest` | *(extra field)* | `ignoreUnknown=false` | Field không khai báo → **400** |
 | `WorkOrderStatusRequest` | `status` | `@NotNull` | Null hoặc giá trị lạ → **400** |
 | `WorkOrderStatusRequest` | *(extra field)* | `ignoreUnknown=false` | Field không khai báo → **400** |
-| `WorkOrderStatusRequest` | `status` | *(service layer)* | Chuyển trạng thái ngược → **422** |
+| `WorkOrderStatusRequest` | `status` | *(Entity layer)* | Chuyển trạng thái ngược/nhảy cóc → **422** |
 
 ---
 
@@ -244,7 +311,10 @@ public record WorkOrderResponse(
 - [ ] `WorkOrderRequest` dùng Java `record`, KHÔNG dùng `class`.
 - [ ] `@JsonIgnoreProperties(ignoreUnknown = false)` có mặt trên tất cả Request DTOs.
 - [ ] `WorkOrderResponse` KHÔNG có `@JsonIgnoreProperties` — response chỉ có chiều ra.
+- [ ] `WorkOrderResponse.from(WorkOrder)` static factory method đã được implement.
 - [ ] `WorkOrderStatus` serialize ra `"Open"` / `"InProgress"` / `"Done"` (dùng `@JsonValue`).
+- [ ] Enum convention: UPPER_SNAKE nội bộ (`OPEN`, `IN_PROGRESS`, `DONE`).
 - [ ] `resolvedAt` có kiểu `Instant`, KHÔNG phải `String` hay `LocalDateTime`.
 - [ ] Không có field nào tự thêm ngoài `api-spec.md`.
-- [ ] `canTransitionTo()` được kiểm tra ở service/domain, không ở DTO hay controller.
+- [ ] `canTransitionTo()` là source-of-truth, được kiểm tra ở Entity `advanceStatus()`, không ở DTO hay controller.
+- [ ] DTO class name thống nhất: `WorkOrderStatusRequest` (KHÔNG `StatusUpdateRequest`).
