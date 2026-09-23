@@ -15,10 +15,10 @@ public class WorkOrderController {
     public WorkOrderController(WorkOrderRepository repo) { this.repo = repo; }
 
     @PostMapping
-    @PreAuthorize("hasRole('TECHNICIAN')")
+    @PreAuthorize("hasRole('TECHNICIAN') or hasRole('DISPATCHER')")
     public ResponseEntity<WorkOrderResponse> create(@Valid @RequestBody WorkOrderRequest req) {
         log.info("create workorder equipmentIdHash={}", req.equipmentId().hashCode());
-        WorkOrder e = new WorkOrder(req.equipmentId(), req.priority());
+        WorkOrder e = new WorkOrder(req.equipmentId(), req.description(), req.priority());
         return ResponseEntity.status(201).body(WorkOrderResponse.from(repo.save(e)));
     }
 }
