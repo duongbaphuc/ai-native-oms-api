@@ -61,7 +61,7 @@ Dự án xác định 3 vai trò chính trong hệ thống điều hành mất �
 
 | HTTP Method | URI Pattern | Vai trò Cho phép (RBAC Rule) | Annotation Ràng buộc |
 |---|---|---|---|
-| `POST` | `/api/v1/workorders` | `DISPATCHER`, `ADMIN` | `@PreAuthorize("hasAnyRole('DISPATCHER', 'ADMIN')")` |
+| `POST` | `/api/v1/workorders` | `DISPATCHER`, `TECHNICIAN`, `ADMIN` | `@PreAuthorize("hasAnyRole('DISPATCHER', 'TECHNICIAN', 'ADMIN')")` |
 | `GET` | `/api/v1/workorders` | `DISPATCHER`, `TECHNICIAN`, `ADMIN` | `@PreAuthorize("hasAnyRole('DISPATCHER', 'TECHNICIAN', 'ADMIN')")` |
 | `GET` | `/api/v1/workorders/{id}` | `DISPATCHER`, `TECHNICIAN`, `ADMIN` | `@PreAuthorize("hasAnyRole('DISPATCHER', 'TECHNICIAN', 'ADMIN')")` |
 | `PATCH` | `/api/v1/workorders/{id}/status`| `TECHNICIAN`, `ADMIN` | `@PreAuthorize("hasAnyRole('TECHNICIAN', 'ADMIN')")` |
@@ -152,10 +152,10 @@ Mọi endpoint trong dự án bắt buộc phải có tối thiểu 3 test case 
 @WithMockUser(username = "dispatcher-01", roles = {"DISPATCHER"})
 void createWorkOrder_withDispatcherRole_shouldReturn201() throws Exception { ... }
 
-// 2. Forbidden case: Sai quyền TECHNICIAN gọi API POST tạo WorkOrder -> 403 Forbidden
+// 2. Forbidden case: Sai quyền (vd: GUEST) gọi API POST tạo WorkOrder -> 403 Forbidden
 @Test
-@WithMockUser(username = "tech-01", roles = {"TECHNICIAN"})
-void createWorkOrder_withTechnicianRole_shouldReturn403Forbidden() throws Exception { ... }
+@WithMockUser(username = "guest-01", roles = {"GUEST"})
+void createWorkOrder_withGuestRole_shouldReturn403Forbidden() throws Exception { ... }
 
 // 3. Unauthorized case: Không truyền token xác thực -> 401 Unauthorized
 @Test
