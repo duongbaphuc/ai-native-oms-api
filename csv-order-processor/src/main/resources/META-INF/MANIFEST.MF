@@ -1,0 +1,6 @@
+Manifest-Version: 1.0
+Implementation-Title: CSV Order Processor Library
+Implementation-Version: 1.0.0
+Implementation-Vendor: GPC OMS Architecture & Standards Team
+Built-By: GPC Architecture
+Build-Jdk-Spec: 17
