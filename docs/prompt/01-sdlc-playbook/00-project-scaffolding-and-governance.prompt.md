@@ -1,4 +1,4 @@
-# Prompt Giai Đoạn 0: Khởi Tạo Khung Dự Án, AI Governance & Hành Lang An Toàn (Day -1 / Day 0)
+# Prompt Giai Đoạn 0: Khởi Tạo Khung Dự Án, AI Governance & Hành Lang An Toàn (Project Inception)
 
 ```markdown
 # ROLE:

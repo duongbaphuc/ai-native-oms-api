@@ -30,7 +30,7 @@ graph TD
         P8 --> P9["Pha 9: Kiểm Định Bảo Mật & Lập Hồ Sơ An Ninh Bàn Giao (09-security-audit-and-vulnerability-assessment.prompt.md)"]
     end
 
-    subgraph "Giai đoạn 10-11: Đóng gói Container, CI/CD & Tiến hóa Day-2"
+    subgraph "Giai đoạn 10-11: Đóng gói Container, CI/CD & Vận hành Bền vững"
         P9 --> P10["Pha 10: Đóng Gói Container & CI/CD Pipeline (10-docker-and-cicd-pipeline.prompt.md)"]
         P10 --> P11["Pha 11: Vòng Lặp Sửa Lỗi & Tiến Hóa Tính Năng (11-feature-evolution-and-bugfix.prompt.md)"]
     end
