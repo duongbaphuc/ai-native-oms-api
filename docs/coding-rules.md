@@ -1,15 +1,15 @@
 # Quy Chuẩn Lập Trình Java & Cẩm Nang Design Patterns (Oracle Senior Java Standards)
 
 <!--
-Role: Principal Java Software Architect & Senior Java Engineer at Oracle
-Task: Define production-grade Java 17+ coding rules, JVM/GC optimization standards, and GoF design pattern guidelines
+Role: Principal Java Software Architect & Senior Java Engineer at Oracle (Oracle Core Platform & OpenJDK Team)
+Task: Production-grade Java 17+ coding rules, JVM/GC optimization standards, and GoF design pattern guidelines with Good vs Bad Practice comparisons
 Context files: docs/domain-model.md, docs/api-spec.md, docs/security-rules.md, docs/internal-coding-standards.md
 Constraints: Java 17 LTS, Spring Boot 3.3, Zero-Lombok, 100% Constructor Injection, RFC 7807 compliance, Pure Java Records
 -->
 
 Tài liệu này xác lập bộ quy chuẩn viết mã (Coding Standards) và hướng dẫn ứng dụng các Mẫu Thiết Kế (Design Patterns) cho toàn bộ dự án, được biên soạn theo phong cách và tư duy của **Senior Java Engineer tại Oracle (Oracle Core Platform & JDK Team)**.
 
-Mọi dòng mã do con người hay AI Coding Agents (GitHub Copilot / Cursor) tạo ra đều bắt buộc phải tuân thủ nghiêm ngặt các nguyên tắc dưới đây.
+Mọi dòng mã do con người hay AI Coding Agents (GitHub Copilot / Cursor / Claude) tạo ra đều bắt buộc phải tuân thủ nghiêm ngặt các nguyên tắc dưới đây.
 
 ---
 
@@ -39,85 +39,253 @@ Mọi dòng mã do con người hay AI Coding Agents (GitHub Copilot / Cursor) t
 
 ---
 
-## 2. Cẩm Nang Ứng Dụng Design Patterns Tối Ưu Hóa Class
+## 2. Cẩm Nang Ứng Dụng Design Patterns Tối Ưu Hóa Class (Good vs Bad Practice)
 
-Việc áp dụng các Design Pattern phải hướng tới mục tiêu tối ưu hóa tính đóng gói, dễ mở rộng, dễ kiểm thử và tiết kiệm tài nguyên:
+Việc áp dụng các Design Pattern phải hướng tới mục tiêu tối ưu hóa tính đóng gói, dễ mở rộng, dễ kiểm thử và tiết kiệm tài nguyên. Dưới đây là đối chiếu chi tiết giữa **Good Practice (Chuẩn Oracle)** và **Bad Practice (Anti-pattern)**:
 
-### 2.1 Static Factory Method Pattern (`of()`, `from()`)
-- **Mục đích:** Thay thế constructors thô, cung cấp tên gọi mang ý nghĩa nghiệp vụ rõ ràng, và đóng gói logic chuyển đổi dữ liệu.
+### 2.1 Static Factory Method Pattern (`from()`, `of()`)
+- **Mục đích:** Thay thế constructors thô, tăng tính biểu đạt ngữ nghĩa (expressive naming), cho phép tái sử dụng đối tượng và đóng gói logic chuyển đổi dữ liệu.
 - **Áp dụng tại:** Tầng DTOs và Value Objects.
-- **Code mẫu chuẩn:**
-  ```java
-  public record WorkOrderResponse(
-      UUID id,
-      String equipmentId,
-      String description,
-      Priority priority,
-      WorkOrderStatus status,
-      Instant createdAt,
-      Instant resolvedAt
-  ) {
-      // Static Factory Method đóng gói logic mapping từ Domain Entity
-      public static WorkOrderResponse from(WorkOrder workOrder) {
-          Objects.requireNonNull(workOrder, "workOrder must not be null");
-          return new WorkOrderResponse(
-              workOrder.getId(),
-              workOrder.getEquipmentId(),
-              workOrder.getDescription(),
-              workOrder.getPriority(),
-              workOrder.getStatus(),
-              workOrder.getCreatedAt(),
-              workOrder.getResolvedAt()
-          );
-      }
-  }
-  ```
+
+#### ❌ BAD PRACTICE (Constructor thô, lộ chi tiết khởi tạo):
+```java
+// BAD: Lộ constructor nhiều tham số, client tự gọi getter rời rạc, không kiểm tra null-safety
+WorkOrderResponse response = new WorkOrderResponse(
+    workOrder.getId(),
+    workOrder.getEquipmentId(),
+    workOrder.getDescription(),
+    workOrder.getPriority(),
+    workOrder.getStatus(),
+    workOrder.getCreatedAt(),
+    workOrder.getResolvedAt()
+);
+```
+
+#### ✅ GOOD PRACTICE (Oracle Standard - Static Factory Method):
+```java
+public record WorkOrderResponse(
+    UUID id,
+    String equipmentId,
+    String description,
+    Priority priority,
+    WorkOrderStatus status,
+    Instant createdAt,
+    Instant resolvedAt
+) {
+    // Static Factory Method đóng gói logic mapping, null-safety và tăng tính biểu đạt
+    public static WorkOrderResponse from(WorkOrder workOrder) {
+        Objects.requireNonNull(workOrder, "workOrder must not be null");
+        return new WorkOrderResponse(
+            workOrder.getId(),
+            workOrder.getEquipmentId(),
+            workOrder.getDescription(),
+            workOrder.getPriority(),
+            workOrder.getStatus(),
+            workOrder.getCreatedAt(),
+            workOrder.getResolvedAt()
+        );
+    }
+}
+```
+
+---
 
 ### 2.2 State Pattern & Strategy Pattern
-- **Mục đích:** Đóng gói toàn bộ máy trạng thái (State Machine) và các quy tắc rẽ nhánh vào chính Enum/State class, triệt tiêu các khối lệnh `if-else` hoặc `switch-case` lộn xộn nằm rải rác ở tầng Service/Controller.
-- **Áp dụng tại:** `WorkOrderStatus.java`.
-- **Code mẫu chuẩn:**
-  ```java
-  public enum WorkOrderStatus {
-      OPEN,
-      IN_PROGRESS,
-      DONE;
+- **Mục đích:** Đóng gói toàn bộ máy trạng thái (State Machine) và các quy tắc rẽ nhánh vào chính Enum/State class, triệt tiêu các khối lệnh `if-else` lồng nhau rải rác ở tầng Service/Controller.
+- **Áp dụng tại:** `WorkOrderStatus.java` và logic chuyển đổi trạng thái của Entity.
 
-      // State Transition Validator đóng gói trọn vẹn quy tắc chuyển đổi
-      public boolean canTransitionTo(WorkOrderStatus target) {
-          if (target == null) {
-              return false;
-          }
-          return switch (this) {
-              case OPEN -> target == IN_PROGRESS;
-              case IN_PROGRESS -> target == DONE;
-              case DONE -> false; // Terminal state - không cho phép chuyển tiếp
-          };
-      }
-  }
-  ```
+#### ❌ BAD PRACTICE (Chuỗi `if-else` phân tán, dễ sót nhánh):
+```java
+// BAD: Service tự kiểm tra trạng thái bằng if-else phức tạp, vi phạm Open-Closed Principle
+if (currentStatus == WorkOrderStatus.OPEN && targetStatus == WorkOrderStatus.IN_PROGRESS) {
+    workOrder.setStatus(targetStatus);
+} else if (currentStatus == WorkOrderStatus.IN_PROGRESS && targetStatus == WorkOrderStatus.DONE) {
+    workOrder.setStatus(targetStatus);
+} else {
+    throw new IllegalStateException("Invalid transition");
+}
+```
 
-### 2.3 Explicit Adapter / Mapper Pattern
+#### ✅ GOOD PRACTICE (Oracle Standard - State Transition Encapsulation):
+```java
+public enum WorkOrderStatus {
+    OPEN,
+    IN_PROGRESS,
+    DONE;
+
+    // Đóng gói trọn vẹn quy tắc chuyển đổi trong Enum, sử dụng Switch Expression hiện đại
+    public boolean canTransitionTo(WorkOrderStatus target) {
+        if (target == null) {
+            return false;
+        }
+        return switch (this) {
+            case OPEN -> target == IN_PROGRESS;
+            case IN_PROGRESS -> target == DONE;
+            case DONE -> false; // Terminal state - không cho phép chuyển tiếp
+        };
+    }
+}
+
+// Trong Domain Aggregate Root:
+public WorkOrder advanceStatus(WorkOrderStatus newStatus) {
+    if (!this.status.canTransitionTo(newStatus)) {
+        throw new IllegalStateException("Invalid state transition from " + this.status + " to " + newStatus);
+    }
+    this.status = newStatus;
+    if (newStatus == WorkOrderStatus.DONE) {
+        this.resolvedAt = Instant.now();
+    }
+    return this;
+}
+```
+
+---
+
+### 2.3 Builder Pattern & Immutable Record Pattern
+- **Mục đích:** Tối ưu hóa việc tạo lập đối tượng nhiều thuộc tính mà vẫn giữ trọn vẹn tính bất biến của dữ liệu.
+- **Áp dụng tại:** Tầng DTOs và cấu hình phân trang.
+
+#### ❌ BAD PRACTICE (Lombok `@Builder` hoặc Mutable JavaBean với setters):
+```java
+// BAD: Class có setters cho phép biến đổi trạng thái sau khi tạo, khó kiểm soát luồng đa luồng
+@Data // LOMBOK BANNED
+public class WorkOrderRequestDTO {
+    private String equipmentId;
+    private String description;
+    private String priority;
+}
+```
+
+#### ✅ GOOD PRACTICE (Oracle Standard - Pure Java 17 Record):
+```java
+// GOOD: Java 17 Record bất biến, ngắn gọn, an toàn đa luồng, Bean Validation chặt chẽ
+public record WorkOrderRequest(
+    @NotBlank(message = "equipmentId must not be blank")
+    @Size(max = 50, message = "equipmentId must not exceed 50 characters")
+    String equipmentId,
+
+    @NotBlank(message = "description must not be blank")
+    @Size(min = 10, max = 500, message = "description must be between 10 and 500 characters")
+    String description,
+
+    @NotNull(message = "priority must not be null")
+    Priority priority
+) {}
+```
+
+---
+
+### 2.4 Explicit Adapter / Mapper Pattern
 - **Mục đích:** Chuyển đổi dữ liệu 1-1 giữa Domain Entity và DTOs mà không dùng reflection.
-- **Nguyên tắc:** 
-  - Cấm sử dụng các thư viện như `ModelMapper`, `Dozer`, `BeanUtils.copyProperties`. Các thư viện này gây overhead lớn về CPU do liên tục inspect metadata qua reflection và dễ sinh lỗi runtime khi tên trường bị lệch mà trình biên dịch không phát hiện được.
-  - Sử dụng phương thức thuần Java (Explicit Mapping qua static methods hoặc dedicated Mapper classes).
+- **Nguyên tắc:** Cấm sử dụng các thư viện như `ModelMapper`, `Dozer`, `BeanUtils.copyProperties`.
 
-### 2.4 Chain of Responsibility Pattern
+#### ❌ BAD PRACTICE (Reflection-heavy Mapper):
+```java
+// BAD: Reflection ngầm, tốn CPU, không bắt được lỗi khi đổi tên field tại thời điểm compile
+BeanUtils.copyProperties(workOrder, responseDTO);
+ModelMapper mapper = new ModelMapper();
+WorkOrderResponse res = mapper.map(workOrder, WorkOrderResponse.class);
+```
+
+#### ✅ GOOD PRACTICE (Oracle Standard - Type-Safe Explicit Mapping):
+```java
+// GOOD: Trình biên dịch kiểm tra kiểu tĩnh (Static Type Checking), tốc độ microsecond, zero-allocation overhead
+public static WorkOrderResponse from(WorkOrder entity) {
+    Objects.requireNonNull(entity, "Entity cannot be null");
+    return new WorkOrderResponse(
+        entity.getId(),
+        entity.getEquipmentId(),
+        entity.getDescription(),
+        entity.getPriority(),
+        entity.getStatus(),
+        entity.getCreatedAt(),
+        entity.getResolvedAt()
+    );
+}
+```
+
+---
+
+### 2.5 Chain of Responsibility Pattern
 - **Mục đích:** Phân tách rạch ròi các khâu xử lý an ninh, xác thực, truy vết và bắt lỗi thành các mắt xích độc lập.
 - **Áp dụng tại:**
   - `SecurityFilterChain` (Dual FilterChain: `@Order(1)` cho H2 Console non-prod, `@Order(2)` cho API chính).
   - `GlobalExceptionHandler` (`@RestControllerAdvice`): Bắt các nhóm ngoại lệ chuyên biệt từ cụ thể nhất (`MethodArgumentNotValidException`) đến tổng quát nhất (`Exception.class`).
 
-### 2.5 Template Method & Orchestration Pattern
-- **Mục đích:** Phân tách rõ trách nhiệm giữa tầng điều phối giao dịch (Service) và tầng nghiệp vụ cốt lõi (Domain Aggregate Root).
-- **Nguyên tắc:**
-  - Service chỉ đóng vai trò **Orchestrator** (Lấy entity từ DB $\rightarrow$ Kích hoạt phương thức nghiệp vụ của entity $\rightarrow$ Lưu lại $\rightarrow$ Chuyển đổi sang Response).
-  - Không bao giờ chuyển đổi trạng thái trực tiếp trong Service bằng setter thô. Entity phải tự bảo vệ tính bất biến (Domain Invariant Encapsulation) qua phương thức `advanceStatus()`.
+#### ✅ GOOD PRACTICE (Oracle Standard - Clean Exception Handling Advice):
+```java
+@RestControllerAdvice
+public class GlobalExceptionHandler {
+    private static final Logger log = LoggerFactory.getLogger(GlobalExceptionHandler.class);
+
+    // Mắt xích #1: Bắt lỗi Validation đầu vào (HTTP 400)
+    @ExceptionHandler(MethodArgumentNotValidException.class)
+    public ProblemDetail handleValidationErrors(MethodArgumentNotValidException ex) {
+        log.warn("Validation failed: {}", ex.getMessage());
+        ProblemDetail problem = ProblemDetail.forStatusAndDetail(HttpStatus.BAD_REQUEST, "Validation Failed");
+        problem.setType(URI.create("urn:problem-type:validation-error"));
+        // Trích xuất invalidParams[] tường minh
+        return problem;
+    }
+
+    // Mắt xích #2: Bắt lỗi vi phạm State Machine (HTTP 422)
+    @ExceptionHandler(IllegalStateException.class)
+    public ProblemDetail handleIllegalState(IllegalStateException ex) {
+        log.warn("Illegal state transition: {}", ex.getMessage());
+        ProblemDetail problem = ProblemDetail.forStatusAndDetail(HttpStatus.UNPROCESSABLE_ENTITY, ex.getMessage());
+        problem.setType(URI.create("urn:problem-type:invalid-state-transition"));
+        return problem;
+    }
+
+    // Mắt xích #3: Chốt chặn an toàn cuối cùng (HTTP 500 - Che giấu stack trace)
+    @ExceptionHandler(Exception.class)
+    public ProblemDetail handleUnexpected(Exception ex) {
+        log.error("Unexpected system error", ex); // Log full stacktrace CHỈ ở server
+        ProblemDetail problem = ProblemDetail.forStatusAndDetail(HttpStatus.INTERNAL_SERVER_ERROR, "An unexpected error occurred");
+        problem.setType(URI.create("urn:problem-type:internal-error"));
+        return problem;
+    }
+}
+```
 
 ---
 
-## 3. Tối Ưu Hóa Bộ Nhớ, Vòng Lặp & Hiệu Năng JVM (GC Optimization)
+### 2.6 Template Method & Orchestration Pattern
+- **Mục đích:** Phân tách rõ trách nhiệm giữa tầng điều phối giao dịch (Service) và tầng nghiệp vụ cốt lõi (Domain Aggregate Root).
+- **Nguyên tắc:**
+  - Service chỉ đóng vai trò **Orchestrator** (Lấy entity từ DB $\rightarrow$ Kích hoạt phương thức nghiệp vụ của entity $\rightarrow$ Lưu lại $\rightarrow$ Chuyển đổi sang Response).
+  - Không bao giờ chuyển đổi trạng thái trực tiếp trong Service bằng setter thô. Entity phải tự bảo vệ tính bất biến qua `advanceStatus()`.
+
+#### ✅ GOOD PRACTICE (Oracle Standard - Orchestration in Service):
+```java
+@Service
+@Transactional
+public class WorkOrderService {
+    private final WorkOrderRepository repository;
+
+    // Constructor Injection tường minh
+    public WorkOrderService(WorkOrderRepository repository) {
+        this.repository = repository;
+    }
+
+    public WorkOrderResponse updateStatus(UUID id, WorkOrderStatus targetStatus) {
+        // 1. Orchestrate: Tìm kiếm entity
+        WorkOrder workOrder = repository.findById(id)
+            .orElseThrow(() -> new ResourceNotFoundException("WorkOrder not found with id: " + id));
+
+        // 2. Delegate: Ủy quyền kiểm tra invariant và chuyển đổi cho Domain Model
+        workOrder.advanceStatus(targetStatus);
+
+        // 3. Persist & Map: Lưu DB và trả về DTO
+        WorkOrder updated = repository.save(workOrder);
+        return WorkOrderResponse.from(updated);
+    }
+}
+```
+
+---
+
+## 3. Tối Ưu Hóa Bộ Nhớ, Vòng Lặp & Hiệu Năng JVM (GC Pressure)
 
 1. **Quản Lý Phạm Vi Biến (Variable Scoping & Escape Analysis):**
    - Khai báo biến trong phạm vi hẹp nhất có thể. Đặt biến sát thời điểm sử dụng đầu tiên.
@@ -130,8 +298,11 @@ Việc áp dụng các Design Pattern phải hướng tới mục tiêu tối ư
 3. **Khởi Tạo Kích Thước Collections (Pre-Sizing Collections):**
    - Khi biết trước số lượng phần tử cần thêm vào `ArrayList`, `HashMap`, hoặc `HashSet`, luôn cung cấp `initialCapacity` để triệt tiêu chi phí cấp phát lại mảng ngầm (Array resizing & copying):
      ```java
-     // Tránh cấp phát thừa và resize nhiều lần
+     // Tránh cấp phát thừa và resize nhiều lần trong bộ nhớ
      List<WorkOrderResponse> result = new ArrayList<>(workOrders.size());
+     for (final WorkOrder wo : workOrders) {
+         result.add(WorkOrderResponse.from(wo));
+     }
      ```
 
 4. **Sử Dụng Stream API Đúng Lúc, Đúng Chỗ:**
