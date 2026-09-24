@@ -212,4 +212,15 @@ class WorkOrderControllerTest {
             .andExpect(status().isForbidden())
             .andExpect(jsonPath("$.type").value("urn:problem-type:forbidden"));
     }
+
+    // Invalid ?status= query value → 400 (F-01: was fallback 500)
+    @Test
+    @WithMockUser(roles = "DISPATCHER")
+    void list_invalidStatusQueryParam_returns400() throws Exception {
+        mockMvc.perform(get("/api/v1/workorders")
+                .param("status", "URGENT"))
+            .andExpect(status().isBadRequest())
+            .andExpect(jsonPath("$.type").value("urn:problem-type:validation-error"))
+            .andExpect(jsonPath("$.invalidParams[0].name").value("status"));
+    }
 }
