@@ -1,0 +1,21 @@
+# Module-Level Implementation Task Prompts (Bản Thảo Kỹ Thuật Theo Từng Phần)
+
+Thư mục này quản lý và lập chỉ mục cho các câu prompt kỹ thuật chi tiết theo từng module chuyên biệt của ứng dụng Outage Work Order API.
+
+Các prompt này được tích hợp ngay phần đầu (header comment `<!-- Role: ... Task: ... Context: ... Constraints: ... -->`) của từng file bản thảo trong `docs/drafts/`.
+
+---
+
+## Danh Mục Bản Thảo & Task Prompts
+
+| Module Nghiệp Vụ | Tệp Bản Thảo Kỹ Thuật Chứa Prompt | Vai Trò Kỹ Thuật (Role) | Nhiệm Vụ Trọng Tâm (Task) |
+|---|---|---|---|
+| **Mapping & Thứ Tự Triển Khai** | [`docs/drafts/draft-file-mapping.md`](../../drafts/draft-file-mapping.md) | Lead Architect | Bản đồ phụ thuộc 14 file và lộ trình hiện thực hóa tuần tự |
+| **Domain Entity & Enums** | [`docs/drafts/draft-workorder-domain.md`](../../drafts/draft-workorder-domain.md) | Senior Domain Engineer | Khởi tạo Aggregate Root `WorkOrder`, State Machine & Enums |
+| **DTOs & Data Transfer Records** | [`docs/drafts/draft-dtos.md`](../../drafts/draft-dtos.md) | Senior Backend Engineer | Các Java 17 immutable records kèm Bean Validation và static factory |
+| **Service Layer Orchestration** | [`docs/drafts/draft-workorder-service.md`](../../drafts/draft-workorder-service.md) | Senior Spring Boot Engineer | Logic điều phối nghiệp vụ, transaction và kiểm tra trạng thái |
+| **Tạo Phiếu Công Tác (POST)** | [`docs/drafts/draft-workorder-create.md`](../../drafts/draft-workorder-create.md) | Senior API Engineer | Endpoint `POST /api/v1/workorders` (201 Created + Location) |
+| **Tra Cứu & Phân Trang (GET)** | [`docs/drafts/draft-workorder-get.md`](../../drafts/draft-workorder-get.md) | Senior API Engineer | Endpoint `GET /api/v1/workorders` (Paged) và `GET /{id}` |
+| **Cập Nhật Trạng Thái (PATCH)** | [`docs/drafts/draft-workorder-patch.md`](../../drafts/draft-workorder-patch.md) | Senior API Engineer | Endpoint `PATCH /api/v1/workorders/{id}/status` (422 State Machine) |
+| **Xử Lý Ngoại Lệ Toàn Cục** | [`docs/drafts/draft-global-exception-handler.md`](../../drafts/draft-global-exception-handler.md) | Senior Framework Engineer | `@RestControllerAdvice` xử lý RFC 7807 Problem Details |
+| **Kiểm Thử Tự Động Toàn Diện** | [`docs/drafts/draft-workorder-tests.md`](../../drafts/draft-workorder-tests.md) | Senior QA Automation Engineer | Ma trận 16 ca kiểm thử nghiệm thu và WebMvcTest sketch |
