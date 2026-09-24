@@ -1,55 +1,111 @@
-// AI Provenance: generated from docs/domain-model.md §Invariants
+// AI Provenance: generated from docs/domain-model.md §Invariants, docs/coding-rules.md
 package com.gpc.oms.domain;
 
+import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
-import static org.junit.jupiter.api.Assertions.*;
 
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
+
+@DisplayName("WorkOrder Aggregate Root Unit Tests")
 class WorkOrderTest {
 
     @Test
+    @DisplayName("Default no-arg constructor creates non-null entity for JPA proxying")
+    void noArgConstructor_forJpa() {
+        WorkOrder wo = new WorkOrder();
+        assertThat(wo).isNotNull();
+        assertThat(wo.getId()).isNull();
+        assertThat(wo.getEquipmentId()).isNull();
+        assertThat(wo.getDescription()).isNull();
+        assertThat(wo.getPriority()).isNull();
+        assertThat(wo.getStatus()).isNull();
+        assertThat(wo.getCreatedAt()).isNull();
+        assertThat(wo.getResolvedAt()).isNull();
+    }
+
+    @Test
+    @DisplayName("Parametric constructor initializes default invariants: status=OPEN, resolvedAt=null, createdAt!=null")
+    void constructor_setsDefaultValuesAndAllGetters() {
+        WorkOrder wo = new WorkOrder("EQ-77", "Quá tải máy biến áp", Priority.HIGH);
+
+        assertThat(wo.getId()).isNull(); // generated upon DB persist
+        assertThat(wo.getEquipmentId()).isEqualTo("EQ-77");
+        assertThat(wo.getDescription()).isEqualTo("Quá tải máy biến áp");
+        assertThat(wo.getPriority()).isEqualTo(Priority.HIGH);
+        assertThat(wo.getStatus()).isEqualTo(WorkOrderStatus.OPEN);
+        assertThat(wo.getCreatedAt()).isNotNull();
+        assertThat(wo.getResolvedAt()).isNull();
+    }
+
+    @Test
+    @DisplayName("advanceStatus() permits linear progression: OPEN -> IN_PROGRESS -> DONE and stamps resolvedAt")
     void advanceStatus_allowsLinearFlow_andSetsResolvedAtOnDone() {
-        WorkOrder wo = new WorkOrder("EQ-77", "Quá tải", Priority.HIGH);
-        assertEquals(WorkOrderStatus.OPEN, wo.getStatus());
-        assertNull(wo.getResolvedAt());
+        WorkOrder wo = new WorkOrder("EQ-77", "Quá tải máy biến áp", Priority.HIGH);
 
+        // Step 1: Advance OPEN -> IN_PROGRESS
         wo.advanceStatus(WorkOrderStatus.IN_PROGRESS);
-        assertEquals(WorkOrderStatus.IN_PROGRESS, wo.getStatus());
-        assertNull(wo.getResolvedAt());
+        assertThat(wo.getStatus()).isEqualTo(WorkOrderStatus.IN_PROGRESS);
+        assertThat(wo.getResolvedAt()).isNull(); // ResolvedAt must remain null until DONE
 
+        // Step 2: Advance IN_PROGRESS -> DONE
         wo.advanceStatus(WorkOrderStatus.DONE);
-        assertEquals(WorkOrderStatus.DONE, wo.getStatus());
-        assertNotNull(wo.getResolvedAt());
+        assertThat(wo.getStatus()).isEqualTo(WorkOrderStatus.DONE);
+        assertThat(wo.getResolvedAt()).isNotNull(); // Automatically timestamped upon DONE
     }
 
     @Test
+    @DisplayName("advanceStatus() rejects skip progression: OPEN -> DONE with IllegalStateException")
     void advanceStatus_rejectsSkip_openToDone() {
-        WorkOrder wo = new WorkOrder("EQ-77", "Quá tải", Priority.HIGH);
-        // OPEN → DONE (skip IN_PROGRESS) — PHẢI bị cấm
-        assertThrows(IllegalStateException.class, () -> wo.advanceStatus(WorkOrderStatus.DONE));
+        WorkOrder wo = new WorkOrder("EQ-77", "Quá tải máy biến áp", Priority.HIGH);
+
+        assertThatThrownBy(() -> wo.advanceStatus(WorkOrderStatus.DONE))
+            .isInstanceOf(IllegalStateException.class)
+            .hasMessage("Invalid state transition from OPEN to DONE");
     }
 
     @Test
+    @DisplayName("advanceStatus() rejects self transition: OPEN -> OPEN")
+    void advanceStatus_rejectsSelfTransition_openToOpen() {
+        WorkOrder wo = new WorkOrder("EQ-77", "Quá tải máy biến áp", Priority.HIGH);
+
+        assertThatThrownBy(() -> wo.advanceStatus(WorkOrderStatus.OPEN))
+            .isInstanceOf(IllegalStateException.class)
+            .hasMessage("Invalid state transition from OPEN to OPEN");
+    }
+
+    @Test
+    @DisplayName("advanceStatus() rejects rollback: IN_PROGRESS -> OPEN")
+    void advanceStatus_rejectsRollback_inProgressToOpen() {
+        WorkOrder wo = new WorkOrder("EQ-77", "Quá tải máy biến áp", Priority.HIGH);
+        wo.advanceStatus(WorkOrderStatus.IN_PROGRESS);
+
+        assertThatThrownBy(() -> wo.advanceStatus(WorkOrderStatus.OPEN))
+            .isInstanceOf(IllegalStateException.class)
+            .hasMessage("Invalid state transition from IN_PROGRESS to OPEN");
+    }
+
+    @Test
+    @DisplayName("advanceStatus() rejects rollback: DONE -> IN_PROGRESS")
     void advanceStatus_rejectsRollback_doneToInProgress() {
-        WorkOrder wo = new WorkOrder("EQ-77", "Quá tải", Priority.HIGH);
+        WorkOrder wo = new WorkOrder("EQ-77", "Quá tải máy biến áp", Priority.HIGH);
         wo.advanceStatus(WorkOrderStatus.IN_PROGRESS);
         wo.advanceStatus(WorkOrderStatus.DONE);
-        // DONE → IN_PROGRESS (rollback) — PHẢI bị cấm
-        assertThrows(IllegalStateException.class, () -> wo.advanceStatus(WorkOrderStatus.IN_PROGRESS));
+
+        assertThatThrownBy(() -> wo.advanceStatus(WorkOrderStatus.IN_PROGRESS))
+            .isInstanceOf(IllegalStateException.class)
+            .hasMessage("Invalid state transition from DONE to IN_PROGRESS");
     }
 
     @Test
-    void advanceStatus_rejectsRollback_inProgressToOpen() {
-        WorkOrder wo = new WorkOrder("EQ-77", "Quá tải", Priority.HIGH);
+    @DisplayName("advanceStatus() rejects rollback: DONE -> OPEN")
+    void advanceStatus_rejectsRollback_doneToOpen() {
+        WorkOrder wo = new WorkOrder("EQ-77", "Quá tải máy biến áp", Priority.HIGH);
         wo.advanceStatus(WorkOrderStatus.IN_PROGRESS);
-        // IN_PROGRESS → OPEN (rollback) — PHẢI bị cấm
-        assertThrows(IllegalStateException.class, () -> wo.advanceStatus(WorkOrderStatus.OPEN));
-    }
+        wo.advanceStatus(WorkOrderStatus.DONE);
 
-    @Test
-    void constructor_setsDefaultValues() {
-        WorkOrder wo = new WorkOrder("EQ-77", "Quá tải", Priority.HIGH);
-        assertNotNull(wo.getCreatedAt());
-        assertEquals(WorkOrderStatus.OPEN, wo.getStatus());
-        assertNull(wo.getResolvedAt());
+        assertThatThrownBy(() -> wo.advanceStatus(WorkOrderStatus.OPEN))
+            .isInstanceOf(IllegalStateException.class)
+            .hasMessage("Invalid state transition from DONE to OPEN");
     }
 }
