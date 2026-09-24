@@ -1,0 +1,226 @@
+# Kế Hoạch Nâng Cấp Kiến Trúc AI-Native & Bộ Prompts v2.0 (csv-vat-calculator)
+
+Tài liệu này định nghĩa lộ trình nâng cấp kiến trúc và cung cấp toàn bộ các câu lệnh prompts chuẩn cho phiên bản **v2.0** của thư viện Java `csv-vat-calculator`.
+
+---
+
+## I. Tổng Quan 4 Trụ Cột Nâng Cấp Kiến Trúc (v2.0 Pillars)
+
+```
+                       ┌────────────────────────────────────────────────────────┐
+                       │               CsvVatCalculator (Facade)                │
+                       │   .builder()                                           │
+                       │     .columnMapping(...)       // Pillar 1: Dynamic     │
+                       │     .currencyScale(0)         // Pillar 2: BigDecimal  │
+                       │     .roundingMode(HALF_UP)    // Pillar 2: BigDecimal  │
+                       │     .discrepancyStrategy(...) // Pillar 3: Validation  │
+                       └───────────────────┬────────────────────────────────────┘
+                                           │
+        ┌──────────────────────────────────┼──────────────────────────────────┐
+        ▼                                  ▼                                  ▼
+[1. Dynamic Metadata]             [2. Core Calculation]             [3. Flexible Output]
+- CsvColumnMapping                - Scale & RoundingMode             - process(Path, Path) -> File CSV
+  (Custom headers per project)    - DiscrepancyStrategy:             - processToString(...) -> String CSV
+- Fallback alias auto-detect        + FAIL_ON_MISMATCH               - processToResult(...) -> Pure POJO
+                                    + WARN_AND_RECALCULATE           - process(Stream, Stream)
+                                    + ACCEPT_INPUT_TOTAL
+```
+
+1. **Pillar 1 - Dynamic Metadata Mapping (`CsvColumnMapping`):**
+   - Không phụ thuộc vào header cố định. Cho phép cấu hình thủ công tên cột thông qua class `CsvColumnMapping` (ví dụ: Dự án A dùng `["SKU", "QTY", "PRICE", "VAT"]`, Dự án B dùng `["Mã SP", "Số lượng", "Đơn giá", "% Thuế"]`).
+   - Nếu không cấu hình, tự động fallback về cơ chế Alias Auto-Detect thông minh đa ngôn ngữ.
+2. **Pillar 2 - Chuẩn hóa tiền tệ (`CalculatorConfig`):**
+   - Đóng gói cấu hình `currencyScale` và `RoundingMode` vào một Value Object `CalculatorConfig`, đảm bảo 100% phép toán sử dụng `BigDecimal`.
+3. **Pillar 3 - Strict Validation & Line Total Cross-Check (`DiscrepancyStrategy`):**
+   - Chặn nghiêm ngặt số lượng âm (`quantity < 0`).
+   - Hỗ trợ cột "Số tổng" đầu vào (nếu có sẵn trong CSV): So sánh $(\text{Quantity} \times \text{Unit Price})$ với giá trị cột tổng. Cung cấp enum chiến lược:
+     - `FAIL_ON_MISMATCH`: Ném `LineTotalDiscrepancyException` nếu lệch quá ngưỡng cho phép (tolerance threshold).
+     - `WARN_AND_RECALCULATE`: Ghi log cảnh báo qua SLF4J và tự động tính lại theo công thức chuẩn.
+     - `ACCEPT_INPUT_TOTAL`: Ưu tiên giá trị người dùng cung cấp nếu không lệch nghiêm trọng.
+4. **Pillar 4 - Fluent API & Đa dạng đầu ra (Diverse Outputs):**
+   - Bổ sung các phương thức xuất linh hoạt:
+     - `processToResult(Path / Stream)`: Chỉ đọc và trả về POJO `OrderCalculationResult` (dùng cho service nghiệp vụ/DB).
+     - `processToString(Path / Stream)`: Trả về toàn bộ nội dung file enriched dưới dạng `String` (dùng cho Kafka message hoặc unit test).
+     - `process(Path in, Path out)` & `process(Stream in, Stream out)`: Ghi trực tiếp ra file/stream.
+
+---
+
+## II. Bộ Prompts Chuẩn Cho Từng Bước Triển Khai v2.0
+
+---
+
+### Giai đoạn 1: Cập nhật Bản đặc tả kỹ thuật `SPEC.md`
+
+#### Prompt 1: Cập nhật `SPEC.md` với 4 trụ cột kiến trúc mới
+```text
+Role: Senior Java Architect.
+Task: Hãy cập nhật tài liệu đặc tả kỹ thuật tại file `SPEC.md` của dự án `csv-vat-calculator` lên phiên bản v2.0 để phản ánh đầy đủ 4 trụ cột kiến trúc mới:
+
+1. Dynamic Metadata Mapping:
+   - Đặc tả class `CsvColumnMapping` cho phép người dùng tự định nghĩa tên cột CSV tùy biến cho từng dự án, hỗ trợ fallback về Alias Auto-Detect nếu không cấu hình.
+2. Chuẩn hóa tính toán tiền tệ:
+   - Cho phép người dùng cấu hình tùy ý `currencyScale` và `RoundingMode` thông qua `CalculatorConfig`.
+3. Chiến lược kiểm tra chéo thành tiền (Line Total Cross-Validation Strategy):
+   - Chặn tuyệt đối số lượng âm (ném ngoại lệ).
+   - Kiểm tra chéo giữa (Quantity * Unit Price) và cột "Số tổng / Line Total" đầu vào (nếu có).
+   - Đặc tả 3 chiến lược xử lý qua enum `LineTotalDiscrepancyStrategy`: FAIL_ON_MISMATCH, WARN_AND_RECALCULATE, ACCEPT_INPUT_TOTAL, kèm ngưỡng sai số `discrepancyTolerance` (mặc định 0.01).
+4. Fluent API & Đa dạng hóa đầu ra (Diverse Outputs):
+   - Mở rộng Facade `CsvVatCalculator`: hỗ trợ xuất ra File CSV, chuỗi in-memory String CSV (`processToString`), hoặc chỉ trả về POJO kết quả `OrderCalculationResult` (`processToResult`).
+
+Hãy cập nhật file `SPEC.md` với cấu trúc tài liệu rõ ràng, chuẩn mực kỹ thuật cao.
+```
+
+---
+
+### Giai đoạn 2: Thiết kế Cấu hình, Dynamic Mapping & Discrepancy Strategy
+
+#### Prompt 2: Triển khai các Model cấu hình và Enums
+```text
+Role: Senior Java Developer.
+Task: Hãy triển khai các lớp cấu hình và enum mới trong package `com.company.shared.csvvat.config` và `com.company.shared.csvvat.exception`:
+
+1. `CsvColumnMapping` (Java 17 Record):
+   - Chứa tên các cột tùy biến: `itemNameColumn`, `quantityColumn`, `unitPriceColumn`, `vatPercentageColumn`, và `lineTotalColumn` (tùy chọn).
+   - Cung cấp `builder()` tiện lợi và phương thức `isDynamic()` để kiểm tra xem người dùng có chỉ định cột tùy biến hay không.
+2. `LineTotalDiscrepancyStrategy` (Enum):
+   - `FAIL_ON_MISMATCH`: Ném ngoại lệ khi phát hiện lệch giữa (Số lượng * Đơn giá) và cột tổng đầu vào.
+   - `WARN_AND_RECALCULATE`: Ghi log cảnh báo mức WARN qua SLF4J và sử dụng giá trị tự tính toán.
+   - `ACCEPT_INPUT_TOTAL`: Sử dụng giá trị cột tổng đầu vào.
+3. `CalculatorConfig` (Java 17 Record):
+   - Đóng gói: `currencyScale` (mặc định 2), `roundingMode` (mặc định HALF_UP), `discrepancyStrategy` (mặc định WARN_AND_RECALCULATE), `discrepancyTolerance` (mặc định 0.01 BigDecimal), và `columnMapping`.
+   - Cung cấp Fluent Builder với các giá trị mặc định hợp lý.
+4. `LineTotalDiscrepancyException` (Exception):
+   - Kế thừa từ `CsvRowValidationException`, mang đầy đủ thông tin: `rowNumber`, `calculatedTotal`, `inputTotal`, `difference`.
+
+Hãy viết mã nguồn hoàn chỉnh, bất biến (Immutable), kèm Javadoc chi tiết.
+```
+
+---
+
+### Giai đoạn 3: TDD - Nâng cấp Core Calculator & Discrepancy Validation
+
+#### Prompt 3: Viết Unit Test cho Core Engine với Discrepancy Strategy (TDD)
+```text
+Role: Senior Java QA Engineer.
+Task: Hãy cập nhật hoặc tạo mới bộ Unit Test `DefaultVatCalculatorDiscrepancyTest` tại `src/test/java/com/company/shared/csvvat/service/` kiểm thử các kịch bản kiểm tra chéo thành tiền:
+
+Yêu cầu test cases (JUnit 5 & AssertJ):
+1. Không có cột tổng đầu vào (null): Tính toán bình thường như cũ.
+2. Khớp tuyệt đối: (Số lượng 2 * Đơn giá 50.000) = 100.000, cột tổng đầu vào là 100.000 -> Không có cảnh báo hay lỗi.
+3. Sai lệch với chiến lược `FAIL_ON_MISMATCH`: Cột tổng đầu vào là 120.000 nhưng tính ra 100.000 -> Bắt buộc ném `LineTotalDiscrepancyException`.
+4. Sai lệch với chiến lược `WARN_AND_RECALCULATE`: Cột tổng đầu vào 120.000 -> Sử dụng giá trị tự tính 100.000, tính đúng VAT 10.000 và Total 110.000.
+5. Sai lệch trong phạm vi dung sai (`discrepancyTolerance` = 0.05): Lệch 0.02 không bị coi là lỗi.
+6. Số lượng âm (< 0): Vẫn chặn nghiêm ngặt và ném ngoại lệ.
+
+Hãy viết code test tường minh với `@DisplayName` rõ ràng.
+```
+
+---
+
+#### Prompt 4: Nâng cấp `DefaultVatCalculator` hiện thực `CalculatorConfig`
+```text
+Role: Senior Java Developer.
+Task: Hãy refactor lớp `DefaultVatCalculator` để tiếp nhận `CalculatorConfig` và xử lý logic kiểm tra chéo thành tiền:
+
+Yêu cầu chi tiết:
+1. Constructor nhận `CalculatorConfig` (hoặc giữ overload cũ để backward-compatible).
+2. Mở rộng `OrderItem` hoặc phương thức tính toán để tiếp nhận `inputLineTotal` (có thể null).
+3. Triển khai logic so khớp:
+   - Tính `computedSubtotal = quantity * unitPrice`.
+   - Nếu `inputLineTotal != null`, tính `difference = abs(computedSubtotal - inputLineTotal)`.
+   - So sánh `difference` với `config.discrepancyTolerance()`:
+     * Nếu vượt quá và chiến lược là `FAIL_ON_MISMATCH` -> ném `LineTotalDiscrepancyException`.
+     * Nếu là `WARN_AND_RECALCULATE` -> log warning qua SLF4J và dùng `computedSubtotal`.
+     * Nếu là `ACCEPT_INPUT_TOTAL` -> dùng `inputLineTotal` làm subtotal để tính VAT.
+4. Đảm bảo PASS 100% các unit test cũ và mới.
+```
+
+---
+
+### Giai đoạn 4: Nâng cấp CSV Reader & Writer linh hoạt
+
+#### Prompt 5: Cập nhật `CommonsCsvReaderService` hỗ trợ Dynamic Mapping
+```text
+Role: Senior Java Developer.
+Task: Hãy nâng cấp `CommonsCsvReaderService` và `CommonsCsvWriterService` để tích hợp `CsvColumnMapping`:
+
+Yêu cầu cho `CommonsCsvReaderService`:
+1. Tiếp nhận `CsvColumnMapping` qua constructor.
+2. Nếu `mapping.isDynamic() == true`:
+   - Tìm chính xác các cột theo tên người dùng chỉ định trong `mapping` (case-insensitive & trim).
+   - Nếu file CSV thiếu cột được cấu hình -> ném `InvalidCsvFormatException` rõ ràng.
+3. Nếu `mapping.isDynamic() == false` (hoặc null):
+   - Sử dụng cơ chế Alias Auto-Detect thông minh đa ngôn ngữ (tiếng Anh + tiếng Việt) như phiên bản trước.
+4. Đọc thêm cột tổng đầu vào `inputLineTotal` (nếu có cấu hình hoặc nhận diện được header `Line Total` / `Thành tiền`).
+
+Yêu cầu cho `CommonsCsvWriterService`:
+- Tiếp nhận cấu hình tên cột xuất ra để đồng bộ với cấu hình đầu vào.
+- Cung cấp thêm phương thức tiện ích `String writeToString(OrderCalculationResult result)` để tuần tự hóa thẳng ra chuỗi String.
+```
+
+---
+
+### Giai đoạn 5: Nâng cấp Facade API `CsvVatCalculator` & Output linh hoạt
+
+#### Prompt 6: Hoàn thiện Facade API với các phương thức xuất đa dạng
+```text
+Role: Senior Java Architect.
+Task: Hãy cập nhật lớp Facade `CsvVatCalculator` và `CsvVatCalculator.Builder` tại package `com.company.shared.csvvat`:
+
+Yêu cầu Fluent API nâng cao:
+1. Builder hỗ trợ:
+   - `.columnMapping(CsvColumnMapping mapping)`
+   - `.discrepancyStrategy(LineTotalDiscrepancyStrategy strategy)`
+   - `.discrepancyTolerance(BigDecimal tolerance)`
+   - `.currencyScale(int scale)`
+   - `.roundingMode(RoundingMode mode)`
+2. Bổ sung các phương thức xuất dữ liệu linh hoạt (Diverse Outputs):
+   - `OrderCalculationResult process(Path input, Path output)`: Xuất ra file CSV (truyền thống).
+   - `OrderCalculationResult process(InputStream in, OutputStream out)`: Stream I/O.
+   - `String processToString(Path input)` / `String processToString(InputStream in)`: Đọc CSV và trả về toàn bộ file CSV enriched dưới dạng chuỗi String in-memory.
+   - `OrderCalculationResult processToResult(Path input)` / `OrderCalculationResult processToResult(InputStream in)`: Chỉ đọc CSV và tính toán trả về đối tượng Java POJO/Record (không tốn chi phí ghi CSV).
+3. Đảm bảo toàn bộ tài nguyên I/O được quản lý an toàn tuyệt đối.
+```
+
+---
+
+### Giai đoạn 6: Kiểm thử tích hợp End-to-End, Sanity Check & Tài liệu
+
+#### Prompt 7: Viết Integration Test toàn diện cho các tính năng v2.0
+```text
+Role: Senior Java QA Engineer.
+Task: Hãy viết bộ kiểm thử tích hợp `CsvVatCalculatorV2IntegrationTest` kiểm chứng toàn bộ 4 tính năng mới:
+
+Các kịch bản kiểm thử:
+1. Dynamic Metadata: Đọc file CSV với format cột tùy biến hoàn toàn (ví dụ: "SKU", "QTY", "RATE", "TAX_RATE", "TOTAL").
+2. Discrepancy Fail-Fast: Cố tình truyền file có dòng lệch tiền (Số lượng 2 * Đơn giá 50.000 nhưng cột Total ghi 200.000) với chiến lược FAIL_ON_MISMATCH -> Ném LineTotalDiscrepancyException.
+3. Discrepancy Warn: File lệch tiền nhưng dùng WARN_AND_RECALCULATE -> Kiểm tra kết quả tự động tính lại đúng và không bị lỗi.
+4. Diverse Outputs:
+   - Gọi `processToString(...)` và kiểm tra chuỗi CSV enriched trả về.
+   - Gọi `processToResult(...)` và kiểm tra POJO nhận được mà không cần file output.
+```
+
+---
+
+#### Prompt 8: Cập nhật `README.md` & Chạy kiểm tra nghiệm thu `mvn clean verify`
+```text
+Role: Lead DevOps & Technical Writer.
+Task:
+1. Cập nhật `README.md` bổ sung tài liệu hướng dẫn cho Dynamic Metadata Mapping, Discrepancy Strategy, và các hàm xuất String / POJO mới.
+2. Chạy lệnh `mvn clean verify` để đảm bảo:
+   - 100% toàn bộ tests (cả v1 và v2) đều PASS.
+   - Báo cáo JaCoCo Code Coverage tiếp tục đạt mục tiêu >= 90%.
+```
+
+---
+
+## III. Bảng Checklist Theo Dõi Tiến Độ Nâng Cấp
+
+| Giai đoạn | Nội dung công việc | Prompt sử dụng | Deliverable dự kiến |
+| :---: | :--- | :---: | :--- |
+| **Bước 1** | Cập nhật thiết kế kỹ thuật v2.0 | `Prompt 1` | File `SPEC.md` cập nhật v2.0 |
+| **Bước 2** | Model Cấu hình, Mapping & Strategy | `Prompt 2` | `CsvColumnMapping`, `CalculatorConfig`, `LineTotalDiscrepancyStrategy` |
+| **Bước 3** | TDD Core Logic & Cross-validation | `Prompt 3`, `Prompt 4` | `DefaultVatCalculatorDiscrepancyTest`, `DefaultVatCalculator` |
+| **Bước 4** | Nâng cấp CSV Reader & Writer | `Prompt 5` | Hỗ trợ dynamic mapping & xuất `String` |
+| **Bước 5** | Nâng cấp Facade & Diverse Outputs | `Prompt 6` | `processToString()`, `processToResult()`, Fluent Builder |
+| **Bước 6** | E2E Tests, Docs & JaCoCo Verify | `Prompt 7`, `Prompt 8` | E2E test suite v2, `README.md`, JaCoCo >= 90% |
