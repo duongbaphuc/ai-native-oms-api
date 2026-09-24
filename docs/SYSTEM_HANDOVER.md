@@ -314,7 +314,7 @@ Toàn bộ 03 phát hiện mức Major/P0 đã được đội ngũ kỹ sư x�
 # 1. Làm sạch và biên dịch mã nguồn
 mvn clean compile
 
-# 2. Chạy toàn bộ 86 automated tests
+# 2. Chạy toàn bộ 89 automated tests
 mvn test
 
 # 3. Chạy kiểm tra toàn diện, build package và thẩm định JaCoCo Quality Gate (100% Coverage)
@@ -323,8 +323,17 @@ mvn clean verify
 # 4. Khởi động ứng dụng Spring Boot cục bộ
 mvn spring-boot:run
 
-# 5. Hoặc chạy file JAR đóng gói độc lập
+# 5. Chạy file JAR đóng gói độc lập
 java -jar target/oms-api-demo-0.0.1-SNAPSHOT.jar
+
+# 6. Đóng gói Container Image bảo mật (Multi-stage Dockerfile, non-root user 10001)
+docker build -t oms-api-demo:latest .
+
+# 7. Khởi chạy toàn bộ cụm ứng dụng và PostgreSQL bằng Docker Compose
+docker compose up -d
+
+# 8. Thăm dò kiểm tra sức khỏe ứng dụng qua Actuator Probe
+curl http://localhost:8080/actuator/health
 ```
 
 ### 6.3 Bảng Điều Khiển Kiểm Thử Tương Tác Trực Quan (Interactive Test Console)
@@ -377,7 +386,7 @@ curl -X PATCH http://localhost:8080/api/v1/workorders/{WORK_ORDER_ID}/status \
 ## 7. HỒ SƠ CHẤT LƯỢNG & BÁO CÁO KIỂM THỬ TỰ ĐỘNG
 
 ### 7.1 Kim Tự Tháp Kiểm Thử (Testing Pyramid)
-Toàn bộ mã nguồn được bảo vệ bởi **86 bài kiểm thử tự động**, phân chia theo các tầng chuyên biệt của Testing Pyramid, đạt tỷ lệ thành công 100% (86/86 Green):
+Toàn bộ mã nguồn được bảo vệ bởi **89 bài kiểm thử tự động**, phân chia theo các tầng chuyên biệt của Testing Pyramid, đạt tỷ lệ thành công 100% (89/89 Green):
 
 ```
                           ▲
@@ -386,7 +395,7 @@ Toàn bộ mã nguồn được bảo vệ bởi **86 bài kiểm thử tự đ�
                        /-----\    Full SpringBootTest Slice
                       / Slice \   WorkOrderControllerTest (15 tests)
                      /  Tests  \  WorkOrderRepositoryTest (4 tests)
-                    /-----------\ H2Console Security Tests (2 tests)
+                    /-----------\ Security & Actuator Probe Tests (5 tests)
                    / Unit Tests  \ WorkOrderTest (12), WorkOrderStatusTest (11), PriorityTest (2)
                   /_______________\ DtoMappingTest (12), WorkOrderServiceTest (8), Exception Tests (9), Config (3)
 ```
@@ -406,9 +415,10 @@ Toàn bộ mã nguồn được bảo vệ bởi **86 bài kiểm thử tự đ�
 | `WorkOrderRepositoryTest` | Persistence Slice Test (`@DataJpaTest`) | 4 | PASS (100%) |
 | `H2ConsoleDevAccessTest` | Security Slice Test (`!prod` public access) | 1 | PASS (100%) |
 | `H2ConsoleProdAccessTest` | Security Slice Test (`prod` admin authorization) | 1 | PASS (100%) |
+| `ActuatorSecurityTest` | Security Slice Test (Health/Info probe access & protection) | 3 | PASS (100%) |
 | `OmsApiApplicationTests` | Spring Context Bootstrap Test | 1 | PASS (100%) |
 | `WorkOrderIntegrationTest` | End-to-End Integration Test (`@SpringBootTest`) | 7 | PASS (100%) |
-| **TỔNG CỘNG** | **Toàn bộ kim tự tháp kiểm thử** | **86** | **86/86 PASS (0 Failures, 0 Errors, 0 Skipped)** |
+| **TỔNG CỘNG** | **Toàn bộ kim tự tháp kiểm thử** | **89** | **89/89 PASS (0 Failures, 0 Errors, 0 Skipped)** |
 
 ### 7.2 Báo Cáo Đo Lường Độ Bao Phủ JaCoCo (JaCoCo Coverage Metrics)
 Dự án tích hợp cấu hình chốt chặn chất lượng (Quality Gate) nghiêm ngặt trong `pom.xml`. Mỗi khi thực hiện `mvn verify`, mã nguồn phải đạt:
@@ -493,7 +503,7 @@ Khi cần mở rộng thêm thực thể hoặc endpoint mới:
 | Tiêu Chí Nghiệm Thu | Kết Quả Đánh Giá | Tình Trạng |
 |---|---|---|
 | Mã nguồn biên dịch thành công không cảnh báo | `BUILD SUCCESS` | [x] ĐẠT |
-| Toàn bộ 86 automated test cases thực thi thành công | 86 Passed, 0 Failed, 0 Skipped | [x] ĐẠT |
+| Toàn bộ 89 automated test cases thực thi thành công | 89 Passed, 0 Failed, 0 Skipped | [x] ĐẠT |
 | JaCoCo Line và Branch Coverage đạt ngưỡng quy định | 100% Line, 100% Branch (12/12 classes) | [x] ĐẠT |
 | Cấu trúc bảng và chỉ mục DB đồng bộ qua Flyway | Schema V1 khởi tạo chính xác | [x] ĐẠT |
 | Giao diện Test Console hoạt động mượt mà trên browser | Đã kiểm chứng tại `http://localhost:8080/` | [x] ĐẠT |
