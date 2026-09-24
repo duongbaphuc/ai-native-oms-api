@@ -46,3 +46,6 @@ src/main/resources/application-prod.yml
 # OS generated files
 .DS_Store
 Thumbs.db
+
+# GSD planning docs (local only, never commit)
+.planning/
