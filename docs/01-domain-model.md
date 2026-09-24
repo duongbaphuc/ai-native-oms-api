@@ -7,7 +7,7 @@ Target Files:
 - src/main/java/com/gpc/oms/domain/WorkOrder.java
 - src/main/java/com/gpc/oms/domain/WorkOrderStatus.java
 - src/main/java/com/gpc/oms/domain/Priority.java
-- src/main/java/com/gpc/oms/repository/WorkOrderRepository.java
+- src/main/java/com/gpc/oms/domain/WorkOrderRepository.java
 -->
 # Khung Kiến trúc Nghiệp vụ (Domain Model)
 
