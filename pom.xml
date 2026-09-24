@@ -48,6 +48,16 @@
             <scope>runtime</scope>
         </dependency>
 
+        <!-- Flyway database migration (SEC-04): core covers H2, postgres module for Production -->
+        <dependency>
+            <groupId>org.flywaydb</groupId>
+            <artifactId>flyway-core</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.flywaydb</groupId>
+            <artifactId>flyway-database-postgresql</artifactId>
+        </dependency>
+
         <!-- Testing -->
         <dependency>
             <groupId>org.springframework.boot</groupId>
