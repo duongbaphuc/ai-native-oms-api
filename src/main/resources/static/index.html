@@ -1,0 +1,977 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AI-Native OMS | Interactive Test Console</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg-primary: #0a0f1d;
+            --bg-secondary: #131b2e;
+            --bg-card: rgba(22, 32, 54, 0.7);
+            --bg-glass: rgba(30, 41, 69, 0.5);
+            --border-color: rgba(255, 255, 255, 0.08);
+            --border-highlight: rgba(59, 130, 246, 0.3);
+            --text-main: #f8fafc;
+            --text-muted: #94a3b8;
+            --accent-blue: #3b82f6;
+            --accent-cyan: #06b6d4;
+            --accent-emerald: #10b981;
+            --accent-amber: #f59e0b;
+            --accent-rose: #f43f5e;
+            --accent-purple: #8b5cf6;
+            --radius-md: 10px;
+            --radius-lg: 16px;
+            --radius-xl: 24px;
+            --shadow-glow: 0 0 25px rgba(59, 130, 246, 0.15);
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+            background: radial-gradient(circle at 10% 20%, #111a33 0%, #070b16 90%);
+            color: var(--text-main);
+            min-height: 100vh;
+            line-height: 1.5;
+            padding-bottom: 50px;
+        }
+
+        /* Top Bar */
+        header {
+            background: rgba(10, 15, 29, 0.85);
+            backdrop-filter: blur(16px);
+            border-bottom: 1px solid var(--border-color);
+            position: sticky;
+            top: 0;
+            z-index: 100;
+            padding: 16px 32px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .brand-container {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .brand-badge {
+            background: linear-gradient(135deg, var(--accent-blue), var(--accent-cyan));
+            color: white;
+            font-weight: 700;
+            font-size: 14px;
+            padding: 6px 12px;
+            border-radius: var(--radius-md);
+            letter-spacing: 0.5px;
+            box-shadow: 0 0 15px rgba(6, 182, 212, 0.4);
+        }
+
+        .brand-title {
+            font-size: 18px;
+            font-weight: 700;
+            letter-spacing: -0.5px;
+            background: linear-gradient(to right, #ffffff, #94a3b8);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .brand-sub {
+            font-size: 12px;
+            color: var(--accent-cyan);
+            font-weight: 500;
+        }
+
+        .header-actions {
+            display: flex;
+            align-items: center;
+            gap: 16px;
+        }
+
+        /* Identity Selector */
+        .identity-box {
+            display: flex;
+            align-items: center;
+            background: var(--bg-secondary);
+            border: 1px solid var(--border-color);
+            border-radius: 30px;
+            padding: 4px 6px;
+            gap: 4px;
+        }
+
+        .identity-btn {
+            background: transparent;
+            border: none;
+            color: var(--text-muted);
+            font-size: 12px;
+            font-weight: 600;
+            padding: 6px 14px;
+            border-radius: 20px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+
+        .identity-btn.active {
+            background: var(--accent-blue);
+            color: white;
+            box-shadow: 0 0 10px rgba(59, 130, 246, 0.4);
+        }
+
+        .h2-link {
+            color: var(--text-muted);
+            text-decoration: none;
+            font-size: 13px;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            padding: 6px 12px;
+            border-radius: var(--radius-md);
+            border: 1px solid var(--border-color);
+            transition: all 0.2s;
+        }
+
+        .h2-link:hover {
+            color: white;
+            border-color: var(--accent-cyan);
+            background: rgba(6, 182, 212, 0.1);
+        }
+
+        /* Main Container */
+        .container {
+            max-width: 1380px;
+            margin: 28px auto;
+            padding: 0 24px;
+            display: grid;
+            grid-template-columns: 1fr 480px;
+            gap: 28px;
+        }
+
+        @media (max-width: 1024px) {
+            .container {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        /* Glass Cards */
+        .card {
+            background: var(--bg-card);
+            border: 1px solid var(--border-color);
+            backdrop-filter: blur(12px);
+            border-radius: var(--radius-xl);
+            padding: 24px;
+            margin-bottom: 24px;
+            box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.37);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 1px;
+            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.15), transparent);
+        }
+
+        .card-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+
+        .card-title {
+            font-size: 17px;
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .card-title .icon {
+            color: var(--accent-cyan);
+        }
+
+        /* State Machine Flow Diagram */
+        .state-flow {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            background: rgba(11, 19, 43, 0.6);
+            border: 1px solid var(--border-color);
+            border-radius: var(--radius-lg);
+            padding: 16px 24px;
+            margin-bottom: 24px;
+        }
+
+        .state-node {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .state-pill {
+            font-size: 13px;
+            font-weight: 600;
+            padding: 6px 16px;
+            border-radius: 20px;
+            letter-spacing: 0.5px;
+        }
+
+        .pill-open { background: rgba(59, 130, 246, 0.2); color: #60a5fa; border: 1px solid rgba(59, 130, 246, 0.4); }
+        .pill-in-progress { background: rgba(245, 158, 11, 0.2); color: #fbbf24; border: 1px solid rgba(245, 158, 11, 0.4); }
+        .pill-done { background: rgba(16, 185, 129, 0.2); color: #34d399; border: 1px solid rgba(16, 185, 129, 0.4); }
+
+        .state-desc {
+            font-size: 11px;
+            color: var(--text-muted);
+        }
+
+        .flow-arrow {
+            font-size: 18px;
+            color: var(--text-muted);
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .flow-badge {
+            font-size: 10px;
+            padding: 2px 6px;
+            border-radius: 4px;
+            background: rgba(255, 255, 255, 0.05);
+            color: var(--text-muted);
+        }
+
+        /* Form Controls */
+        .form-group {
+            margin-bottom: 16px;
+        }
+
+        .form-label {
+            display: block;
+            font-size: 13px;
+            font-weight: 500;
+            color: var(--text-muted);
+            margin-bottom: 6px;
+        }
+
+        .form-input, .form-textarea, .form-select {
+            width: 100%;
+            background: var(--bg-secondary);
+            border: 1px solid var(--border-color);
+            border-radius: var(--radius-md);
+            padding: 10px 14px;
+            color: white;
+            font-size: 14px;
+            outline: none;
+            transition: all 0.2s;
+        }
+
+        .form-input:focus, .form-textarea:focus, .form-select:focus {
+            border-color: var(--accent-blue);
+            box-shadow: 0 0 10px rgba(59, 130, 246, 0.25);
+        }
+
+        .form-textarea {
+            resize: vertical;
+            min-height: 75px;
+        }
+
+        .form-row {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 16px;
+        }
+
+        .quick-tags {
+            display: flex;
+            gap: 8px;
+            margin-top: 6px;
+            flex-wrap: wrap;
+        }
+
+        .tag-btn {
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid var(--border-color);
+            color: var(--text-muted);
+            font-size: 11px;
+            padding: 3px 8px;
+            border-radius: 6px;
+            cursor: pointer;
+            transition: all 0.15s;
+        }
+
+        .tag-btn:hover {
+            color: white;
+            border-color: var(--accent-cyan);
+            background: rgba(6, 182, 212, 0.1);
+        }
+
+        .btn {
+            background: linear-gradient(135deg, var(--accent-blue), #2563eb);
+            color: white;
+            border: none;
+            border-radius: var(--radius-md);
+            padding: 10px 20px;
+            font-size: 14px;
+            font-weight: 600;
+            cursor: pointer;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            transition: all 0.2s;
+            box-shadow: 0 4px 12px rgba(37, 99, 235, 0.3);
+        }
+
+        .btn:hover {
+            transform: translateY(-1px);
+            box-shadow: 0 6px 16px rgba(37, 99, 235, 0.45);
+        }
+
+        .btn:active {
+            transform: translateY(0);
+        }
+
+        .btn-secondary {
+            background: var(--bg-secondary);
+            border: 1px solid var(--border-color);
+            box-shadow: none;
+            color: var(--text-main);
+        }
+
+        .btn-secondary:hover {
+            background: rgba(255, 255, 255, 0.08);
+            border-color: rgba(255, 255, 255, 0.2);
+            box-shadow: none;
+        }
+
+        .btn-danger {
+            background: linear-gradient(135deg, var(--accent-rose), #e11d48);
+            box-shadow: 0 4px 12px rgba(244, 63, 94, 0.3);
+        }
+
+        /* Filter Toolbar */
+        .toolbar {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 16px;
+            gap: 12px;
+            flex-wrap: wrap;
+        }
+
+        .filter-group {
+            display: flex;
+            gap: 8px;
+            align-items: center;
+        }
+
+        /* Data Table */
+        .table-wrapper {
+            overflow-x: auto;
+            border: 1px solid var(--border-color);
+            border-radius: var(--radius-lg);
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 13px;
+            text-align: left;
+        }
+
+        th {
+            background: rgba(19, 27, 46, 0.9);
+            color: var(--text-muted);
+            font-weight: 600;
+            padding: 12px 16px;
+            border-bottom: 1px solid var(--border-color);
+            text-transform: uppercase;
+            font-size: 11px;
+            letter-spacing: 0.5px;
+        }
+
+        td {
+            padding: 12px 16px;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.04);
+            vertical-align: middle;
+        }
+
+        tr:hover td {
+            background: rgba(255, 255, 255, 0.02);
+        }
+
+        .priority-badge {
+            font-size: 11px;
+            font-weight: 600;
+            padding: 3px 8px;
+            border-radius: 6px;
+            display: inline-block;
+        }
+
+        .priority-CRITICAL { background: rgba(244, 63, 94, 0.2); color: #fb7185; border: 1px solid rgba(244, 63, 94, 0.4); }
+        .priority-HIGH { background: rgba(245, 158, 11, 0.2); color: #fbbf24; border: 1px solid rgba(245, 158, 11, 0.4); }
+        .priority-MEDIUM { background: rgba(59, 130, 246, 0.2); color: #60a5fa; border: 1px solid rgba(59, 130, 246, 0.4); }
+        .priority-LOW { background: rgba(148, 163, 184, 0.2); color: #cbd5e1; border: 1px solid rgba(148, 163, 184, 0.4); }
+
+        .action-btns {
+            display: flex;
+            gap: 6px;
+        }
+
+        .btn-sm {
+            padding: 4px 10px;
+            font-size: 11px;
+            border-radius: 6px;
+        }
+
+        /* Inspector Panel */
+        .inspector-panel {
+            position: sticky;
+            top: 96px;
+        }
+
+        .status-pill {
+            font-size: 12px;
+            font-weight: 700;
+            padding: 4px 10px;
+            border-radius: 20px;
+            font-family: 'JetBrains Mono', monospace;
+        }
+
+        .status-2xx { background: rgba(16, 185, 129, 0.2); color: #34d399; border: 1px solid rgba(16, 185, 129, 0.5); }
+        .status-4xx { background: rgba(244, 63, 94, 0.2); color: #fb7185; border: 1px solid rgba(244, 63, 94, 0.5); }
+        .status-5xx { background: rgba(239, 68, 68, 0.3); color: #ef4444; border: 1px solid #ef4444; }
+
+        .json-viewer {
+            background: #060913;
+            border: 1px solid var(--border-color);
+            border-radius: var(--radius-lg);
+            padding: 16px;
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 12px;
+            color: #e2e8f0;
+            overflow-x: auto;
+            max-height: 480px;
+            white-space: pre-wrap;
+            word-break: break-word;
+        }
+
+        .meta-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 12px;
+            margin-bottom: 16px;
+        }
+
+        .meta-item {
+            background: var(--bg-secondary);
+            padding: 10px 14px;
+            border-radius: var(--radius-md);
+            border: 1px solid var(--border-color);
+        }
+
+        .meta-label {
+            font-size: 11px;
+            color: var(--text-muted);
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .meta-val {
+            font-size: 13px;
+            font-weight: 600;
+            margin-top: 2px;
+            font-family: 'JetBrains Mono', monospace;
+        }
+
+        .rfc-alert {
+            background: rgba(244, 63, 94, 0.1);
+            border-left: 3px solid var(--accent-rose);
+            padding: 10px 14px;
+            border-radius: 0 var(--radius-md) var(--radius-md) 0;
+            font-size: 12px;
+            margin-bottom: 14px;
+            color: #fecdd3;
+        }
+
+        .pagination {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-top: 16px;
+            font-size: 12px;
+            color: var(--text-muted);
+        }
+
+        .pagination-btns {
+            display: flex;
+            gap: 6px;
+        }
+
+        /* Empty state */
+        .empty-state {
+            padding: 36px 20px;
+            text-align: center;
+            color: var(--text-muted);
+        }
+    </style>
+</head>
+<body>
+
+    <!-- Header -->
+    <header>
+        <div class="brand-container">
+            <span class="brand-badge">OMS API</span>
+            <div>
+                <div class="brand-title">Outage Work Order System</div>
+                <div class="brand-sub">AI-Native Spring Boot 3.3 Microservice &bull; RFC 7807 Standard</div>
+            </div>
+        </div>
+
+        <div class="header-actions">
+            <!-- Role Selector -->
+            <div class="identity-box">
+                <span style="font-size: 11px; color: var(--text-muted); margin-left: 8px;">Role:</span>
+                <button class="identity-btn active" id="role-admin" onclick="switchRole('admin', 'admin123', 'ADMIN')">Admin</button>
+                <button class="identity-btn" id="role-dispatcher" onclick="switchRole('dispatcher', 'dispatcher123', 'DISPATCHER')">Dispatcher</button>
+                <button class="identity-btn" id="role-technician" onclick="switchRole('technician', 'technician123', 'TECHNICIAN')">Technician</button>
+                <button class="identity-btn" id="role-guest" onclick="switchRole('', '', 'ANONYMOUS')">No Auth</button>
+            </div>
+
+            <!-- Database Console Link -->
+            <a href="/h2-console" target="_blank" class="h2-link" title="Open H2 Database Console">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2v20M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg>
+                H2 Console
+            </a>
+        </div>
+    </header>
+
+    <div class="container">
+        <!-- Left: Dashboard & Actions -->
+        <main>
+            <!-- State Transition Rule Visualizer -->
+            <div class="state-flow">
+                <div class="state-node">
+                    <span class="state-pill pill-open">Open</span>
+                    <span class="state-desc">Default on Create</span>
+                </div>
+                <div class="flow-arrow">
+                    <span class="flow-badge">Linear Only</span> &rarr;
+                </div>
+                <div class="state-node">
+                    <span class="state-pill pill-in-progress">InProgress</span>
+                    <span class="state-desc">Assigned & Working</span>
+                </div>
+                <div class="flow-arrow">
+                    <span class="flow-badge">Auto Timestamp</span> &rarr;
+                </div>
+                <div class="state-node">
+                    <span class="state-pill pill-done">Done</span>
+                    <span class="state-desc">Terminal State</span>
+                </div>
+            </div>
+
+            <!-- Create Work Order Form -->
+            <div class="card">
+                <div class="card-header">
+                    <div class="card-title">
+                        <span class="icon">&#9881;</span> Create Work Order
+                        <span style="font-size: 11px; font-weight: normal; color: var(--text-muted); margin-left: 8px;">(POST /api/v1/workorders)</span>
+                    </div>
+                    <button class="tag-btn" onclick="testInvalidPayload()" title="Test 400 Bad Request with missing equipment and short description">
+                        &#9888; Test Validation Error (400)
+                    </button>
+                </div>
+
+                <form id="createForm" onsubmit="handleCreate(event)">
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label class="form-label">Equipment ID *</label>
+                            <input type="text" id="equipmentId" class="form-input" placeholder="e.g. TR-500KV-HANOI" required maxlength="50">
+                            <div class="quick-tags">
+                                <span class="tag-btn" onclick="setEquipment('TR-500KV-HANOI')">TR-500KV-HANOI</span>
+                                <span class="tag-btn" onclick="setEquipment('REC-22KV-04')">REC-22KV-04</span>
+                                <span class="tag-btn" onclick="setEquipment('SUB-110-DANANG')">SUB-110-DANANG</span>
+                            </div>
+                        </div>
+
+                        <div class="form-group">
+                            <label class="form-label">Priority *</label>
+                            <select id="priority" class="form-select">
+                                <option value="CRITICAL">CRITICAL (Khẩn cấp)</option>
+                                <option value="HIGH" selected>HIGH (Cao)</option>
+                                <option value="MEDIUM">MEDIUM (Trung bình)</option>
+                                <option value="LOW">LOW (Thấp)</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label class="form-label">Description (Min 10 chars) *</label>
+                        <textarea id="description" class="form-textarea" placeholder="Nội dung mô tả chi tiết sự cố lưới điện..." required minlength="10" maxlength="500">Máy biến áp 500kV trạm biến áp Đông Anh cảnh báo quá tải nhiệt mức độ cao</textarea>
+                    </div>
+
+                    <div style="display: flex; justify-content: flex-end; gap: 10px;">
+                        <button type="submit" class="btn">
+                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 5v14M5 12h14"/></svg>
+                            Submit Work Order
+                        </button>
+                    </div>
+                </form>
+            </div>
+
+            <!-- Work Order List -->
+            <div class="card">
+                <div class="card-header">
+                    <div class="card-title">
+                        <span class="icon">&#9776;</span> Work Orders Directory
+                        <span style="font-size: 11px; font-weight: normal; color: var(--text-muted); margin-left: 8px;">(GET /api/v1/workorders)</span>
+                    </div>
+
+                    <div class="toolbar">
+                        <div class="filter-group">
+                            <span style="font-size: 12px; color: var(--text-muted);">Status Filter:</span>
+                            <button class="tag-btn" style="background: rgba(59,130,246,0.2); color: #60a5fa;" onclick="loadWorkOrders('')">All</button>
+                            <button class="tag-btn" onclick="loadWorkOrders('Open')">Open</button>
+                            <button class="tag-btn" onclick="loadWorkOrders('InProgress')">InProgress</button>
+                            <button class="tag-btn" onclick="loadWorkOrders('Done')">Done</button>
+                        </div>
+                        <button class="btn btn-secondary btn-sm" onclick="loadWorkOrders(currentStatusFilter)">&#8635; Refresh</button>
+                    </div>
+                </div>
+
+                <div class="table-wrapper">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Equipment ID</th>
+                                <th>Description</th>
+                                <th>Priority</th>
+                                <th>Status</th>
+                                <th>Created At</th>
+                                <th style="text-align: right;">Transition Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody id="workOrderTableBody">
+                            <tr>
+                                <td colspan="6" class="empty-state">Loading work orders...</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+
+                <div class="pagination">
+                    <div id="paginationInfo">Showing 0 orders</div>
+                    <div class="pagination-btns">
+                        <button class="tag-btn" id="prevPageBtn" onclick="changePage(-1)" disabled>&larr; Prev</button>
+                        <button class="tag-btn" id="nextPageBtn" onclick="changePage(1)" disabled>Next &rarr;</button>
+                    </div>
+                </div>
+            </div>
+        </main>
+
+        <!-- Right: Live API & RFC 7807 Response Inspector -->
+        <aside class="inspector-panel">
+            <div class="card">
+                <div class="card-header">
+                    <div class="card-title">
+                        <span class="icon">&#128269;</span> API Live Inspector
+                    </div>
+                    <span id="responseStatusBadge" class="status-pill status-2xx">200 OK</span>
+                </div>
+
+                <div class="meta-grid">
+                    <div class="meta-item">
+                        <div class="meta-label">Active Role</div>
+                        <div class="meta-val" id="metaRole">ADMIN</div>
+                    </div>
+                    <div class="meta-item">
+                        <div class="meta-label">Latency</div>
+                        <div class="meta-val" id="metaLatency">12 ms</div>
+                    </div>
+                </div>
+
+                <div id="rfcAlertBox" class="rfc-alert" style="display: none;">
+                    <strong>RFC 7807 Problem Details Detected</strong>
+                    <div id="rfcAlertDetail" style="font-size: 11px; margin-top: 4px;"></div>
+                </div>
+
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
+                    <span style="font-size: 12px; color: var(--text-muted); font-family: 'JetBrains Mono', monospace;" id="metaEndpoint">GET /api/v1/workorders</span>
+                    <button class="tag-btn" onclick="copyResponseJson()">Copy JSON</button>
+                </div>
+
+                <div class="json-viewer" id="jsonViewer">// Awaiting API interaction...</div>
+
+                <!-- Test Boundary Triggers -->
+                <div style="margin-top: 20px; border-top: 1px solid var(--border-color); padding-top: 16px;">
+                    <div style="font-size: 12px; font-weight: 600; margin-bottom: 8px; color: var(--text-muted);">Test Security & RFC 7807 Invariants:</div>
+                    <div style="display: flex; gap: 8px; flex-wrap: wrap;">
+                        <button class="tag-btn" onclick="testNonExistingId()">Test 404 (Not Found)</button>
+                        <button class="tag-btn" onclick="testMalformedJson()">Test 400 (Malformed JSON)</button>
+                        <button class="tag-btn" onclick="testForbiddenPatch()">Test 403 (Forbidden RBAC)</button>
+                    </div>
+                </div>
+            </div>
+        </aside>
+    </div>
+
+    <script>
+        // State
+        let currentUser = { username: 'admin', password: 'admin123', role: 'ADMIN' };
+        let currentPage = 0;
+        let pageSize = 10;
+        let currentStatusFilter = '';
+        let lastResponseData = null;
+
+        function getAuthHeader() {
+            if (!currentUser.username) return {};
+            const creds = btoa(currentUser.username + ':' + currentUser.password);
+            return { 'Authorization': 'Basic ' + creds };
+        }
+
+        function switchRole(username, password, role) {
+            currentUser = { username, password, role };
+            document.querySelectorAll('.identity-btn').forEach(btn => btn.classList.remove('active'));
+            if (role === 'ADMIN') document.getElementById('role-admin').classList.add('active');
+            else if (role === 'DISPATCHER') document.getElementById('role-dispatcher').classList.add('active');
+            else if (role === 'TECHNICIAN') document.getElementById('role-technician').classList.add('active');
+            else document.getElementById('role-guest').classList.add('active');
+
+            document.getElementById('metaRole').textContent = role;
+            loadWorkOrders(currentStatusFilter);
+        }
+
+        function setEquipment(id) {
+            document.getElementById('equipmentId').value = id;
+        }
+
+        // Render response in inspector
+        function renderInspector(method, url, status, data, latencyMs) {
+            lastResponseData = data;
+            document.getElementById('metaEndpoint').textContent = `${method} ${url}`;
+            document.getElementById('metaLatency').textContent = `${latencyMs} ms`;
+
+            const statusBadge = document.getElementById('responseStatusBadge');
+            statusBadge.textContent = `${status} ${status >= 200 && status < 300 ? 'OK' : ''}`;
+            statusBadge.className = 'status-pill ' + (status >= 200 && status < 300 ? 'status-2xx' : (status >= 400 && status < 500 ? 'status-4xx' : 'status-5xx'));
+
+            // Check if RFC 7807
+            const rfcBox = document.getElementById('rfcAlertBox');
+            if (data && data.type && data.type.startsWith('urn:problem-type:')) {
+                rfcBox.style.display = 'block';
+                document.getElementById('rfcAlertDetail').textContent = `Type: ${data.type} | Detail: ${data.detail || 'Validation error'}`;
+            } else {
+                rfcBox.style.display = 'none';
+            }
+
+            document.getElementById('jsonViewer').textContent = JSON.stringify(data, null, 2);
+        }
+
+        // Fetch Work Orders
+        async function loadWorkOrders(status = '') {
+            currentStatusFilter = status;
+            const start = performance.now();
+            let url = `/api/v1/workorders?page=${currentPage}&size=${pageSize}`;
+            if (status) url += `&status=${status}`;
+
+            try {
+                const res = await fetch(url, {
+                    headers: { ...getAuthHeader(), 'Accept': 'application/json' }
+                });
+                const latency = Math.round(performance.now() - start);
+                const data = await res.json();
+                renderInspector('GET', url, res.status, data, latency);
+
+                if (res.ok && data.content) {
+                    renderTable(data.content);
+                    document.getElementById('paginationInfo').textContent = 
+                        `Page ${data.pageNumber + 1} of ${data.totalPages || 1} (${data.totalElements} total)`;
+                    document.getElementById('prevPageBtn').disabled = data.isFirst;
+                    document.getElementById('nextPageBtn').disabled = data.isLast;
+                } else {
+                    document.getElementById('workOrderTableBody').innerHTML = `
+                        <tr><td colspan="6" class="empty-state" style="color: #fb7185;">Error: ${data.title || 'Access Denied or Failed'}</td></tr>
+                    `;
+                }
+            } catch (err) {
+                renderInspector('GET', url, 500, { error: err.message }, 0);
+            }
+        }
+
+        function renderTable(orders) {
+            const tbody = document.getElementById('workOrderTableBody');
+            if (!orders || orders.length === 0) {
+                tbody.innerHTML = '<tr><td colspan="6" class="empty-state">No work orders recorded yet. Create one above!</td></tr>';
+                return;
+            }
+
+            tbody.innerHTML = orders.map(wo => {
+                const statusClass = wo.status === 'Open' ? 'pill-open' : (wo.status === 'InProgress' ? 'pill-in-progress' : 'pill-done');
+                const createdTime = new Date(wo.createdAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+                
+                let transitionButtons = '';
+                if (wo.status === 'Open') {
+                    transitionButtons = `
+                        <button class="btn btn-secondary btn-sm" onclick="patchStatus('${wo.id}', 'InProgress')">&rarr; InProgress</button>
+                        <button class="tag-btn" onclick="patchStatus('${wo.id}', 'Done')" title="Attempt illegal skip transition (should return 422)">&times; Skip to Done</button>
+                    `;
+                } else if (wo.status === 'InProgress') {
+                    transitionButtons = `
+                        <button class="btn btn-secondary btn-sm" style="color: #34d399; border-color: rgba(16,185,129,0.3);" onclick="patchStatus('${wo.id}', 'Done')">&check; Complete (Done)</button>
+                        <button class="tag-btn" onclick="patchStatus('${wo.id}', 'Open')" title="Attempt illegal rollback (should return 422)">&larr; Rollback</button>
+                    `;
+                } else {
+                    transitionButtons = `<span style="font-size: 11px; color: #34d399;">Resolved</span>`;
+                }
+
+                return `
+                    <tr>
+                        <td style="font-family: 'JetBrains Mono', monospace; font-weight: 600; color: #60a5fa;">${wo.equipmentId}</td>
+                        <td style="max-width: 260px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">${wo.description}</td>
+                        <td><span class="priority-badge priority-${wo.priority}">${wo.priority}</span></td>
+                        <td><span class="state-pill ${statusClass}">${wo.status}</span></td>
+                        <td style="color: var(--text-muted); font-size: 12px;">${createdTime}</td>
+                        <td style="text-align: right;"><div class="action-btns" style="justify-content: flex-end;">${transitionButtons}</div></td>
+                    </tr>
+                `;
+            }).join('');
+        }
+
+        // Create Work Order
+        async function handleCreate(e) {
+            e.preventDefault();
+            const equipmentId = document.getElementById('equipmentId').value;
+            const description = document.getElementById('description').value;
+            const priority = document.getElementById('priority').value;
+
+            const payload = { equipmentId, description, priority };
+            const start = performance.now();
+
+            const res = await fetch('/api/v1/workorders', {
+                method: 'POST',
+                headers: {
+                    ...getAuthHeader(),
+                    'Content-Type': 'application/json',
+                    'Accept': 'application/json'
+                },
+                body: JSON.stringify(payload)
+            });
+
+            const latency = Math.round(performance.now() - start);
+            const data = await res.json();
+            renderInspector('POST', '/api/v1/workorders', res.status, data, latency);
+
+            if (res.ok) {
+                loadWorkOrders(currentStatusFilter);
+            }
+        }
+
+        // Patch Status
+        async function patchStatus(id, newStatus) {
+            const start = performance.now();
+            const payload = { status: newStatus };
+
+            const res = await fetch(`/api/v1/workorders/${id}/status`, {
+                method: 'PATCH',
+                headers: {
+                    ...getAuthHeader(),
+                    'Content-Type': 'application/json',
+                    'Accept': 'application/json'
+                },
+                body: JSON.stringify(payload)
+            });
+
+            const latency = Math.round(performance.now() - start);
+            const data = await res.json();
+            renderInspector('PATCH', `/api/v1/workorders/${id}/status`, res.status, data, latency);
+
+            if (res.ok) {
+                loadWorkOrders(currentStatusFilter);
+            }
+        }
+
+        function changePage(delta) {
+            currentPage += delta;
+            if (currentPage < 0) currentPage = 0;
+            loadWorkOrders(currentStatusFilter);
+        }
+
+        // Boundary test helpers
+        async function testNonExistingId() {
+            const fakeId = '00000000-0000-0000-0000-000000000000';
+            const start = performance.now();
+            const res = await fetch(`/api/v1/workorders/${fakeId}`, {
+                headers: { ...getAuthHeader(), 'Accept': 'application/json' }
+            });
+            const latency = Math.round(performance.now() - start);
+            const data = await res.json();
+            renderInspector('GET', `/api/v1/workorders/${fakeId}`, res.status, data, latency);
+        }
+
+        async function testMalformedJson() {
+            const start = performance.now();
+            const res = await fetch('/api/v1/workorders', {
+                method: 'POST',
+                headers: { ...getAuthHeader(), 'Content-Type': 'application/json' },
+                body: '{"equipmentId": "EQ-1", "priority": "NON_EXISTING_ENUM"}'
+            });
+            const latency = Math.round(performance.now() - start);
+            const data = await res.json();
+            renderInspector('POST', '/api/v1/workorders', res.status, data, latency);
+        }
+
+        async function testInvalidPayload() {
+            const start = performance.now();
+            const res = await fetch('/api/v1/workorders', {
+                method: 'POST',
+                headers: { ...getAuthHeader(), 'Content-Type': 'application/json' },
+                body: '{"equipmentId": "", "description": "Short", "priority": "HIGH"}'
+            });
+            const latency = Math.round(performance.now() - start);
+            const data = await res.json();
+            renderInspector('POST', '/api/v1/workorders', res.status, data, latency);
+        }
+
+        async function testForbiddenPatch() {
+            // Temporarily use dispatcher creds to patch status
+            const creds = btoa('dispatcher:dispatcher123');
+            const fakeId = '00000000-0000-0000-0000-000000000000';
+            const start = performance.now();
+            const res = await fetch(`/api/v1/workorders/${fakeId}/status`, {
+                method: 'PATCH',
+                headers: { 'Authorization': 'Basic ' + creds, 'Content-Type': 'application/json' },
+                body: JSON.stringify({ status: 'InProgress' })
+            });
+            const latency = Math.round(performance.now() - start);
+            const data = await res.json();
+            renderInspector('PATCH (as DISPATCHER)', `/api/v1/workorders/.../status`, res.status, data, latency);
+        }
+
+        function copyResponseJson() {
+            if (!lastResponseData) return;
+            navigator.clipboard.writeText(JSON.stringify(lastResponseData, null, 2));
+            alert('JSON copied to clipboard!');
+        }
+
+        // Initial Load
+        window.addEventListener('DOMContentLoaded', () => {
+            loadWorkOrders();
+        });
+    </script>
+</body>
+</html>
