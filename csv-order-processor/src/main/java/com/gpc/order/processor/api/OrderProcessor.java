@@ -51,6 +51,58 @@ public interface OrderProcessor {
   CsvProcessingResult process(Path filePath, CsvConfig config);
 
   /**
+   * Xử lý dữ liệu đơn hàng từ một InputStream dạng byte với MetadataConfig.
+   *
+   * @param inputStream luồng dữ liệu byte CSV (sẽ đọc theo chuẩn UTF-8)
+   * @param config cấu hình metadata ánh xạ cột, dấu phân cách và chế độ xuất
+   * @return kết quả xử lý gồm chuỗi CSV làm giàu, byte array và đối tượng tổng hợp
+   */
+  default CsvProcessingResult process(
+      InputStream inputStream, com.gpc.order.processor.api.config.MetadataConfig config) {
+    java.util.Objects.requireNonNull(config, "config must not be null");
+    return process(inputStream, config.toCsvConfig());
+  }
+
+  /**
+   * Xử lý dữ liệu đơn hàng từ một đường dẫn tệp tin trên hệ thống tập tin với MetadataConfig.
+   *
+   * @param filePath đường dẫn tệp tin CSV
+   * @param config cấu hình metadata ánh xạ cột, dấu phân cách và chế độ xuất
+   * @return kết quả xử lý gồm chuỗi CSV làm giàu, byte array và đối tượng tổng hợp
+   */
+  default CsvProcessingResult process(
+      Path filePath, com.gpc.order.processor.api.config.MetadataConfig config) {
+    java.util.Objects.requireNonNull(config, "config must not be null");
+    return process(filePath, config.toCsvConfig());
+  }
+
+  /**
+   * Xử lý dữ liệu đơn hàng từ chuỗi văn bản CSV với MetadataConfig.
+   *
+   * @param content chuỗi văn bản CSV đầu vào
+   * @param config cấu hình metadata ánh xạ cột, dấu phân cách và chế độ xuất
+   * @return kết quả xử lý gồm chuỗi CSV làm giàu, byte array và đối tượng tổng hợp
+   */
+  default CsvProcessingResult process(
+      String content, com.gpc.order.processor.api.config.MetadataConfig config) {
+    java.util.Objects.requireNonNull(config, "config must not be null");
+    return process(content, config.toCsvConfig());
+  }
+
+  /**
+   * Xử lý dữ liệu đơn hàng từ một Reader với MetadataConfig.
+   *
+   * @param reader đối tượng đọc luồng ký tự CSV
+   * @param config cấu hình metadata ánh xạ cột, dấu phân cách và chế độ xuất
+   * @return kết quả xử lý gồm chuỗi CSV làm giàu, byte array và đối tượng tổng hợp
+   */
+  default CsvProcessingResult process(
+      Reader reader, com.gpc.order.processor.api.config.MetadataConfig config) {
+    java.util.Objects.requireNonNull(config, "config must not be null");
+    return process(reader, config.toCsvConfig());
+  }
+
+  /**
    * Xử lý dữ liệu đơn hàng từ chuỗi văn bản CSV và ánh xạ trực tiếp sang Aggregate Root Order.
    *
    * @param orderId mã định danh đơn hàng

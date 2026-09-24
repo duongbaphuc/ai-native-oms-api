@@ -7,20 +7,23 @@ import java.util.Objects;
 
 /**
  * Metadata cấu hình truyền vào thư viện để ánh xạ động dữ liệu đơn hàng CSV.
+ * Cho phép thiết lập có/không có header, ký tự phân cách, bảng ánh xạ vị trí các cột
+ * và chế độ đầu ra (REPORT_MODE hoặc DATA_MODE).
  *
- * @param hasHeader Xác định tệp CSV có dòng tiêu đề hay không.
- * @param delimiter Ký tự phân cách đang sử dụng (thông thường là ',' hoặc ';').
+ * @param hasHeader Xác định tệp CSV có dòng tiêu đề hay không. Mặc định là true.
+ * @param delimiter Ký tự phân cách các trường (thông thường là ',' hoặc ';').
  * @param columnMapping Ánh xạ vị trí các cột cần thiết (Số lượng, Đơn giá, Số tổng, % VAT) thông qua
  *        tên cột (String) nếu có header, hoặc chỉ số cột 0-based (Integer) nếu không có header.
- * @param outputMode Chế độ đầu ra (REPORT_MODE hoặc DATA_MODE).
+ * @param outputMode Chế độ đầu ra (REPORT_MODE có footer tổng cộng, hoặc DATA_MODE thuần danh sách mặt
+ *        hàng).
  */
-public record CsvConfig(
+public record MetadataConfig(
     boolean hasHeader,
     char delimiter,
     Map<Object, ColumnKey> columnMapping,
     OutputMode outputMode) {
 
-  public CsvConfig {
+  public MetadataConfig {
     Objects.requireNonNull(columnMapping, "columnMapping must not be null");
     Objects.requireNonNull(outputMode, "outputMode must not be null");
 
@@ -36,7 +39,7 @@ public record CsvConfig(
   }
 
   /**
-   * Tạo đối tượng Builder để thiết lập cấu hình CsvConfig từng bước linh hoạt.
+   * Tạo đối tượng Builder để thiết lập cấu hình MetadataConfig từng bước linh hoạt theo mẫu Fluent API.
    *
    * @return đối tượng Builder mới
    */
@@ -45,31 +48,31 @@ public record CsvConfig(
   }
 
   /**
-   * Chuyển đổi từ đối tượng MetadataConfig sang CsvConfig.
+   * Chuyển đổi từ đối tượng CsvConfig sang MetadataConfig.
    *
-   * @param metadataConfig cấu hình MetadataConfig nguồn
-   * @return đối tượng CsvConfig tương ứng
-   */
-  public static CsvConfig from(MetadataConfig metadataConfig) {
-    Objects.requireNonNull(metadataConfig, "metadataConfig must not be null");
-    return new CsvConfig(
-        metadataConfig.hasHeader(),
-        metadataConfig.delimiter(),
-        metadataConfig.columnMapping(),
-        metadataConfig.outputMode());
-  }
-
-  /**
-   * Chuyển đổi đối tượng CsvConfig sang MetadataConfig.
-   *
+   * @param csvConfig cấu hình CsvConfig nguồn
    * @return đối tượng MetadataConfig tương ứng
    */
-  public MetadataConfig toMetadataConfig() {
-    return new MetadataConfig(hasHeader, delimiter, columnMapping, outputMode);
+  public static MetadataConfig from(CsvConfig csvConfig) {
+    Objects.requireNonNull(csvConfig, "csvConfig must not be null");
+    return new MetadataConfig(
+        csvConfig.hasHeader(),
+        csvConfig.delimiter(),
+        csvConfig.columnMapping(),
+        csvConfig.outputMode());
   }
 
   /**
-   * Bộ dựng (Builder) hỗ trợ xây dựng đối tượng CsvConfig bất biến theo mẫu Fluent API.
+   * Chuyển đổi đối tượng MetadataConfig sang CsvConfig.
+   *
+   * @return đối tượng CsvConfig tương ứng
+   */
+  public CsvConfig toCsvConfig() {
+    return new CsvConfig(hasHeader, delimiter, columnMapping, outputMode);
+  }
+
+  /**
+   * Bộ dựng (Builder) hỗ trợ xây dựng đối tượng MetadataConfig bất biến theo mẫu Fluent API.
    */
   public static class Builder {
     private boolean hasHeader = true;
@@ -139,12 +142,12 @@ public record CsvConfig(
     }
 
     /**
-     * Kiểm tra tính hợp lệ và hoàn tất khởi tạo đối tượng CsvConfig bất biến.
+     * Kiểm tra tính hợp lệ và hoàn tất khởi tạo đối tượng MetadataConfig bất biến.
      *
-     * @return đối tượng CsvConfig đã hoàn tất cấu hình
+     * @return đối tượng MetadataConfig đã hoàn tất cấu hình
      */
-    public CsvConfig build() {
-      return new CsvConfig(hasHeader, delimiter, columnMapping, outputMode);
+    public MetadataConfig build() {
+      return new MetadataConfig(hasHeader, delimiter, columnMapping, outputMode);
     }
   }
 }
