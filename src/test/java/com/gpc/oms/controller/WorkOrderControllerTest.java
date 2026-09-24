@@ -222,6 +222,8 @@ class WorkOrderControllerTest {
             .andExpect(status().isBadRequest())
             .andExpect(jsonPath("$.type").value("urn:problem-type:validation-error"))
             .andExpect(jsonPath("$.invalidParams[0].name").value("status"));
+    }
+
     // Row 15: Unexpected Exception fallback → 500
     @Test
     @WithMockUser(roles = "TECHNICIAN")
