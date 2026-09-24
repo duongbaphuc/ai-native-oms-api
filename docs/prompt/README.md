@@ -9,8 +9,9 @@
 ```
 docs/prompt/
 ├── README.md                              # [Tài liệu này] Mục lục điều hướng và quy chuẩn quản trị prompt
-├── 01-sdlc-playbook/                      # Chuỗi 8 prompt quy trình AI-Native SDLC chuẩn mực (End-to-End)
+├── 01-sdlc-playbook/                      # Chuỗi 12 prompt quy trình AI-Native SDLC hoàn chỉnh (End-to-End)
 │   ├── 00-MASTER-AI-NATIVE-SDLC-PLAYBOOK.md
+│   ├── 00-project-scaffolding-and-governance.prompt.md
 │   ├── 01-business-analysis-and-domain.prompt.md
 │   ├── 02-technical-architecture-and-api-spec.prompt.md
 │   ├── 03-ai-context-auditing-and-remediation.prompt.md
@@ -18,7 +19,10 @@ docs/prompt/
 │   ├── 05-automated-testing-and-jacoco-coverage.prompt.md
 │   ├── 06-interactive-verification-and-console.prompt.md
 │   ├── 07-comprehensive-code-review-audit.prompt.md
-│   └── 08-system-handover-documentation.prompt.md
+│   ├── 08-system-handover-documentation.prompt.md
+│   ├── 09-security-audit-and-vulnerability-assessment.prompt.md
+│   ├── 10-docker-and-cicd-pipeline.prompt.md
+│   └── 11-feature-evolution-and-bugfix.prompt.md
 ├── 02-copilot-slash-commands/             # Catalog tra cứu lệnh Slash Commands tích hợp trong IDE
 │   └── README.md                          # (Tham chiếu trực tiếp đến .github/prompts/*.prompt.md)
 ├── 03-module-task-prompts/                # Chỉ mục các prompt triển khai theo từng phần kỹ thuật
