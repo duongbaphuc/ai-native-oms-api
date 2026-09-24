@@ -11,10 +11,12 @@ import com.gpc.oms.exception.GlobalExceptionHandler;
 import com.gpc.oms.exception.ResourceNotFoundException;
 import com.gpc.oms.service.WorkOrderService;
 import org.junit.jupiter.api.Test;
+import org.mockito.ArgumentCaptor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.context.annotation.Import;
+import org.springframework.data.domain.Pageable;
 import org.springframework.http.MediaType;
 import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.test.web.servlet.MockMvc;
@@ -25,6 +27,7 @@ import java.util.UUID;
 
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.when;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
@@ -237,5 +240,20 @@ class WorkOrderControllerTest {
             .andExpect(jsonPath("$.type").value("urn:problem-type:internal-error"))
             .andExpect(jsonPath("$.status").value(500))
             .andExpect(jsonPath("$.detail").value("An unexpected error occurred"));
+    }
+
+    // SEC-02: ?size= vượt trần bị cap về max-page-size=100 (chống DoS OOM)
+    @Test
+    @WithMockUser(roles = "DISPATCHER")
+    void list_sizeOverMax_isCappedTo100() throws Exception {
+        ArgumentCaptor<Pageable> pageableCaptor = ArgumentCaptor.forClass(Pageable.class);
+        when(workOrderService.getWorkOrders(pageableCaptor.capture(), any()))
+            .thenReturn(new PagedResponse<>(List.of(), 0, 100, 0, 0, true, true));
+
+        mockMvc.perform(get("/api/v1/workorders")
+                .param("size", "200"))
+            .andExpect(status().isOk());
+
+        assertEquals(100, pageableCaptor.getValue().getPageSize());
     }
 }
