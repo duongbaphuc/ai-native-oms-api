@@ -52,6 +52,16 @@ jobs:
       - name: Checkout Source Code
         uses: actions/checkout@v4
 
+      - name: Set up JDK 17 (Eclipse Temurin)
+        uses: actions/setup-java@v4
+        with:
+          distribution: 'temurin'
+          java-version: '17'
+          cache: 'maven'
+
+      - name: Populate Local Maven Cache (Avoid 429 Rate Limiting)
+        run: mvn dependency:resolve -B
+
       - name: Run Trivy Vulnerability Scanner (Filesystem & Dependencies)
         uses: aquasecurity/trivy-action@master
         with:
