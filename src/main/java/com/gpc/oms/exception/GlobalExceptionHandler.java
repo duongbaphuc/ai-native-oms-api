@@ -10,6 +10,7 @@ import org.springframework.security.access.AccessDeniedException;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
+import org.springframework.web.method.annotation.MethodArgumentTypeMismatchException;
 
 import java.net.URI;
 import java.util.List;
@@ -51,7 +52,21 @@ public class GlobalExceptionHandler {
         return problem;
     }
 
-    // Handler #3: 403 — @PreAuthorize fail
+    // Handler #3: 400 — Query/path param conversion fail (vd: ?status=URGENT)
+    // Trigger: StringToWorkOrderStatusConverter quăng IllegalArgumentException,
+    // Spring MVC wrap thành MethodArgumentTypeMismatchException
+    // Response: invalidParams[].name = tên param (vd: "status")
+    @ExceptionHandler(MethodArgumentTypeMismatchException.class)
+    public ProblemDetail handleQueryParamTypeMismatch(MethodArgumentTypeMismatchException ex) {
+        log.warn("Query parameter type mismatch: {}", ex.getName());
+        ProblemDetail problem = ProblemDetail.forStatusAndDetail(HttpStatus.BAD_REQUEST, "Validation Failed");
+        problem.setType(URI.create("urn:problem-type:validation-error"));
+        problem.setProperty("invalidParams",
+            List.of(Map.of("name", ex.getName(), "reason", "Invalid value for parameter '" + ex.getName() + "'")));
+        return problem;
+    }
+
+    // Handler #4: 403 — @PreAuthorize fail
     // Trigger: AccessDeniedException từ Spring Security khi role không đủ
     // Import: org.springframework.security.access.AccessDeniedException (KHÔNG phải java.nio.file.AccessDeniedException)
     @ExceptionHandler(AccessDeniedException.class)
@@ -62,7 +77,7 @@ public class GlobalExceptionHandler {
         return problem;
     }
 
-    // Handler #4: 404 — Resource không tìm thấy
+    // Handler #5: 404 — Resource không tìm thấy
     // Trigger: Service throw ResourceNotFoundException khi findById trả empty
     @ExceptionHandler(ResourceNotFoundException.class)
     public ProblemDetail handleResourceNotFound(ResourceNotFoundException ex) {
@@ -72,7 +87,7 @@ public class GlobalExceptionHandler {
         return problem;
     }
 
-    // Handler #5: 422 — Vi phạm state machine (invalid state transition)
+    // Handler #6: 422 — Vi phạm state machine (invalid state transition)
     // Trigger: Entity throw IllegalStateException qua advanceStatus(), Service re-throw
     @ExceptionHandler(IllegalStateException.class)
     public ProblemDetail handleIllegalStateTransition(IllegalStateException ex) {
@@ -82,8 +97,8 @@ public class GlobalExceptionHandler {
         return problem;
     }
 
-    // Handler #6: 500 — Fallback cuối cùng, không lộ chi tiết nội bộ
-    // Trigger: mọi Exception không khớp handler #1-#5
+    // Handler #7: 500 — Fallback cuối cùng, không lộ chi tiết nội bộ
+    // Trigger: mọi Exception không khớp handler #1-#6
     // Response: message chung, KHÔNG lộ stack trace / SQL / class name
     @ExceptionHandler(Exception.class)
     public ProblemDetail handleUnexpected(Exception ex) {
