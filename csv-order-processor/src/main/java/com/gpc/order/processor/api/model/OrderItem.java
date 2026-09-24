@@ -5,6 +5,7 @@ import java.math.RoundingMode;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.Objects;
 
 /**
  * Đại diện cho 1 dòng mặt hàng trong tệp CSV đơn hàng sau khi phân tích và tính toán.
@@ -29,6 +30,10 @@ public record OrderItem(
     BigDecimal vatAmount,
     BigDecimal lineTotalWithVat) {
 
+  public static final int MONEY_SCALE = 2;
+  public static final RoundingMode ROUNDING_MODE = RoundingMode.HALF_UP;
+  private static final BigDecimal ONE_HUNDRED = new BigDecimal("100");
+
   public OrderItem {
     if (lineNumber < 1) {
       throw new IllegalArgumentException("lineNumber must be positive (>= 1): " + lineNumber);
@@ -40,16 +45,64 @@ public record OrderItem(
         : Collections.unmodifiableList(new ArrayList<>(rawValues));
 
     if (unitPrice != null) {
-      unitPrice = unitPrice.setScale(2, RoundingMode.HALF_UP);
+      unitPrice = roundMoney(unitPrice);
     }
     if (lineTotal != null) {
-      lineTotal = lineTotal.setScale(2, RoundingMode.HALF_UP);
+      lineTotal = roundMoney(lineTotal);
     }
     if (vatAmount != null) {
-      vatAmount = vatAmount.setScale(2, RoundingMode.HALF_UP);
+      vatAmount = roundMoney(vatAmount);
     }
     if (lineTotalWithVat != null) {
-      lineTotalWithVat = lineTotalWithVat.setScale(2, RoundingMode.HALF_UP);
+      lineTotalWithVat = roundMoney(lineTotalWithVat);
     }
+  }
+
+  public static BigDecimal roundMoney(BigDecimal value) {
+    if (value == null) {
+      return BigDecimal.ZERO.setScale(MONEY_SCALE, ROUNDING_MODE);
+    }
+    return value.setScale(MONEY_SCALE, ROUNDING_MODE);
+  }
+
+  public static BigDecimal calculateLineTotal(BigDecimal quantity, BigDecimal unitPrice) {
+    Objects.requireNonNull(quantity, "quantity must not be null");
+    Objects.requireNonNull(unitPrice, "unitPrice must not be null");
+    return roundMoney(quantity.multiply(unitPrice));
+  }
+
+  public static BigDecimal calculateVatAmount(BigDecimal lineTotal, BigDecimal vatRate) {
+    Objects.requireNonNull(lineTotal, "lineTotal must not be null");
+    Objects.requireNonNull(vatRate, "vatRate must not be null");
+
+    BigDecimal rawVat = lineTotal.multiply(vatRate).divide(ONE_HUNDRED, 8, RoundingMode.HALF_UP);
+    return roundMoney(rawVat);
+  }
+
+  public static OrderItem of(
+      int lineNumber,
+      List<String> rawValues,
+      BigDecimal quantity,
+      BigDecimal unitPrice,
+      BigDecimal vatRate) {
+    BigDecimal lineTotal = calculateLineTotal(quantity, unitPrice);
+    BigDecimal vatAmount = calculateVatAmount(lineTotal, vatRate);
+    BigDecimal lineTotalWithVat = lineTotal.add(vatAmount);
+
+    return new OrderItem(
+        lineNumber, rawValues, quantity, unitPrice, lineTotal, vatRate, vatAmount, lineTotalWithVat);
+  }
+
+  public static OrderItem ofWithLineTotal(
+      int lineNumber,
+      List<String> rawValues,
+      BigDecimal rawLineTotal,
+      BigDecimal vatRate) {
+    BigDecimal lineTotal = roundMoney(rawLineTotal);
+    BigDecimal vatAmount = calculateVatAmount(lineTotal, vatRate);
+    BigDecimal lineTotalWithVat = lineTotal.add(vatAmount);
+
+    return new OrderItem(
+        lineNumber, rawValues, null, null, lineTotal, vatRate, vatAmount, lineTotalWithVat);
   }
 }
