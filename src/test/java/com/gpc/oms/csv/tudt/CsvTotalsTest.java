@@ -187,9 +187,12 @@ class CsvTotalsTest {
                 && total.contains(t.vat().toPlainString())
                 && total.contains(t.payable().toPlainString()),
                 "TOTAL row carries summary values: " + total);
-        List<String> totalCells = CsvTotals.scanHeaders(total + "\nX");
+        // TOTAL row never quotes (literal TOTAL + empty fillers + plain numbers),
+        // so a plain split counts fields exactly; scanHeaders would reject the
+        // empty filler cells as duplicate headers.
+        String[] totalCells = total.split(",", -1);
         // TOTAL shape: 5 original cols (literal + 4 empty filler incl. note) + 3 totals
-        assertEquals(8, totalCells.size(), "TOTAL field count: " + total);
+        assertEquals(8, totalCells.length, "TOTAL field count: " + total);
 
         byte[] raw = Files.readAllBytes(out);
         assertTrue(raw.length > 0 && raw[raw.length - 1] == '\n', "trailing newline");
