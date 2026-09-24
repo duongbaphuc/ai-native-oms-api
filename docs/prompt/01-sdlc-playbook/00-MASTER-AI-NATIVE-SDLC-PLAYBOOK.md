@@ -4,18 +4,36 @@ Tài liệu này tổng hợp toàn bộ chuỗi Prompt chuẩn mực theo cấu
 
 ---
 
-## 1. Sơ Đồ Quy Trình 9 Giai Đoạn Tuyến Tính
+## 1. Sơ Đồ Quy Trình 12 Giai Đoạn Tuyến Tính (End-to-End AI-Native SDLC)
 
 ```mermaid
 graph TD
-    P1["Giai đoạn 1: Phân tích Nghiệp vụ & Mô hình hóa Miền (01-business-analysis-and-domain.prompt.md)"] --> P2["Giai đoạn 2: Thiết kế Kiến trúc & Hợp đồng API (02-technical-architecture-and-api-spec.prompt.md)"]
-    P2 --> P3["Giai đoạn 3: Kiểm toán Ngữ cảnh AI & Đồng bộ Đặc tả (03-ai-context-auditing-and-remediation.prompt.md)"]
-    P3 --> P4["Giai đoạn 4: Hiện thực hóa Mã nguồn theo Đặc tả (04-spec-driven-implementation.prompt.md)"]
-    P4 --> P5["Giai đoạn 5: Kiểm thử Tự động & 100% JaCoCo Coverage (05-automated-testing-and-jacoco-coverage.prompt.md)"]
-    P5 --> P6["Giai đoạn 6: Nghiệm thu Trực quan & Test Console (06-interactive-verification-and-console.prompt.md)"]
-    P6 --> P7["Giai đoạn 7: Kiểm toán Toàn diện Mã nguồn vs Đặc tả (07-comprehensive-code-review-audit.prompt.md)"]
-    P7 --> P8["Giai đoạn 8: Lập Hồ Sơ Bàn Giao Kỹ Thuật & Vận Hành (08-system-handover-documentation.prompt.md)"]
-    P8 --> P9["Giai đoạn 9: Kiểm Định Bảo Mật & Lập Hồ Sơ An Ninh Bàn Giao (09-security-audit-and-vulnerability-assessment.prompt.md)"]
+    subgraph "Giai đoạn 0: Khởi tạo Nền móng & AI Governance"
+        P0["Pha 0: Khởi tạo Scaffolding & AI Governance (00-project-scaffolding-and-governance.prompt.md)"]
+    end
+
+    subgraph "Giai đoạn 1-3: Đặc tả & Kiểm toán Ngữ cảnh (Spec-Driven)"
+        P0 --> P1["Pha 1: Phân tích Nghiệp vụ & Mô hình hóa Miền (01-business-analysis-and-domain.prompt.md)"]
+        P1 --> P2["Pha 2: Thiết kế Kiến trúc & Hợp đồng API (02-technical-architecture-and-api-spec.prompt.md)"]
+        P2 --> P3["Pha 3: Kiểm toán Ngữ cảnh AI & Đồng bộ Đặc tả (03-ai-context-auditing-and-remediation.prompt.md)"]
+    end
+
+    subgraph "Giai đoạn 4-6: Hiện thực hóa & Nghiệm thu Chất lượng"
+        P3 --> P4["Pha 4: Hiện thực hóa Mã nguồn theo Đặc tả (04-spec-driven-implementation.prompt.md)"]
+        P4 --> P5["Pha 5: Kiểm thử Tự động & 100% JaCoCo Coverage (05-automated-testing-and-jacoco-coverage.prompt.md)"]
+        P5 --> P6["Pha 6: Nghiệm thu Trực quan & Test Console (06-interactive-verification-and-console.prompt.md)"]
+    end
+
+    subgraph "Giai đoạn 7-9: Đối soát Mã nguồn, Bàn giao & An ninh"
+        P6 --> P7["Pha 7: Kiểm toán Toàn diện Mã nguồn vs Đặc tả (07-comprehensive-code-review-audit.prompt.md)"]
+        P7 --> P8["Pha 8: Lập Hồ Sơ Bàn Giao Kỹ Thuật & Vận Hành (08-system-handover-documentation.prompt.md)"]
+        P8 --> P9["Pha 9: Kiểm Định Bảo Mật & Lập Hồ Sơ An Ninh Bàn Giao (09-security-audit-and-vulnerability-assessment.prompt.md)"]
+    end
+
+    subgraph "Giai đoạn 10-11: Đóng gói Container, CI/CD & Tiến hóa Day-2"
+        P9 --> P10["Pha 10: Đóng Gói Container & CI/CD Pipeline (10-docker-and-cicd-pipeline.prompt.md)"]
+        P10 --> P11["Pha 11: Vòng Lặp Sửa Lỗi & Tiến Hóa Tính Năng (11-feature-evolution-and-bugfix.prompt.md)"]
+    end
 ```
 
 ---
@@ -24,6 +42,7 @@ graph TD
 
 | STT | Tên Tệp Prompt | Vai Trò (Role) | Mục Tiêu Chính (Task) | Tiêu Chí Đo Lường (Done When) |
 |---|---|---|---|---|
+| **00** | [`00-project-scaffolding-and-governance.prompt.md`](00-project-scaffolding-and-governance.prompt.md) | Principal DevOps Architect & AI Context Engineer | Khởi tạo khung dự án từ số 0, `pom.xml`, `.gitignore`, `CONTRIBUTING.md`, và `.github/copilot-instructions.md` | `./mvnw clean compile` Green, AI Guardrails sẵn sàng, Git repo chuẩn hóa |
 | **01** | [`01-business-analysis-and-domain.prompt.md`](01-business-analysis-and-domain.prompt.md) | Principal Business Analyst & DDD Strategic Architect | Phân tích bài toán, xác định Aggregate Root, Value Objects, và State Machine | Bảng thực thể 4 cột, ma trận 9 trạng thái không mơ hồ |
 | **02** | [`02-technical-architecture-and-api-spec.prompt.md`](02-technical-architecture-and-api-spec.prompt.md) | Principal API Architect & Security Specialist | Thiết kế hợp đồng RESTful, bảo mật RBAC, và quy chuẩn lỗi RFC 7807 | Bảng Schema Request/Response, Step-by-step logic, Ma trận lỗi URN |
 | **03** | [`03-ai-context-auditing-and-remediation.prompt.md`](03-ai-context-auditing-and-remediation.prompt.md) | Senior AI Context Auditor & Quality Assurance | Rà soát khoảng trống ngữ cảnh, vá điểm gãy vỡ, triệt tiêu ảo giác | Báo cáo kiểm toán, đồng bộ 100% tài liệu, tạo `CONTEXT_INDEX.md` |
@@ -33,6 +52,8 @@ graph TD
 | **07** | [`07-comprehensive-code-review-audit.prompt.md`](07-comprehensive-code-review-audit.prompt.md) | Lead Software Quality Auditor & Principal Code Review Architect | Kiểm toán đối chiếu 100% dòng code với toàn bộ 9 tài liệu đặc tả markdown | Báo cáo kiểm toán, ma trận truy vết 1-1, điểm số tuân thủ, Production Verdict |
 | **08** | [`08-system-handover-documentation.prompt.md`](08-system-handover-documentation.prompt.md) | Principal Technical Delivery Lead & SRE Architect | Tổng hợp mã nguồn, kiểm thử, cấu hình để lập Hồ Sơ Bàn Giao Kỹ Thuật Toàn Diện | File `SYSTEM_HANDOVER.md` 9 phần tiêu chuẩn, sẵn sàng vận hành & ký nghiệm thu |
 | **09** | [`09-security-audit-and-vulnerability-assessment.prompt.md`](09-security-audit-and-vulnerability-assessment.prompt.md) | Principal Application Security Architect & DevSecOps Lead | Thẩm định OWASP API Top 10, CWE, dò quét bug issue và lập Hồ Sơ An Ninh Bàn Giao | File `SECURITY_HANDOVER_REPORT.md` 8 phần tiêu chuẩn, Hardening Roadmap P0-P2 |
+| **10** | [`10-docker-and-cicd-pipeline.prompt.md`](10-docker-and-cicd-pipeline.prompt.md) | Lead DevSecOps Architect & Cloud-Native Engineer | Đóng gói Multi-Stage Dockerfile (non-root), Docker Compose và GitHub Actions CI/CD | `docker build` thành công, `.github/workflows/ci.yml` kiểm định tự động |
+| **11** | [`11-feature-evolution-and-bugfix.prompt.md`](11-feature-evolution-and-bugfix.prompt.md) | Principal SRE & Spec-Driven Evolution Specialist | Quy trình tiếp nhận Issue, Spec-First Bugfix, Red-Green test, mở Atomic PR | Zero Regression, Spec đồng bộ 100% với Code, JaCoCo Coverage bảo toàn |
 
 ---
 
