@@ -14,6 +14,7 @@ public record PagedResponse<T>(
     boolean isLast
 ) {
     public static <T> PagedResponse<T> from(Page<T> page) {
+        java.util.Objects.requireNonNull(page, "page must not be null");
         return new PagedResponse<>(
             page.getContent(),
             page.getNumber(),

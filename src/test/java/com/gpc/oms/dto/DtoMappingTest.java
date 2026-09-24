@@ -16,6 +16,7 @@ import java.util.List;
 import java.util.UUID;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 @DisplayName("DTO Mapping & Record Invariants Unit Tests")
 class DtoMappingTest {
@@ -48,6 +49,14 @@ class DtoMappingTest {
         assertThat(dto.status()).isEqualTo(WorkOrderStatus.DONE);
         assertThat(dto.resolvedAt()).isNotNull();
         assertThat(dto.resolvedAt()).isEqualTo(entity.getResolvedAt());
+    }
+
+    @Test
+    @DisplayName("WorkOrderResponse.from(null) throws NullPointerException")
+    void workOrderResponse_from_nullEntity_throwsException() {
+        assertThatThrownBy(() -> WorkOrderResponse.from(null))
+            .isInstanceOf(NullPointerException.class)
+            .hasMessage("workOrder must not be null");
     }
 
     @Test
@@ -132,6 +141,14 @@ class DtoMappingTest {
         assertThat(response.totalPages()).isZero();
         assertThat(response.isFirst()).isTrue();
         assertThat(response.isLast()).isTrue();
+    }
+
+    @Test
+    @DisplayName("PagedResponse.from(null) throws NullPointerException")
+    void pagedResponse_from_nullPage_throwsException() {
+        assertThatThrownBy(() -> PagedResponse.from(null))
+            .isInstanceOf(NullPointerException.class)
+            .hasMessage("page must not be null");
     }
 
     @Test
