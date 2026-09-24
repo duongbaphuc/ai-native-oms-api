@@ -260,5 +260,17 @@ class WorkOrderIntegrationTest {
                 .andExpect(jsonPath("$.title").value("Unprocessable Entity"))
                 .andExpect(jsonPath("$.detail").value("Invalid state transition from OPEN to DONE"));
         }
+
+        @Test
+        @DisplayName("12. GET with invalid status query param returns 400 (urn:problem-type:validation-error)")
+        @WithMockUser(username = "dispatcher_user", roles = {"DISPATCHER"})
+        void getWithInvalidStatusQueryParam_returns400ProblemDetail() throws Exception {
+            mockMvc.perform(get("/api/v1/workorders")
+                    .param("status", "URGENT"))
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.status").value(400))
+                .andExpect(jsonPath("$.type").value("urn:problem-type:validation-error"))
+                .andExpect(jsonPath("$.invalidParams[0].name").value("status"));
+        }
     }
 }
