@@ -17,8 +17,9 @@ Outage Work Order API — microservice quản lý sự kiện mất điện (OMS
 - **Design Patterns:**
   * *Static Factory Method Pattern:* DTOs (`WorkOrderResponse.from()`, `PagedResponse.from()`) with defensive `Objects.requireNonNull()`.
   * *State Pattern / State Machine:* Enforce valid transitions (`canTransitionTo()`) in Enum; Domain Entities (`WorkOrder.advanceStatus()`) protect domain invariants with `IllegalStateException`.
-  * *Pure Records & Immutability:* 100% Request/Response DTOs are Java 17 `record`. Local variables marked `final` for JIT escape analysis.
-  * *Pre-sizing Collections:* Always supply `initialCapacity` when collection size is known.
+  * *Pure Records & Immutability:* 100% Request/Response DTOs are Java 17 `record`. Local variables and parameters marked `final` for JIT escape analysis.
+  * *Pre-sizing Collections & Array Caching:* Always supply `initialCapacity` when collection size is known (`new ArrayList<>(size)`). Cache `Enum.values()` static array clone in hot paths (e.g. converters).
+  * *Centralized Constants (DRY):* Reuse `ProblemTypes` for RFC 7807 problem type URIs across exception handlers, controllers, and security configs to eliminate magic literals and duplicate `URI.create()` allocations.
 - **Dependency Injection:** Constructor injection only with `private final` fields. CẤM TUYỆT ĐỐI `@Autowired` trên field.
 - **Zero-Lombok & Zero-Reflection:** CẤM TUYỆT ĐỐI Lombok annotations và Reflection mappers (`ModelMapper`). Ánh xạ tường minh bằng Static Factory hoặc MapStruct.
 - **SLF4J Logging:** Parametric logging only (`log.info("...", var)`). Cấm string concatenation `+` trong log. Cấm log PII hoặc raw payload.
@@ -26,6 +27,7 @@ Outage Work Order API — microservice quản lý sự kiện mất điện (OMS
 
 ## Testing
 - JUnit 5 + Spring Boot Test. `@WebMvcTest` for controller tests, `@DataJpaTest` for repository tests.
+- **Object Mother / Test Fixtures Pattern:** Use centralized `WorkOrderTestFixtures` (`src/test/java/com/gpc/oms/testutil/`) to generate mock entities and DTOs; eliminate boilerplate object instantiations across test suites.
 - Every endpoint must have tests for: success case, validation failure (400), unauthorized (401), forbidden (403), not found (404), invalid state transition (422).
 - Quality Gate: 100% Line & Branch JaCoCo coverage required across domain, service, controller, dto, exception packages.
 - Run `mvn test` — all tests must pass before any PR.

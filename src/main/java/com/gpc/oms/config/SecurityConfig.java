@@ -55,8 +55,8 @@ public class SecurityConfig {
                     response.setStatus(401);
                     response.setContentType("application/problem+json");
                     response.getWriter().write("""
-                        {"type":"urn:problem-type:unauthorized","title":"Unauthorized","status":401,"detail":"Authentication token is missing or expired","instance":"%s"}"""
-                        .formatted(request.getRequestURI()));
+                        {"type":"%s","title":"Unauthorized","status":401,"detail":"Authentication token is missing or expired","instance":"%s"}"""
+                        .formatted(com.gpc.oms.exception.ProblemTypes.UNAUTHORIZED, request.getRequestURI()));
                 })
             )
             .httpBasic(Customizer.withDefaults());

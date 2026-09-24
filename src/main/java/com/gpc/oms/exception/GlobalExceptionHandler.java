@@ -12,7 +12,6 @@ import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 import org.springframework.web.method.annotation.MethodArgumentTypeMismatchException;
 
-import java.net.URI;
 import java.util.List;
 import java.util.Map;
 
@@ -27,13 +26,14 @@ public class GlobalExceptionHandler {
     public ProblemDetail handleValidationErrors(final MethodArgumentNotValidException ex) {
         log.warn("Validation failed: {}", ex.getMessage());
         final ProblemDetail problem = ProblemDetail.forStatusAndDetail(HttpStatus.BAD_REQUEST, "Validation Failed");
-        problem.setType(URI.create("urn:problem-type:validation-error"));
+        problem.setType(ProblemTypes.VALIDATION_ERROR);
         
-        final List<Map<String, String>> invalidParams = ex.getBindingResult().getFieldErrors().stream()
-            .map(error -> Map.of(
-                "name", error.getField(),
-                "reason", error.getDefaultMessage() != null ? error.getDefaultMessage() : "Invalid value"
-            )).toList();
+        final List<org.springframework.validation.FieldError> fieldErrors = ex.getBindingResult().getFieldErrors();
+        final List<Map<String, String>> invalidParams = new java.util.ArrayList<>(fieldErrors.size());
+        for (final org.springframework.validation.FieldError error : fieldErrors) {
+            final String reason = error.getDefaultMessage() != null ? error.getDefaultMessage() : "Invalid value";
+            invalidParams.add(Map.of("name", error.getField(), "reason", reason));
+        }
             
         problem.setProperty("invalidParams", invalidParams);
         return problem;
@@ -46,7 +46,7 @@ public class GlobalExceptionHandler {
     public ProblemDetail handleMalformedJson(final HttpMessageNotReadableException ex) {
         log.warn("Malformed request body");
         final ProblemDetail problem = ProblemDetail.forStatusAndDetail(HttpStatus.BAD_REQUEST, "Malformed Request Body");
-        problem.setType(URI.create("urn:problem-type:malformed-json"));
+        problem.setType(ProblemTypes.MALFORMED_JSON);
         problem.setProperty("invalidParams",
             List.of(Map.of("name", "body", "reason", "Request body is malformed or contains an invalid enum value")));
         return problem;
@@ -60,7 +60,7 @@ public class GlobalExceptionHandler {
     public ProblemDetail handleQueryParamTypeMismatch(final MethodArgumentTypeMismatchException ex) {
         log.warn("Query parameter type mismatch: {}", ex.getName());
         final ProblemDetail problem = ProblemDetail.forStatusAndDetail(HttpStatus.BAD_REQUEST, "Validation Failed");
-        problem.setType(URI.create("urn:problem-type:validation-error"));
+        problem.setType(ProblemTypes.VALIDATION_ERROR);
         problem.setProperty("invalidParams",
             List.of(Map.of("name", ex.getName(), "reason", "Invalid value for parameter '" + ex.getName() + "'")));
         return problem;
@@ -73,7 +73,7 @@ public class GlobalExceptionHandler {
     public ProblemDetail handleAccessDenied(final AccessDeniedException ex) {
         log.warn("Access denied");
         final ProblemDetail problem = ProblemDetail.forStatusAndDetail(HttpStatus.FORBIDDEN, "Access Denied");
-        problem.setType(URI.create("urn:problem-type:forbidden"));
+        problem.setType(ProblemTypes.FORBIDDEN);
         return problem;
     }
 
@@ -83,7 +83,7 @@ public class GlobalExceptionHandler {
     public ProblemDetail handleResourceNotFound(final ResourceNotFoundException ex) {
         log.warn("Resource not found: {}", ex.getMessage());
         final ProblemDetail problem = ProblemDetail.forStatusAndDetail(HttpStatus.NOT_FOUND, ex.getMessage());
-        problem.setType(URI.create("urn:problem-type:not-found"));
+        problem.setType(ProblemTypes.NOT_FOUND);
         return problem;
     }
 
@@ -93,7 +93,7 @@ public class GlobalExceptionHandler {
     public ProblemDetail handleIllegalStateTransition(final IllegalStateException ex) {
         log.warn("Illegal state transition: {}", ex.getMessage());
         final ProblemDetail problem = ProblemDetail.forStatusAndDetail(HttpStatus.UNPROCESSABLE_ENTITY, ex.getMessage());
-        problem.setType(URI.create("urn:problem-type:invalid-state-transition"));
+        problem.setType(ProblemTypes.INVALID_STATE_TRANSITION);
         return problem;
     }
 
@@ -105,7 +105,7 @@ public class GlobalExceptionHandler {
         log.error("Unexpected error", ex); // full stacktrace CHỈ ở server log, KHÔNG trả về client
         final ProblemDetail problem = ProblemDetail.forStatusAndDetail(
             HttpStatus.INTERNAL_SERVER_ERROR, "An unexpected error occurred");
-        problem.setType(URI.create("urn:problem-type:internal-error"));
+        problem.setType(ProblemTypes.INTERNAL_ERROR);
         return problem;
     }
 }
