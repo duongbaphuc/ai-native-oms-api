@@ -19,7 +19,7 @@ Tài liệu là kim chỉ nam để GitHub Copilot tự động sinh các lớp 
 
 ## 1. Tổng quan Kiến trúc Bảo mật (Security Architecture)
 
-- **Framework:** Spring Security 6.3.3 tích hợp trên nền tảng Spring Boot 3.3.4.
+- **Framework:** Spring Security 6.3.4 tích hợp trên nền tảng Spring Boot 3.3.5.
 - **Mô hình xác thực:** Không trạng thái (Stateless Session - `SessionCreationPolicy.STATELESS`).
 - **Chiến lược xác thực theo giai đoạn:**
   - **Hiện tại (Dev / Test / Staging):** HTTP Basic Authentication với phân định profile `@Profile("!prod")` cho danh sách tài khoản demo trong bộ nhớ (`InMemoryUserDetailsManager`).
