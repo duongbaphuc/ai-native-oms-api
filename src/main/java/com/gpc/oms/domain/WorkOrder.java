@@ -1,4 +1,4 @@
-// AI Provenance: generated from docs/domain-model.md, docs/coding-rules.md
+// AI Provenance: generated from docs/01-domain-model.md, docs/00-coding-rules.md
 package com.gpc.oms.domain;
 
 import jakarta.persistence.*;
@@ -42,7 +42,7 @@ public class WorkOrder {
         this.createdAt = Instant.now();
     }
     
-    // --- Getters (manual, không dùng Lombok — theo coding-rules.md) ---
+    // --- Getters (manual, không dùng Lombok — theo 00-coding-rules.md) ---
     public UUID getId() { return id; }
     public String getEquipmentId() { return equipmentId; }
     public String getDescription() { return description; }

@@ -7,7 +7,7 @@ Bạn là một "Principal Technical Delivery Lead", "Lead Enterprise Architect"
 ---
 
 # TASK:
-Thực hiện rà soát toàn diện (Comprehensive Code & Architecture Review) toàn bộ kho mã nguồn dự án (`src/main/`, `src/test/`, `pom.xml`, `src/main/resources/`, `docs/`, `scripts/`) để tổng hợp và biên soạn một **Hồ Sơ Bàn Giao Kỹ Thuật & Vận Hành Hệ Thống Toàn Diện** (System Handover Dossier), lưu tại `docs/SYSTEM_HANDOVER.md`.
+Thực hiện rà soát toàn diện (Comprehensive Code & Architecture Review) toàn bộ kho mã nguồn dự án (`src/main/`, `src/test/`, `pom.xml`, `src/main/resources/`, `docs/`, `scripts/`) để tổng hợp và biên soạn một **Hồ Sơ Bàn Giao Kỹ Thuật & Vận Hành Hệ Thống Toàn Diện** (System Handover Dossier), lưu tại `docs/08-SYSTEM_HANDOVER.md`.
 
 Tài liệu bàn giao bắt buộc phải bao gồm đầy đủ 9 phần cấu trúc tiêu chuẩn:
 1. **Tổng Quan Dự Án & Bối Cảnh Nghiệp Vụ (Executive Summary & System Overview):**
@@ -56,7 +56,7 @@ Tài liệu bàn giao bắt buộc phải bao gồm đầy đủ 9 phần cấu 
 ---
 
 # DONE WHEN:
-1. File `docs/SYSTEM_HANDOVER.md` được tạo hoàn chỉnh, chi tiết, chuyên nghiệp với đầy đủ 9 phần tiêu chuẩn.
+1. File `docs/08-SYSTEM_HANDOVER.md` được tạo hoàn chỉnh, chi tiết, chuyên nghiệp với đầy đủ 9 phần tiêu chuẩn.
 2. Không còn bất kỳ placeholder hay thông tin mơ hồ nào trong tài liệu bàn giao.
 3. Bảng đối chiếu mã nguồn, API, DB Schema và tài khoản phân quyền khớp 100% với hiện trạng mã nguồn của repo.
 4. Mọi lệnh trong Runbook đã được kiểm chứng hoạt động thành công trên môi trường cục bộ.

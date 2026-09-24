@@ -25,7 +25,7 @@ assignees: ''
 - **Branch/Commit:**
 
 ### 5. RCA Link / Notes
-<!-- Link spec liên quan: docs/domain-model.md, docs/api-spec.md -->
+<!-- Link spec liên quan: docs/01-domain-model.md, docs/02-api-spec.md -->
 
 ### 6. Screenshots / Logs
 <!-- Đính kèm screenshot hoặc log output nếu có -->

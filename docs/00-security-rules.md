@@ -1,7 +1,7 @@
 <!--
 Role: Principal Security Architect
 Task: Application Security Guardrails, RBAC Enforcement, PII Hygiene, and OWASP Defense
-Context files: docs/coding-rules.md, docs/api-rules.md, docs/security-auth-spec.md
+Context files: docs/00-coding-rules.md, docs/00-api-rules.md, docs/02-security-auth-spec.md
 Constraints: Zero-trust, parameterized queries only, no hardcoded secrets, RBAC per endpoint
 Target Files:
 - src/main/java/com/gpc/oms/config/SecurityConfig.java

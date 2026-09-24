@@ -2,7 +2,7 @@
 **Dự án:** Outage Management System (OMS) — Outage Work Order API  
 **Kiểm toán viên:** Senior AI Context Auditor & AI-Native SDLC Quality Assurance Expert  
 **Thời điểm thực hiện:** 24/09/2026  
-**Tài liệu Đặc tả Gốc làm Chuẩn quy chiếu (Baseline Spec):** [`docs/br-analysis-wo.md`](file:///c:/ai-native-oms-api/docs/br-analysis-wo.md)  
+**Tài liệu Đặc tả Gốc làm Chuẩn quy chiếu (Baseline Spec):** [`docs/01-br-analysis-wo.md`](file:///c:/ai-native-oms-api/docs/01-br-analysis-wo.md)  
 **Phạm vi:** Toàn bộ 30+ tệp tài liệu Markdown (.md) trong workspace `c:\ai-native-oms-api`
 
 ---
@@ -12,7 +12,7 @@
 ### 1.1 Tổng quan Đánh giá
 Hệ thống tài liệu kỹ thuật của dự án `ai-native-oms-api` được xây dựng theo định hướng **Spec-Driven Development** nhằm phục vụ môi trường **AI-Native SDLC** (hỗ trợ GitHub Copilot và các Autonomous AI Agents tự động sinh mã nguồn không sinh ảo giác - zero-hallucination).
 
-Sau quá trình rà soát và kiểm toán đối chiếu chéo (cross-reference) toàn diện từ tài liệu đặc tả nghiệp vụ gốc ([`docs/br-analysis-wo.md`](file:///c:/ai-native-oms-api/docs/br-analysis-wo.md)) đến các tài liệu thiết kế nền tảng ([`domain-model.md`](file:///c:/ai-native-oms-api/docs/domain-model.md), [`api-spec.md`](file:///c:/ai-native-oms-api/docs/api-spec.md), [`database-migration-spec.md`](file:///c:/ai-native-oms-api/docs/database-migration-spec.md), [`security-auth-spec.md`](file:///c:/ai-native-oms-api/docs/security-auth-spec.md)) và các tệp bản thảo cài đặt chi tiết (`docs/drafts/*.md`), kết quả đánh giá sức khỏe tài liệu đạt mức:
+Sau quá trình rà soát và kiểm toán đối chiếu chéo (cross-reference) toàn diện từ tài liệu đặc tả nghiệp vụ gốc ([`docs/01-br-analysis-wo.md`](file:///c:/ai-native-oms-api/docs/01-br-analysis-wo.md)) đến các tài liệu thiết kế nền tảng ([`01-domain-model.md`](file:///c:/ai-native-oms-api/docs/01-domain-model.md), [`02-api-spec.md`](file:///c:/ai-native-oms-api/docs/02-api-spec.md), [`02-database-migration-spec.md`](file:///c:/ai-native-oms-api/docs/02-database-migration-spec.md), [`02-security-auth-spec.md`](file:///c:/ai-native-oms-api/docs/02-security-auth-spec.md)) và các tệp bản thảo cài đặt chi tiết (`docs/drafts/*.md`), kết quả đánh giá sức khỏe tài liệu đạt mức:
 
 ### 🌟 CHỈ SỐ SỨC KHỎE HỆ THỐNG (SYSTEM HEALTH SCORE): **92 / 100 (TỐT - READY WITH MINOR REFINEMENTS)**
 
@@ -27,18 +27,18 @@ pie title Phân Bổ Tình Trạng Tài Liệu Markdown
 
 | Trục Đánh Giá (Metric Dimension) | Điểm số | Trạng thái | Đánh giá Tóm tắt |
 |---|:---:|:---:|---|
-| **1. Spec Compliance (Tuân thủ Đặc tả)** | **96/100** | Xuất sắc | Dữ liệu thực thể `WorkOrder`, bảng `work_orders`, RBAC matrix và State Machine bám sát 100% yêu cầu nghiệp vụ gốc trong [`br-analysis-wo.md`](file:///c:/ai-native-oms-api/docs/br-analysis-wo.md). |
+| **1. Spec Compliance (Tuân thủ Đặc tả)** | **96/100** | Xuất sắc | Dữ liệu thực thể `WorkOrder`, bảng `work_orders`, RBAC matrix và State Machine bám sát 100% yêu cầu nghiệp vụ gốc trong [`01-br-analysis-wo.md`](file:///c:/ai-native-oms-api/docs/01-br-analysis-wo.md). |
 | **2. Cross-File Logic Sync (Đồng bộ Logic)** | **90/100** | Tốt | Dòng chảy dữ liệu từ Schema DDL $\rightarrow$ Entity JPA $\rightarrow$ DTO Records $\rightarrow$ API Endpoints nhất quán cao. Tồn tại 2 điểm gãy logic vi mô: tàn dư `ResponseStatusException` và sự phân kỳ trong đặc tả phân trang (Pagination). |
 | **3. AI Zero-Hallucination Readiness** | **94/100** | Rất tốt | 100% schema có bảng thuộc tính đầy đủ 4-5 cột, mã giả tuần tự (step-by-step pseudo-code) cho mọi method, ma trận lỗi RFC 7807 tường minh, target file paths định danh tuyệt đối. |
 | **4. Redundancy & Noise Ratio** | **78/100** | Cảnh báo | Khoảng **20% số lượng file Markdown** hiện tại là tài liệu dư thừa, bao gồm các file scorecard/review đơn lẻ thời kỳ đầu và các báo cáo audit lịch sử đã lỗi thời gây nhiễu context window của AI. |
 
 ### 1.3 Các Điểm Nhận Định Cốt Lõi (Key Audit Findings)
-1. **Trụ cột Đặc tả Rất Vững Chắc:** Tài liệu [`br-analysis-wo.md`](file:///c:/ai-native-oms-api/docs/br-analysis-wo.md) làm rất tốt vai trò Single Source of Truth (SSOT), phân định rõ ràng các tầng UI, API, Data, ràng buộc máy trạng thái đơn hướng (`OPEN` $\rightarrow$ `IN_PROGRESS` $\rightarrow$ `DONE`), và ma trận RBAC cho 3 vai trò: `DISPATCHER`, `TECHNICIAN`, `ADMIN`.
+1. **Trụ cột Đặc tả Rất Vững Chắc:** Tài liệu [`01-br-analysis-wo.md`](file:///c:/ai-native-oms-api/docs/01-br-analysis-wo.md) làm rất tốt vai trò Single Source of Truth (SSOT), phân định rõ ràng các tầng UI, API, Data, ràng buộc máy trạng thái đơn hướng (`OPEN` $\rightarrow$ `IN_PROGRESS` $\rightarrow$ `DONE`), và ma trận RBAC cho 3 vai trò: `DISPATCHER`, `TECHNICIAN`, `ADMIN`.
 2. **Sự Hiện Diện của Nhiễu Ngữ Cảnh (Context Noise):** Thư mục `docs/ai-context-auditor/` chứa 4 file báo cáo kiểm toán lịch sử, cùng với `docs/scorecard-workorder-create.md` và `docs/review-workorder-create.md`. Các file này là snapshot của các pha phát triển cũ (chứa điểm phạt của những lỗi đã được fix từ lâu), nếu nạp chung vào context window của Copilot sẽ gây mâu thuẫn nhận thức (cognitive dissonance) cho mô hình AI.
 3. **Mâu thuẫn Vi mô Cần Khắc Phục:** 
    - Tàn dư chú thích về `ResponseStatusException` còn sót lại ở 3 vị trí (trong khi code Java thực tế đã chuyển sang dùng `ResourceNotFoundException` và `IllegalStateException`).
-   - Xung đột giữa [`ADR-001-use-h2-database.md`](file:///c:/ai-native-oms-api/docs/ADR-001-use-h2-database.md) (`ddl-auto: update`) và [`database-migration-spec.md`](file:///c:/ai-native-oms-api/docs/database-migration-spec.md) (Flyway `V1__init_work_orders_schema.sql`).
-   - Sự thiếu kết nối giữa thiết kế `PagedResponse<T>` ([`internal-coding-standards.md`](file:///c:/ai-native-oms-api/docs/internal-coding-standards.md)) và implementation draft [`draft-workorder-get.md`](file:///c:/ai-native-oms-api/docs/drafts/draft-workorder-get.md) (vẫn đang dùng `List<WorkOrderResponse>`).
+   - Xung đột giữa [`02-ADR-001-use-h2-database.md`](file:///c:/ai-native-oms-api/docs/02-ADR-001-use-h2-database.md) (`ddl-auto: update`) và [`02-database-migration-spec.md`](file:///c:/ai-native-oms-api/docs/02-database-migration-spec.md) (Flyway `V1__init_work_orders_schema.sql`).
+   - Sự thiếu kết nối giữa thiết kế `PagedResponse<T>` ([`00-internal-coding-standards.md`](file:///c:/ai-native-oms-api/docs/00-internal-coding-standards.md)) và implementation draft [`draft-workorder-get.md`](file:///c:/ai-native-oms-api/docs/drafts/draft-workorder-get.md) (vẫn đang dùng `List<WorkOrderResponse>`).
 
 ---
 
@@ -50,10 +50,10 @@ Phần này phân tích cách dữ liệu, quy tắc nghiệp vụ và logic k�
 
 ```mermaid
 graph TD
-    BR["docs/br-analysis-wo.md<br/>(Business Requirements SSOT)"] --> DM["docs/domain-model.md<br/>(Entity & Invariants)"]
-    BR --> DB["docs/database-migration-spec.md<br/>(Flyway & DDL Schema)"]
-    BR --> API["docs/api-spec.md<br/>(REST API Contracts)"]
-    BR --> SEC["docs/security-auth-spec.md<br/>(JWT & RBAC Matrix)"]
+    BR["docs/01-br-analysis-wo.md<br/>(Business Requirements SSOT)"] --> DM["docs/01-domain-model.md<br/>(Entity & Invariants)"]
+    BR --> DB["docs/02-database-migration-spec.md<br/>(Flyway & DDL Schema)"]
+    BR --> API["docs/02-api-spec.md<br/>(REST API Contracts)"]
+    BR --> SEC["docs/02-security-auth-spec.md<br/>(JWT & RBAC Matrix)"]
 
     DM --> D_DOM["docs/drafts/draft-workorder-domain.md<br/>(WorkOrder, Enums, Repo)"]
     API --> D_DTO["docs/drafts/draft-dtos.md<br/>(Request/Response Records)"]
@@ -74,13 +74,13 @@ graph TD
 
 | Chiều Đồng Bộ | File Nguồn (Source Spec) | File Cài Đặt / Bản Thảo (Target Drafts) | Tình Trạng | Đánh Giá Chi Tiết & Điểm Gãy (Gaps) |
 |---|---|---|:---:|---|
-| **1. Entity & Data Schema** | [`br-analysis-wo.md`](file:///c:/ai-native-oms-api/docs/br-analysis-wo.md) §1<br>[`domain-model.md`](file:///c:/ai-native-oms-api/docs/domain-model.md) §1<br>[`database-migration-spec.md`](file:///c:/ai-native-oms-api/docs/database-migration-spec.md) §2 | [`draft-workorder-domain.md`](file:///c:/ai-native-oms-api/docs/drafts/draft-workorder-domain.md)<br>[`draft-dtos.md`](file:///c:/ai-native-oms-api/docs/drafts/draft-dtos.md) | ✅ **Đồng bộ hoàn hảo** | • Tên entity `WorkOrder`, bảng `work_orders`.<br>• Trường: `id` (UUID), `equipmentId` (max 50, NotBlank), `description` (10-500, NotBlank), `priority` (LOW, MEDIUM, HIGH, CRITICAL), `status` (OPEN, IN_PROGRESS, DONE), `createdAt` (UTC Instant), `resolvedAt` (UTC Instant, nullable).<br>• Ràng buộc vật lý DB khớp 100% ràng buộc Bean Validation và JPA annotations. |
-| **2. State Machine Logic** | [`br-analysis-wo.md`](file:///c:/ai-native-oms-api/docs/br-analysis-wo.md) §2.2<br>[`domain-model.md`](file:///c:/ai-native-oms-api/docs/domain-model.md) §2 | [`draft-workorder-domain.md`](file:///c:/ai-native-oms-api/docs/drafts/draft-workorder-domain.md) §3, §5.2<br>[`draft-workorder-patch.md`](file:///c:/ai-native-oms-api/docs/drafts/draft-workorder-patch.md) | ✅ **Đồng bộ hoàn hảo** | • Máy trạng thái tuyến tính đơn hướng: `OPEN` $\rightarrow$ `IN_PROGRESS` $\rightarrow$ `DONE`.<br>• Nguồn chân lý duy nhất (SSOT): `WorkOrderStatus.canTransitionTo()`.<br>• Cấm skip (`OPEN` $\rightarrow$ `DONE`) và cấm rollback $\rightarrow$ ném `IllegalStateException` $\rightarrow$ Map sang HTTP 422 `urn:problem-type:invalid-state-transition`.<br>• `resolvedAt` được gán tự động tại Domain layer khi chuyển sang `DONE`. |
-| **3. RBAC & Security Matrix** | [`br-analysis-wo.md`](file:///c:/ai-native-oms-api/docs/br-analysis-wo.md) §2.1<br>[`security-auth-spec.md`](file:///c:/ai-native-oms-api/docs/security-auth-spec.md) §3<br>[`api-spec.md`](file:///c:/ai-native-oms-api/docs/api-spec.md) | [`draft-workorder-create.md`](file:///c:/ai-native-oms-api/docs/drafts/draft-workorder-create.md)<br>[`draft-workorder-get.md`](file:///c:/ai-native-oms-api/docs/drafts/draft-workorder-get.md)<br>[`draft-workorder-patch.md`](file:///c:/ai-native-oms-api/docs/drafts/draft-workorder-patch.md)<br>[`draft-workorder-tests.md`](file:///c:/ai-native-oms-api/docs/drafts/draft-workorder-tests.md) | ✅ **Đồng bộ hoàn hảo** | • `POST /api/v1/workorders`: DISPATCHER, TECHNICIAN, ADMIN.<br>• `GET /api/v1/workorders`: DISPATCHER, TECHNICIAN, ADMIN.<br>• `GET /api/v1/workorders/{id}`: DISPATCHER, TECHNICIAN, ADMIN.<br>• `PATCH /api/v1/workorders/{id}/status`: TECHNICIAN, ADMIN (DISPATCHER bị 403 Forbidden).<br>• Đồng bộ 100% qua `@PreAuthorize` và các test case bảo mật trong acceptance matrix. |
-| **4. RFC 7807 Error Catalog** | [`api-rules.md`](file:///c:/ai-native-oms-api/docs/api-rules.md) §3<br>[`api-spec.md`](file:///c:/ai-native-oms-api/docs/api-spec.md) (Edge cases) | [`draft-global-exception-handler.md`](file:///c:/ai-native-oms-api/docs/drafts/draft-global-exception-handler.md)<br>[`draft-workorder-service.md`](file:///c:/ai-native-oms-api/docs/drafts/draft-workorder-service.md)<br>[`draft-workorder-patch.md`](file:///c:/ai-native-oms-api/docs/drafts/draft-workorder-patch.md) | ⚠️ **Đứt gãy vi mô (Gap #1)** | • Chuẩn URI `urn:problem-type:*` đã thống nhất tuyệt đối.<br>• 6 Handlers trong `GlobalExceptionHandler.java` khớp mã lỗi chuẩn.<br>• **Gãy kết nối văn bản:** Tàn dư chú thích nhắc đến `ResponseStatusException` trong [`draft-workorder-service.md`](file:///c:/ai-native-oms-api/docs/drafts/draft-workorder-service.md) L90, [`draft-dtos.md`](file:///c:/ai-native-oms-api/docs/drafts/draft-dtos.md) L95 và [`draft-global-exception-handler.md`](file:///c:/ai-native-oms-api/docs/drafts/draft-global-exception-handler.md) L6, L36. |
-| **5. Phân Trang (Pagination & Query)** | [`br-analysis-wo.md`](file:///c:/ai-native-oms-api/docs/br-analysis-wo.md) §3<br>[`database-migration-spec.md`](file:///c:/ai-native-oms-api/docs/database-migration-spec.md) §3<br>[`internal-coding-standards.md`](file:///c:/ai-native-oms-api/docs/internal-coding-standards.md) §3 | [`api-spec.md`](file:///c:/ai-native-oms-api/docs/api-spec.md) §2<br>[`draft-workorder-get.md`](file:///c:/ai-native-oms-api/docs/drafts/draft-workorder-get.md)<br>[`draft-workorder-service.md`](file:///c:/ai-native-oms-api/docs/drafts/draft-workorder-service.md)<br>[`draft-file-mapping.md`](file:///c:/ai-native-oms-api/docs/drafts/draft-file-mapping.md) | ❌ **Đứt gãy kiến trúc (Gap #2)** | • BR quy định `GET /api/v1/workorders` có phân trang.<br>• DB spec đã tạo composite index `(status, created_at DESC)` phục vụ phân trang.<br>• Coding standards đã định nghĩa hoàn chỉnh generic `PagedResponse<T>`.<br>• **NHƯNG:** `api-spec.md` ghi lấp lửng "List hoặc PagedResponse", `draft-workorder-get.md` dùng `repo.findAll()` trả `List<WorkOrderResponse>`, `draft-file-mapping.md` không có file `PagedResponse.java`. |
-| **6. Khởi tạo Database CSDL** | [`database-migration-spec.md`](file:///c:/ai-native-oms-api/docs/database-migration-spec.md) §4, §5 | [`ADR-001-use-h2-database.md`](file:///c:/ai-native-oms-api/docs/ADR-001-use-h2-database.md) | ❌ **Xung đột trực tiếp (Gap #3)** | • `database-migration-spec.md` quy định sử dụng **Flyway** migration (`V1__init_work_orders_schema.sql`) cho cả H2 và PostgreSQL; cấm bật `ddl-auto=update`.<br>• `ADR-001-use-h2-database.md` lại ghi "Sử dụng tính năng `ddl-auto: update` của Hibernate để tự động tạo schema". |
-| **7. Quy ước Sinh Code của Copilot** | 3-Tier Architecture Rule ([`internal-coding-standards.md`](file:///c:/ai-native-oms-api/docs/internal-coding-standards.md)) | [`.github/prompts/implement-endpoint.prompt.md`](file:///c:/ai-native-oms-api/.github/prompts/implement-endpoint.prompt.md)<br>[`.github/prompts/review-code.prompt.md`](file:///c:/ai-native-oms-api/.github/prompts/review-code.prompt.md) | ⚠️ **Đứt gãy quy trình (Gap #4)** | • Prompt `implement-endpoint.prompt.md` L13-17 nhảy cóc: DTOs $\rightarrow$ Domain/Entity $\rightarrow$ Repository $\rightarrow$ Controller (BỎ QUÊN tầng Service).<br>• Cả 2 file prompt vẫn dùng quy ước Enum chuỗi cũ `Open -> InProgress -> Done` thay vì UPPER_SNAKE `OPEN -> IN_PROGRESS -> DONE`. |
+| **1. Entity & Data Schema** | [`01-br-analysis-wo.md`](file:///c:/ai-native-oms-api/docs/01-br-analysis-wo.md) §1<br>[`01-domain-model.md`](file:///c:/ai-native-oms-api/docs/01-domain-model.md) §1<br>[`02-database-migration-spec.md`](file:///c:/ai-native-oms-api/docs/02-database-migration-spec.md) §2 | [`draft-workorder-domain.md`](file:///c:/ai-native-oms-api/docs/drafts/draft-workorder-domain.md)<br>[`draft-dtos.md`](file:///c:/ai-native-oms-api/docs/drafts/draft-dtos.md) | ✅ **Đồng bộ hoàn hảo** | • Tên entity `WorkOrder`, bảng `work_orders`.<br>• Trường: `id` (UUID), `equipmentId` (max 50, NotBlank), `description` (10-500, NotBlank), `priority` (LOW, MEDIUM, HIGH, CRITICAL), `status` (OPEN, IN_PROGRESS, DONE), `createdAt` (UTC Instant), `resolvedAt` (UTC Instant, nullable).<br>• Ràng buộc vật lý DB khớp 100% ràng buộc Bean Validation và JPA annotations. |
+| **2. State Machine Logic** | [`01-br-analysis-wo.md`](file:///c:/ai-native-oms-api/docs/01-br-analysis-wo.md) §2.2<br>[`01-domain-model.md`](file:///c:/ai-native-oms-api/docs/01-domain-model.md) §2 | [`draft-workorder-domain.md`](file:///c:/ai-native-oms-api/docs/drafts/draft-workorder-domain.md) §3, §5.2<br>[`draft-workorder-patch.md`](file:///c:/ai-native-oms-api/docs/drafts/draft-workorder-patch.md) | ✅ **Đồng bộ hoàn hảo** | • Máy trạng thái tuyến tính đơn hướng: `OPEN` $\rightarrow$ `IN_PROGRESS` $\rightarrow$ `DONE`.<br>• Nguồn chân lý duy nhất (SSOT): `WorkOrderStatus.canTransitionTo()`.<br>• Cấm skip (`OPEN` $\rightarrow$ `DONE`) và cấm rollback $\rightarrow$ ném `IllegalStateException` $\rightarrow$ Map sang HTTP 422 `urn:problem-type:invalid-state-transition`.<br>• `resolvedAt` được gán tự động tại Domain layer khi chuyển sang `DONE`. |
+| **3. RBAC & Security Matrix** | [`01-br-analysis-wo.md`](file:///c:/ai-native-oms-api/docs/01-br-analysis-wo.md) §2.1<br>[`02-security-auth-spec.md`](file:///c:/ai-native-oms-api/docs/02-security-auth-spec.md) §3<br>[`02-api-spec.md`](file:///c:/ai-native-oms-api/docs/02-api-spec.md) | [`draft-workorder-create.md`](file:///c:/ai-native-oms-api/docs/drafts/draft-workorder-create.md)<br>[`draft-workorder-get.md`](file:///c:/ai-native-oms-api/docs/drafts/draft-workorder-get.md)<br>[`draft-workorder-patch.md`](file:///c:/ai-native-oms-api/docs/drafts/draft-workorder-patch.md)<br>[`draft-workorder-tests.md`](file:///c:/ai-native-oms-api/docs/drafts/draft-workorder-tests.md) | ✅ **Đồng bộ hoàn hảo** | • `POST /api/v1/workorders`: DISPATCHER, TECHNICIAN, ADMIN.<br>• `GET /api/v1/workorders`: DISPATCHER, TECHNICIAN, ADMIN.<br>• `GET /api/v1/workorders/{id}`: DISPATCHER, TECHNICIAN, ADMIN.<br>• `PATCH /api/v1/workorders/{id}/status`: TECHNICIAN, ADMIN (DISPATCHER bị 403 Forbidden).<br>• Đồng bộ 100% qua `@PreAuthorize` và các test case bảo mật trong acceptance matrix. |
+| **4. RFC 7807 Error Catalog** | [`00-api-rules.md`](file:///c:/ai-native-oms-api/docs/00-api-rules.md) §3<br>[`02-api-spec.md`](file:///c:/ai-native-oms-api/docs/02-api-spec.md) (Edge cases) | [`draft-global-exception-handler.md`](file:///c:/ai-native-oms-api/docs/drafts/draft-global-exception-handler.md)<br>[`draft-workorder-service.md`](file:///c:/ai-native-oms-api/docs/drafts/draft-workorder-service.md)<br>[`draft-workorder-patch.md`](file:///c:/ai-native-oms-api/docs/drafts/draft-workorder-patch.md) | ⚠️ **Đứt gãy vi mô (Gap #1)** | • Chuẩn URI `urn:problem-type:*` đã thống nhất tuyệt đối.<br>• 6 Handlers trong `GlobalExceptionHandler.java` khớp mã lỗi chuẩn.<br>• **Gãy kết nối văn bản:** Tàn dư chú thích nhắc đến `ResponseStatusException` trong [`draft-workorder-service.md`](file:///c:/ai-native-oms-api/docs/drafts/draft-workorder-service.md) L90, [`draft-dtos.md`](file:///c:/ai-native-oms-api/docs/drafts/draft-dtos.md) L95 và [`draft-global-exception-handler.md`](file:///c:/ai-native-oms-api/docs/drafts/draft-global-exception-handler.md) L6, L36. |
+| **5. Phân Trang (Pagination & Query)** | [`01-br-analysis-wo.md`](file:///c:/ai-native-oms-api/docs/01-br-analysis-wo.md) §3<br>[`02-database-migration-spec.md`](file:///c:/ai-native-oms-api/docs/02-database-migration-spec.md) §3<br>[`00-internal-coding-standards.md`](file:///c:/ai-native-oms-api/docs/00-internal-coding-standards.md) §3 | [`02-api-spec.md`](file:///c:/ai-native-oms-api/docs/02-api-spec.md) §2<br>[`draft-workorder-get.md`](file:///c:/ai-native-oms-api/docs/drafts/draft-workorder-get.md)<br>[`draft-workorder-service.md`](file:///c:/ai-native-oms-api/docs/drafts/draft-workorder-service.md)<br>[`draft-file-mapping.md`](file:///c:/ai-native-oms-api/docs/drafts/draft-file-mapping.md) | ❌ **Đứt gãy kiến trúc (Gap #2)** | • BR quy định `GET /api/v1/workorders` có phân trang.<br>• DB spec đã tạo composite index `(status, created_at DESC)` phục vụ phân trang.<br>• Coding standards đã định nghĩa hoàn chỉnh generic `PagedResponse<T>`.<br>• **NHƯNG:** `02-api-spec.md` ghi lấp lửng "List hoặc PagedResponse", `draft-workorder-get.md` dùng `repo.findAll()` trả `List<WorkOrderResponse>`, `draft-file-mapping.md` không có file `PagedResponse.java`. |
+| **6. Khởi tạo Database CSDL** | [`02-database-migration-spec.md`](file:///c:/ai-native-oms-api/docs/02-database-migration-spec.md) §4, §5 | [`02-ADR-001-use-h2-database.md`](file:///c:/ai-native-oms-api/docs/02-ADR-001-use-h2-database.md) | ❌ **Xung đột trực tiếp (Gap #3)** | • `02-database-migration-spec.md` quy định sử dụng **Flyway** migration (`V1__init_work_orders_schema.sql`) cho cả H2 và PostgreSQL; cấm bật `ddl-auto=update`.<br>• `02-ADR-001-use-h2-database.md` lại ghi "Sử dụng tính năng `ddl-auto: update` của Hibernate để tự động tạo schema". |
+| **7. Quy ước Sinh Code của Copilot** | 3-Tier Architecture Rule ([`00-internal-coding-standards.md`](file:///c:/ai-native-oms-api/docs/00-internal-coding-standards.md)) | [`.github/prompts/implement-endpoint.prompt.md`](file:///c:/ai-native-oms-api/.github/prompts/implement-endpoint.prompt.md)<br>[`.github/prompts/review-code.prompt.md`](file:///c:/ai-native-oms-api/.github/prompts/review-code.prompt.md) | ⚠️ **Đứt gãy quy trình (Gap #4)** | • Prompt `implement-endpoint.prompt.md` L13-17 nhảy cóc: DTOs $\rightarrow$ Domain/Entity $\rightarrow$ Repository $\rightarrow$ Controller (BỎ QUÊN tầng Service).<br>• Cả 2 file prompt vẫn dùng quy ước Enum chuỗi cũ `Open -> InProgress -> Done` thay vì UPPER_SNAKE `OPEN -> IN_PROGRESS -> DONE`. |
 
 ---
 
@@ -98,14 +98,14 @@ graph TD
 - **Mô tả:** Cơ sở hạ tầng dữ liệu và tiêu chuẩn lập trình đã chuẩn bị sẵn sàng cho phân trang chuyên nghiệp, nhưng bản thảo API và Controller vẫn đang trả về `List<WorkOrderResponse>` dạng phẳng.
 - **Rủi ro:** Khi dữ liệu thực tế tại các trạm điện lực tăng lên hàng chục nghìn records, API `GET /api/v1/workorders` sẽ gây tràn bộ nhớ (Out of Memory - OOM) và Full Table Scan.
 - **Hành động đề xuất:** 
-  1. Chốt phương án phân trang chuẩn theo [`internal-coding-standards.md`](file:///c:/ai-native-oms-api/docs/internal-coding-standards.md) §3.
+  1. Chốt phương án phân trang chuẩn theo [`00-internal-coding-standards.md`](file:///c:/ai-native-oms-api/docs/00-internal-coding-standards.md) §3.
   2. Bổ sung `PagedResponse.java` vào [`draft-file-mapping.md`](file:///c:/ai-native-oms-api/docs/drafts/draft-file-mapping.md) (#8 trong danh sách DTOs).
   3. Cập nhật `WorkOrderService.getAll(Pageable pageable)` và `WorkOrderController.getWorkOrders(Pageable pageable, ...)`.
 
 #### ❌ GAP #3: Xung đột Khởi tạo CSDL giữa ADR-001 và Database Migration Spec
-- **Mô tả:** `ADR-001` được phê duyệt từ ngày 22/09/2026 với quyết định dùng `ddl-auto: update`. Đến ngày 23/09/2026, `database-migration-spec.md` ra đời và thiết lập nguyên tắc quản lý schema nghiêm ngặt bằng **Flyway** (`V1__init_work_orders_schema.sql`), cấm `ddl-auto: update`.
+- **Mô tả:** `ADR-001` được phê duyệt từ ngày 22/09/2026 với quyết định dùng `ddl-auto: update`. Đến ngày 23/09/2026, `02-database-migration-spec.md` ra đời và thiết lập nguyên tắc quản lý schema nghiêm ngặt bằng **Flyway** (`V1__init_work_orders_schema.sql`), cấm `ddl-auto: update`.
 - **Rủi ro:** LLM đọc `ADR-001` sẽ tự động cấu hình `application-dev.yml` có `ddl-auto: update`, làm xung đột với cơ chế kiểm soát checksum của Flyway và gây schema drift giữa local dev và CI/CD.
-- **Hành động đề xuất:** Cập nhật `ADR-001-use-h2-database.md` phần Quyết định thành: `Sử dụng H2 Database kết hợp Flyway migration (spring.jpa.hibernate.ddl-auto: validate), đảm bảo 100% script DDL chạy giống hệt môi trường PostgreSQL Production`.
+- **Hành động đề xuất:** Cập nhật `02-ADR-001-use-h2-database.md` phần Quyết định thành: `Sử dụng H2 Database kết hợp Flyway migration (spring.jpa.hibernate.ddl-auto: validate), đảm bảo 100% script DDL chạy giống hệt môi trường PostgreSQL Production`.
 
 #### ⚠️ GAP #4: Mẫu Prompt Copilot Thiếu Tầng Service và Lệch Chuẩn Enum
 - **Mô tả:** Các tệp prompt trong `.github/prompts/` là công cụ kích hoạt trực tiếp cho Copilot nhưng chưa được đồng bộ theo các quyết định kiến trúc P0 mới nhất.
@@ -146,25 +146,25 @@ c:\ai-native-oms-api\
 │       └── review-code.prompt.md             # Prompt kiểm toán code theo 12 tiêu chí
 │
 ├── docs/
-│   ├── CONTEXT_INDEX.md                      # [MỚI] Bản đồ điều hướng ngữ cảnh trung tâm cho AI
+│   ├── 03-CONTEXT_INDEX.md                      # [MỚI] Bản đồ điều hướng ngữ cảnh trung tâm cho AI
 │   │
 │   ├── specs/                                # TẦNG ĐẶC TẢ CỐT LÕI (Specifications - SSOT)
-│   │   ├── br-analysis-wo.md                 # Đặc tả Nghiệp vụ gốc (Business Requirements SSOT)
-│   │   ├── domain-model.md                   # Mô hình Thực thể & Invariants & State Machine
-│   │   ├── api-spec.md                       # Hợp đồng REST API, RBAC Matrix, Schemas
-│   │   ├── database-migration-spec.md        # CSDL, Data Types, Indexes & Flyway Scripts
-│   │   └── security-auth-spec.md             # Bảo mật, JWT Claims, CORS, Rate Limit
+│   │   ├── 01-br-analysis-wo.md                 # Đặc tả Nghiệp vụ gốc (Business Requirements SSOT)
+│   │   ├── 01-domain-model.md                   # Mô hình Thực thể & Invariants & State Machine
+│   │   ├── 02-api-spec.md                       # Hợp đồng REST API, RBAC Matrix, Schemas
+│   │   ├── 02-database-migration-spec.md        # CSDL, Data Types, Indexes & Flyway Scripts
+│   │   └── 02-security-auth-spec.md             # Bảo mật, JWT Claims, CORS, Rate Limit
 │   │
 │   ├── standards/                            # TẦNG QUY CHUẨN KỸ THUẬT (Technical Standards)
-│   │   ├── api-rules.md                      # Nguyên tắc thiết kế API & RFC 7807 Error Catalog
-│   │   ├── security-rules.md                 # Nguyên tắc bảo vệ biên giới & Masking PII
-│   │   ├── coding-rules.md                   # Chuẩn viết mã Java 17, Spring Boot 3.3, SLF4J
-│   │   ├── internal-coding-standards.md      # Quy chuẩn Date/Time UTC, Object Mapping, Phân trang
-│   │   └── observability-and-logging.md      # Chuẩn hóa Structured Logging ECS, Metrics, Tracing
+│   │   ├── 00-api-rules.md                      # Nguyên tắc thiết kế API & RFC 7807 Error Catalog
+│   │   ├── 00-security-rules.md                 # Nguyên tắc bảo vệ biên giới & Masking PII
+│   │   ├── 00-coding-rules.md                   # Chuẩn viết mã Java 17, Spring Boot 3.3, SLF4J
+│   │   ├── 00-internal-coding-standards.md      # Quy chuẩn Date/Time UTC, Object Mapping, Phân trang
+│   │   └── 02-observability-and-logging.md      # Chuẩn hóa Structured Logging ECS, Metrics, Tracing
 │   │
 │   ├── architecture/                         # TẦNG QUYẾT ĐỊNH KIẾN TRÚC & DEVOPS
-│   │   ├── ADR-001-use-h2-database.md        # Quyết định kiến trúc DB Dev (Cập nhật Flyway)
-│   │   └── devops-pipeline-spec.md           # Dockerfile đa tầng, CI/CD GitHub Actions, SonarQube
+│   │   ├── 02-ADR-001-use-h2-database.md        # Quyết định kiến trúc DB Dev (Cập nhật Flyway)
+│   │   └── 10-devops-pipeline-spec.md           # Dockerfile đa tầng, CI/CD GitHub Actions, SonarQube
 │   │
 │   ├── drafts/                               # TẦNG BẢN THẢO CÀI ĐẶT CHI TIẾT (Copilot Blueprints)
 │   │   ├── draft-file-mapping.md             # Bảng danh mục 14 file Java + Implementation Order
@@ -191,7 +191,7 @@ c:\ai-native-oms-api\
 ### 4.2 Lợi Ích Của Cấu Trúc Mới Trong AI-Native SDLC
 
 1. **Ngăn Chặn Ảo Giác Triệt Để (Zero Hallucination via Isolation):** Bằng cách đưa các tệp review cũ và audit logs vào thư mục `docs/archive/`, các công cụ như GitHub Copilot Workspace hoặc Cursor khi quét tự động `@docs` sẽ không bao giờ đọc phải các thông tin mâu thuẫn hay các chỉ trích cũ đã lỗi thời.
-2. **Context Modular Loading (Tải ngữ cảnh theo nhu cầu):** File điều hướng mới [`docs/CONTEXT_INDEX.md`](file:///c:/ai-native-oms-api/docs/CONTEXT_INDEX.md) sẽ đóng vai trò như một sitemap: khi lập trình viên yêu cầu Copilot "Viết Service cho WorkOrder", Copilot chỉ cần load `specs/domain-model.md`, `standards/coding-rules.md` và `drafts/draft-workorder-service.md`, tiết kiệm hơn 70% dung lượng context window và tăng tốc độ phản hồi đáng kể.
+2. **Context Modular Loading (Tải ngữ cảnh theo nhu cầu):** File điều hướng mới [`docs/03-CONTEXT_INDEX.md`](file:///c:/ai-native-oms-api/docs/03-CONTEXT_INDEX.md) sẽ đóng vai trò như một sitemap: khi lập trình viên yêu cầu Copilot "Viết Service cho WorkOrder", Copilot chỉ cần load `specs/01-domain-model.md`, `standards/00-coding-rules.md` và `drafts/draft-workorder-service.md`, tiết kiệm hơn 70% dung lượng context window và tăng tốc độ phản hồi đáng kể.
 3. **Phân Định Trách Nhiệm Rõ Ràng (Clear Ownership):**
    - Product Owner / Business Analyst quản lý thư mục `docs/specs/`.
    - Lead Architect quản lý `docs/standards/` và `docs/architecture/`.
@@ -204,8 +204,8 @@ c:\ai-native-oms-api\
 | Mức Ưu Tiên | Hạng Mục Công Việc | Các File Tác Động | Thời Gian Ước Tính | Kết Quả Mong Đợi |
 |:---:|---|---|:---:|---|
 | **P0** | **Dọn dẹp tàn dư `ResponseStatusException`** | `draft-workorder-service.md`<br>`draft-dtos.md`<br>`draft-global-exception-handler.md` | 10 phút | Loại bỏ 100% tham chiếu lỗi thời, đồng bộ cơ chế re-throw `IllegalStateException` $\rightarrow$ 422. |
-| **P0** | **Chốt và Đồng bộ Phân Trang (Pagination)** | `api-spec.md`<br>`draft-workorder-get.md`<br>`draft-workorder-service.md`<br>`draft-file-mapping.md` | 20 phút | Đưa `PagedResponse<T>` vào luồng chính thức của `GET /api/v1/workorders`, bổ sung file vào mapping. |
-| **P1** | **Cập nhật ADR-001 đồng bộ Flyway** | `docs/ADR-001-use-h2-database.md` | 5 phút | Đồng nhất phương thức tạo schema giữa H2 và Postgres qua Flyway script. |
-| **P1** | **Tái cấu trúc thư mục & Cách ly file dư thừa** | Tạo `docs/specs/`, `docs/standards/`, `docs/archive/`... và di chuyển file | 15 phút | Làm sạch workspace, cô lập rác tài liệu, tạo `CONTEXT_INDEX.md`. |
+| **P0** | **Chốt và Đồng bộ Phân Trang (Pagination)** | `02-api-spec.md`<br>`draft-workorder-get.md`<br>`draft-workorder-service.md`<br>`draft-file-mapping.md` | 20 phút | Đưa `PagedResponse<T>` vào luồng chính thức của `GET /api/v1/workorders`, bổ sung file vào mapping. |
+| **P1** | **Cập nhật ADR-001 đồng bộ Flyway** | `docs/02-ADR-001-use-h2-database.md` | 5 phút | Đồng nhất phương thức tạo schema giữa H2 và Postgres qua Flyway script. |
+| **P1** | **Tái cấu trúc thư mục & Cách ly file dư thừa** | Tạo `docs/specs/`, `docs/standards/`, `docs/archive/`... và di chuyển file | 15 phút | Làm sạch workspace, cô lập rác tài liệu, tạo `03-CONTEXT_INDEX.md`. |
 | **P2** | **Loại bỏ trùng lặp Enum trong DTOs** | `docs/drafts/draft-dtos.md` | 10 phút | Loại bỏ khai báo thừa `Priority` & `WorkOrderStatus`, chỉ import từ `domain`. |
 | **P2** | **Cập nhật Prompt Templates Copilot** | `.github/prompts/*.prompt.md` | 10 phút | Đảm bảo luồng 3-tier và chuẩn enum UPPER_SNAKE trong hướng dẫn tự động. |

@@ -1,7 +1,7 @@
 <!--
 Role: Principal API Architect
 Task: API Contract, Request/Response Table Schemas, RBAC, Step-by-step Logic, and RFC 7807 Error Mappings
-Context files: docs/domain-model.md, docs/api-rules.md, docs/security-rules.md, docs/internal-coding-standards.md
+Context files: docs/01-domain-model.md, docs/00-api-rules.md, docs/00-security-rules.md, docs/00-internal-coding-standards.md
 Constraints: REST plural `/api/v1/workorders`, RFC 7807 problem+json, Strict Bean Validation, 3-tier architecture
 Target Files:
 - src/main/java/com/gpc/oms/controller/WorkOrderController.java

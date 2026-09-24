@@ -1,4 +1,4 @@
-// AI Provenance: generated from docs/api-spec.md §3, docs/api-rules.md §3
+// AI Provenance: generated from docs/02-api-spec.md §3, docs/00-api-rules.md §3
 package com.gpc.oms.exception;
 
 import org.junit.jupiter.api.DisplayName;

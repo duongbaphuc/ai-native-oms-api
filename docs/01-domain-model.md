@@ -1,7 +1,7 @@
 <!--
 Role: Principal Domain Architect & Modeling Lead
 Task: Core Domain Model, Invariants, State Machine, and Target File Mapping for Outage Work Order
-Context files: docs/coding-rules.md, docs/api-rules.md, docs/database-migration-spec.md
+Context files: docs/00-coding-rules.md, docs/00-api-rules.md, docs/02-database-migration-spec.md
 Constraints: JPA Entity, UUID PK, Instant UTC, strict UPPER_SNAKE Enums, One-way State Machine
 Target Files:
 - src/main/java/com/gpc/oms/domain/WorkOrder.java

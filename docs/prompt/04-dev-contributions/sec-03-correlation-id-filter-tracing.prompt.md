@@ -2,7 +2,7 @@
 > **Phân loại:** Observability & Security Feature Task Prompt  
 > **Issue:** [#31](https://github.com/duongbaphuc/ai-native-oms-api/issues/31)  
 > **Lỗ hổng:** SEC-03 (CWE-778 Insufficient Logging / Forensic Audit Gap — CVSS MEDIUM)  
-> **Tài liệu đối chiếu:** `docs/observability-and-logging.md §2`, `docs/SECURITY_HANDOVER_REPORT.md §3`, `docs/SYSTEM_HANDOVER.md §2.1`  
+> **Tài liệu đối chiếu:** `docs/02-observability-and-logging.md §2`, `docs/09-SECURITY_HANDOVER_REPORT.md §3`, `docs/08-SYSTEM_HANDOVER.md §2.1`  
 > **Mục tiêu:** Hiện thực hóa `CorrelationIdFilter` kế thừa `OncePerRequestFilter`, gắn mã truy vết liên chuỗi `X-Correlation-Id` vào MDC log context và HTTP Response, hỗ trợ điều tra dấu vết an ninh (Forensic Audit).
 
 ```markdown
@@ -12,7 +12,7 @@ Bạn là một "Senior Observability Engineer" kiêm "Spring Web Security Speci
 ---
 
 # TASK:
-Hiện thực hóa tính năng truy vết phân tán SEC-03 bằng Java cho dự án hiện tại theo yêu cầu trong Issue #31 (`docs/observability-and-logging.md §2`):
+Hiện thực hóa tính năng truy vết phân tán SEC-03 bằng Java cho dự án hiện tại theo yêu cầu trong Issue #31 (`docs/02-observability-and-logging.md §2`):
 
 1. **Hiện thực hóa lớp `CorrelationIdFilter.java`:**
    - **Đường dẫn tệp:** `src/main/java/com/gpc/oms/config/CorrelationIdFilter.java`

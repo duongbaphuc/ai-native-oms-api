@@ -1,11 +1,11 @@
 ## 1. Traceability (Issue link, Spec path)
 - Issue: `closes #` / `WO-` (nhánh `feature/WO-<id>`)
-- Spec: `docs/domain-model.md`, `docs/api-spec.md` (mục nào thay đổi?)
+- Spec: `docs/01-domain-model.md`, `docs/02-api-spec.md` (mục nào thay đổi?)
 - Loại thay đổi: [ ] `feat` [ ] `fix` [ ] `refactor` [ ] `docs` [ ] `test`
 
 ## 2. AI Usage Disclosure & Provenance (tools, prompts/context, generated vs hand-written)
 - Tool: (Copilot / khác, phiên bản nếu có)
-- Context files: `docs/coding-rules.md`, `docs/api-rules.md`, `docs/security-rules.md`
+- Context files: `docs/00-coding-rules.md`, `docs/00-api-rules.md`, `docs/00-security-rules.md`
 - Phần nào AI sinh / phần nào viết tay / đã review hallucination (không package/API ảo):
 
 ## 3. Verification & Evidence (tests, linter, spec review)

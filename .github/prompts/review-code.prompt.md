@@ -3,7 +3,7 @@ name: Review OMS Code
 description: Audit code against the project's 12 Scorecard quality and security criteria.
 ---
 
-Audit the selected code or PR changes against the project standards in `#file:docs/br-analysis-wo.md`, `#file:docs/coding-rules.md`, `#file:docs/api-rules.md`, `#file:docs/security-rules.md`, and `#file:docs/internal-coding-standards.md`.
+Audit the selected code or PR changes against the project standards in `#file:docs/01-br-analysis-wo.md`, `#file:docs/00-coding-rules.md`, `#file:docs/00-api-rules.md`, `#file:docs/00-security-rules.md`, and `#file:docs/00-internal-coding-standards.md`.
 
 Verify each of the following 12 criteria:
 

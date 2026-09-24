@@ -1,7 +1,7 @@
 # Prompt: Fix Invalid Status Query Parameter Mapping (Issue #21 / Finding F-01)
 > **Tác giả / Contributor:** `tudtbis92`  
 > **Pull Request:** [#24](https://github.com/duongbaphuc/ai-native-oms-api/pull/24)  
-> **Tài liệu đối chiếu:** `docs/api-spec.md §2`, `docs/domain-model.md §Invariants`  
+> **Tài liệu đối chiếu:** `docs/02-api-spec.md §2`, `docs/01-domain-model.md §Invariants`  
 
 ```markdown
 # ROLE:

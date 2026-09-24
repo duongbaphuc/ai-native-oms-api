@@ -32,12 +32,11 @@ Outage Work Order API — microservice quản lý sự kiện mất điện (OMS
 - Quality Gate: 100% Line & Branch JaCoCo coverage required across domain, service, controller, dto, exception packages.
 - Run `mvn test` — all tests must pass before any PR.
 
-## References
-- Business Requirements Analysis: [docs/br-analysis-wo.md](../docs/br-analysis-wo.md)
-- Domain Model: [docs/domain-model.md](../docs/domain-model.md)
-- API Specification: [docs/api-spec.md](../docs/api-spec.md)
-- Database Migration Specification: [docs/database-migration-spec.md](../docs/database-migration-spec.md)
-- Internal Coding Standards: [docs/internal-coding-standards.md](../docs/internal-coding-standards.md)
-- Coding Rules: [docs/coding-rules.md](../docs/coding-rules.md)
-- API Design Rules: [docs/api-rules.md](../docs/api-rules.md)
-- Security Rules: [docs/security-rules.md](../docs/security-rules.md)
+## References (AI-Native SDLC Order)
+- Phase 00 (Governance & Rules): [docs/00-coding-rules.md](../docs/00-coding-rules.md), [docs/00-internal-coding-standards.md](../docs/00-internal-coding-standards.md), [docs/00-api-rules.md](../docs/00-api-rules.md), [docs/00-security-rules.md](../docs/00-security-rules.md)
+- Phase 01 (Business & Domain): [docs/01-br-analysis-wo.md](../docs/01-br-analysis-wo.md), [docs/01-domain-model.md](../docs/01-domain-model.md)
+- Phase 02 (Architecture & Specs): [docs/02-api-spec.md](../docs/02-api-spec.md), [docs/02-database-migration-spec.md](../docs/02-database-migration-spec.md), [docs/02-security-auth-spec.md](../docs/02-security-auth-spec.md), [docs/02-observability-and-logging.md](../docs/02-observability-and-logging.md), [docs/02-ADR-001-use-h2-database.md](../docs/02-ADR-001-use-h2-database.md)
+- Phase 03 (Context Index): [docs/03-CONTEXT_INDEX.md](../docs/03-CONTEXT_INDEX.md)
+- Phase 08 (Handover & Dossier): [docs/08-SYSTEM_HANDOVER.md](../docs/08-SYSTEM_HANDOVER.md), [docs/08-ORACLE_JAVA_DOCUMENTATION.md](../docs/08-ORACLE_JAVA_DOCUMENTATION.md)
+- Phase 09 (Security Handover): [docs/09-SECURITY_HANDOVER_REPORT.md](../docs/09-SECURITY_HANDOVER_REPORT.md)
+- Phase 10 (DevOps & CI/CD): [docs/10-devops-pipeline-spec.md](../docs/10-devops-pipeline-spec.md)

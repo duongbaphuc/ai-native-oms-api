@@ -1,4 +1,4 @@
-// AI Provenance: generated from docs/api-spec.md §1, docs/domain-model.md, docs/coding-rules.md
+// AI Provenance: generated from docs/02-api-spec.md §1, docs/01-domain-model.md, docs/00-coding-rules.md
 package com.gpc.oms.dto;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;

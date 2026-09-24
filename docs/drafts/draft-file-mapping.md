@@ -25,7 +25,7 @@ Copilot/LLM **KHÔNG được tạo file ngoài danh sách này** trừ khi đư
 | 9 | `WorkOrderService.java` | `com.gpc.oms.service` | `src/main/java/com/gpc/oms/service/WorkOrderService.java` | NEW | [`draft-workorder-service.md`](draft-workorder-service.md) |
 | 10 | `WorkOrderController.java` | `com.gpc.oms.controller` | `src/main/java/com/gpc/oms/controller/WorkOrderController.java` | NEW | [`draft-workorder-create.md`](draft-workorder-create.md), [`draft-workorder-get.md`](draft-workorder-get.md), [`draft-workorder-patch.md`](draft-workorder-patch.md) |
 | 11 | `GlobalExceptionHandler.java` | `com.gpc.oms.exception` | `src/main/java/com/gpc/oms/exception/GlobalExceptionHandler.java` | NEW | [`draft-global-exception-handler.md`](draft-global-exception-handler.md) |
-| 12 | `ResourceNotFoundException.java` | `com.gpc.oms.exception` | `src/main/java/com/gpc/oms/exception/ResourceNotFoundException.java` | NEW | [`api-spec.md`](../api-spec.md) §3 |
+| 12 | `ResourceNotFoundException.java` | `com.gpc.oms.exception` | `src/main/java/com/gpc/oms/exception/ResourceNotFoundException.java` | NEW | [`02-api-spec.md`](../02-api-spec.md) §3 |
 
 ## Test Code (`src/test/java/`)
 

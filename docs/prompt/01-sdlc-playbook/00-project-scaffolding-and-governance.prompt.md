@@ -26,7 +26,7 @@ Khởi tạo toàn bộ cấu trúc nền móng kỹ thuật và cơ chế quả
      * Cấm dùng Lombok, bắt buộc dùng Java 17 immutable records và explicit POJOs.
      * Tuân thủ kiến trúc 3 tầng Clean Architecture (Controller $\rightarrow$ Service $\rightarrow$ Repository).
      * Bắt buộc kiểm thử 100% trước khi mở Pull Request.
-   - Tạo `docs/coding-rules.md`: Thiết lập bộ quy chuẩn viết mã (Java Coding Standards & Design Patterns Guide) theo phong cách của **Senior Java Engineer tại Oracle (Oracle Core Platform & JDK Team)**:
+   - Tạo `docs/00-coding-rules.md`: Thiết lập bộ quy chuẩn viết mã (Java Coding Standards & Design Patterns Guide) theo phong cách của **Senior Java Engineer tại Oracle (Oracle Core Platform & JDK Team)**:
      * **Code Style Chuẩn Oracle & Effective Java (Joshua Bloch):** Immutability by default, Fail-Fast principle, Defensive Programming, đóng gói dữ liệu triệt để, cấm hoàn toàn Project Lombok (`@Data`, `@Getter`, `@Setter`), bắt buộc 100% Constructor Injection với `private final` fields.
      * **Ứng Dụng Các Mẫu Thiết Kế (Design Patterns) Tối Ưu Hóa Class:**
        + *Static Factory Method Pattern (`from()`, `of()`):* Thay thế constructors thô, tăng tính biểu đạt ngữ nghĩa và kiểm soát cấp phát đối tượng (vd: `WorkOrderResponse.from(entity)`).
@@ -36,7 +36,7 @@ Khởi tạo toàn bộ cấu trúc nền móng kỹ thuật và cơ chế quả
        + *Chain of Responsibility Pattern:* Ứng dụng trong việc xử lý tuần tự qua Filter chains (`SecurityFilterChain`, `CorrelationIdFilter`) và Controller Advice bắt lỗi tập trung (`GlobalExceptionHandler`).
      * **Tối Ưu Hóa Hiệu Năng JVM & Bộ Nhớ (GC Pressure):** Quản lý chặt chẽ phạm vi biến (Variable Scoping), ưu tiên biến `final` cục bộ để hỗ trợ JIT Compiler Escape Analysis, khởi tạo kích thước ban đầu (initial capacity) cho Collections, phân biệt rạch ròi khi nào dùng nối chuỗi `+` (invokedynamic) và khi nào dùng `StringBuilder` trong vòng lặp lớn.
    - Tạo `.copilotignore`: Ngăn chặn AI đọc hoặc rò rỉ dữ liệu từ các file nhạy cảm (`.env`, certificates, private keys, database dumps).
-   - Khởi tạo khung tài liệu `docs/CONTEXT_INDEX.md`: Tạo bản đồ nguồn chân lý (Single Source of Truth) ban đầu.
+   - Khởi tạo khung tài liệu `docs/03-CONTEXT_INDEX.md`: Tạo bản đồ nguồn chân lý (Single Source of Truth) ban đầu.
 
 4. **Thiết Lập Quy Chuẩn Đóng Góp & Phân Nhánh (Team & AI Governance):**
    - Tạo `CONTRIBUTING.md`:
@@ -72,7 +72,7 @@ Khởi tạo toàn bộ cấu trúc nền móng kỹ thuật và cơ chế quả
 # DONE WHEN:
 1. Toàn bộ cấu trúc thư mục của dự án được khởi tạo chuẩn hóa.
 2. Lệnh `./mvnw clean compile` (hoặc `mvn clean compile`) thực thi thành công: `BUILD SUCCESS`.
-3. Tệp `.github/copilot-instructions.md`, `docs/coding-rules.md` (chuẩn Oracle Senior Java Engineer & Design Patterns), `.copilotignore`, `CONTRIBUTING.md`, và các template PR/Issue sẵn sàng hoạt động.
+3. Tệp `.github/copilot-instructions.md`, `docs/00-coding-rules.md` (chuẩn Oracle Senior Java Engineer & Design Patterns), `.copilotignore`, `CONTRIBUTING.md`, và các template PR/Issue sẵn sàng hoạt động.
 4. Kho lưu trữ Git được khởi tạo với commit đầu tiên sạch sẽ, nhánh `main` được bảo vệ.
 5. Môi trường sẵn sàng 100% để bước vào Giai đoạn 1 (Phân tích Nghiệp vụ & Mô hình hóa Miền).
 ```

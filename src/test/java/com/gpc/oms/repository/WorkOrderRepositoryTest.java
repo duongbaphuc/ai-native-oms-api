@@ -1,4 +1,4 @@
-// AI Provenance: generated from docs/database-migration-spec.md, docs/domain-model.md
+// AI Provenance: generated from docs/02-database-migration-spec.md, docs/01-domain-model.md
 package com.gpc.oms.repository;
 
 import com.gpc.oms.domain.Priority;

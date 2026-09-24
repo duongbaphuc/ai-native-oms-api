@@ -38,7 +38,7 @@
 
 | File | Thay đổi |
 |---|---|
-| [`api-spec.md`](file:///c:/ai-native-oms-api/docs/api-spec.md) | `"id": "WO-10432"` → `"id": "550e8400-e29b-41d4-a716-446655440000"` (UUID format) |
+| [`02-api-spec.md`](file:///c:/ai-native-oms-api/docs/02-api-spec.md) | `"id": "WO-10432"` → `"id": "550e8400-e29b-41d4-a716-446655440000"` (UUID format) |
 
 ---
 
@@ -64,6 +64,6 @@
 | State machine logic xung đột (skip vs strict) | ✅ Strict linear via `canTransitionTo()` |
 | Thiếu Service layer (2-tier vs 3-tier) | ✅ 3-tier, tạo `draft-workorder-service.md` |
 | Tên DTO không thống nhất (`StatusUpdateRequest` vs `WorkOrderStatusRequest`) | ✅ Thống nhất `WorkOrderStatusRequest` |
-| `api-spec.md` dùng String ID thay vì UUID | ✅ Sửa thành UUID format |
+| `02-api-spec.md` dùng String ID thay vì UUID | ✅ Sửa thành UUID format |
 | Test row 4 assert sai handler | ✅ Corrected: handler #2 (`handleMalformedJson`), `invalidParams[0].name=body` |
 | `WorkOrderResponse.from()` thiếu implementation | ✅ Added full implementation |

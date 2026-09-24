@@ -1,4 +1,4 @@
-// AI Provenance: generated from docs/api-spec.md §4, docs/domain-model.md §Invariants
+// AI Provenance: generated from docs/02-api-spec.md §4, docs/01-domain-model.md §Invariants
 package com.gpc.oms.dto;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;

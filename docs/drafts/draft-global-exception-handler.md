@@ -1,6 +1,6 @@
 <!--
 Role: Senior Engineer. Task: Tạo GlobalExceptionHandler trả lỗi theo chuẩn RFC 7807 Problem Details.
-Context files: docs/api-rules.md, docs/security-rules.md
+Context files: docs/00-api-rules.md, docs/00-security-rules.md
 Constraints: 
 - Map MethodArgumentNotValidException (400) -> invalidParams chi tiết.
 - Map HttpMessageNotReadableException (400) -> malformed JSON / invalid enum.
@@ -39,7 +39,7 @@ DRAFT ONLY — scoring target, never wired into app.
 ## Handler Code
 
 ```java
-// AI Provenance: generated from docs/api-rules.md §2, docs/security-rules.md §4, docs/coding-rules.md
+// AI Provenance: generated from docs/00-api-rules.md §2, docs/00-security-rules.md §4, docs/00-coding-rules.md
 package com.gpc.oms.exception;
 
 import com.gpc.oms.exception.ResourceNotFoundException;
@@ -162,6 +162,6 @@ public class GlobalExceptionHandler {
 - [ ] `ProblemDetail` (Spring Boot 3) — KHÔNG dùng custom error class
 - [ ] Không trả stack trace, SQL message, class name ra client
 - [ ] Log: `log.warn` cho 4xx, `log.error` cho 5xx
-- [ ] RFC 7807 `type` URI khớp `api-spec.md §5`
+- [ ] RFC 7807 `type` URI khớp `02-api-spec.md §5`
 - [ ] Package: `com.gpc.oms.exception`
 - [ ] Oracle Senior Java Style: Sử dụng `final` cho parameters và local variables để tối ưu JIT Escape Analysis.

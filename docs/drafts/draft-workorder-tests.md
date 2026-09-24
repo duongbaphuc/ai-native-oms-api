@@ -1,6 +1,6 @@
 <!--
 Role: Senior Engineer. Task: Draft test case cho WorkOrder API (4 endpoint + RBAC + RFC 7807).
-Context files: docs/domain-model.md, docs/api-spec.md, docs/coding-rules.md, docs/api-rules.md, docs/security-rules.md.
+Context files: docs/01-domain-model.md, docs/02-api-spec.md, docs/00-coding-rules.md, docs/00-api-rules.md, docs/00-security-rules.md.
 Constraints: JUnit 5 + MockMvc, schema đúng api-spec, lỗi assert theo RFC 7807 (type/title/status/invalidParams), không log PII.
 Architecture: 3-tier — Controller test mock WorkOrderService (không mock Repository trực tiếp).
 Research: Context7 /spring-projects/spring-boot (@WebMvcTest addFilters=true tự apply security chain; Boot 4 dùng @MockitoBean);
@@ -53,7 +53,7 @@ DRAFT ONLY — scoring target, never wired into app.
 **Target file:** `src/test/java/com/gpc/oms/domain/WorkOrderTest.java`
 
 ```java
-// AI Provenance: generated from docs/domain-model.md §Invariants
+// AI Provenance: generated from docs/01-domain-model.md §Invariants
 package com.gpc.oms.domain;
 
 import org.junit.jupiter.api.Test;
@@ -120,7 +120,7 @@ class WorkOrderTest {
 > **3-tier architecture:** Test mock `WorkOrderService` (KHÔNG mock `WorkOrderRepository`). Controller chỉ delegate, nên test focus vào: HTTP status, request validation, authorization, response schema.
 
 ```java
-// AI Provenance: generated from docs/api-spec.md, docs/security-rules.md
+// AI Provenance: generated from docs/02-api-spec.md, docs/00-security-rules.md
 package com.gpc.oms.controller;
 
 import com.fasterxml.jackson.databind.ObjectMapper;

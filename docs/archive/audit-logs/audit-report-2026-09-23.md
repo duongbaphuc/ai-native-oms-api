@@ -50,7 +50,7 @@ Thay thế toàn bộ nội dung file bằng:
 ```markdown
 <!--
 Role: Senior Engineer. Task: Define WorkOrder entity, Enums, and Repository.
-Context files: docs/domain-model.md, docs/coding-rules.md
+Context files: docs/01-domain-model.md, docs/00-coding-rules.md
 Constraints: JPA Entity, UUID, Enum types. NO business logic leaking.
 DRAFT ONLY — scoring target, never wired into app.
 -->
@@ -103,7 +103,7 @@ public interface WorkOrderRepository extends JpaRepository<WorkOrder, UUID> {}
 ```
 
 ## 6. Getter Convention
-- Dùng **manual getters** (KHÔNG dùng Lombok) — khớp `coding-rules.md` về implicit dependency.
+- Dùng **manual getters** (KHÔNG dùng Lombok) — khớp `00-coding-rules.md` về implicit dependency.
 - Generate getter cho tất cả 7 fields.
 
 ## 7. Checklist
@@ -123,7 +123,7 @@ public interface WorkOrderRepository extends JpaRepository<WorkOrder, UUID> {}
 
 | # | Lỗ hổng | Mức độ | Hậu quả nếu không sửa |
 |---|---|---|---|
-| C-1 | **Controller gọi Repository trực tiếp** — vi phạm separation of concerns. `coding-rules.md` và `api-rules.md` không cấm nhưng `br-analysis-wo.md` mô tả kiến trúc 3 tầng. Copilot sẽ không biết có Service layer hay không | 🔴 Cao | AI sinh Controller fat, không có Service để unit test |
+| C-1 | **Controller gọi Repository trực tiếp** — vi phạm separation of concerns. `00-coding-rules.md` và `00-api-rules.md` không cấm nhưng `01-br-analysis-wo.md` mô tả kiến trúc 3 tầng. Copilot sẽ không biết có Service layer hay không | 🔴 Cao | AI sinh Controller fat, không có Service để unit test |
 | C-2 | **Thiếu step-by-step logic** — chỉ có code block, không có pseudo-code mô tả luồng 1→2→3 | 🔴 Cao | Copilot phải reverse-engineer logic từ code |
 | C-3 | **Thiếu error mapping table** — không liệt kê đầy đủ các lỗi có thể xảy ra khi POST (400 validation, 400 malformed JSON, 403 no auth, 500 unexpected) | ⚠️ Trung bình | AI bỏ sót edge case |
 | C-4 | **`ResponseEntity.status(201)`** thay vì `HttpStatus.CREATED` — inconsistent với draft khác dùng `HttpStatus` constant | ⚠️ Nhỏ | Code style không đồng nhất |
@@ -134,8 +134,8 @@ public interface WorkOrderRepository extends JpaRepository<WorkOrder, UUID> {}
 ```markdown
 <!--
 Role: Senior Engineer. Task: POST /api/v1/workorders tạo WorkOrder.
-Context files: docs/coding-rules.md, docs/api-rules.md, docs/security-rules.md.
-Constraints: schema đúng docs/api-spec.md, lỗi RFC 7807, @Valid, JPA only.
+Context files: docs/00-coding-rules.md, docs/00-api-rules.md, docs/00-security-rules.md.
+Constraints: schema đúng docs/02-api-spec.md, lỗi RFC 7807, @Valid, JPA only.
 DRAFT ONLY — scoring target, never wired into app.
 -->
 # Draft: POST /api/v1/workorders
@@ -187,7 +187,7 @@ DRAFT ONLY — scoring target, never wired into app.
 |---|---|---|
 | G-1 | **Controller gọi `repo` trực tiếp** — cùng vấn đề C-1, không qua Service layer | 🔴 Cao |
 | G-2 | **Thiếu step-by-step logic** — chỉ có code, không có pseudo-code | 🔴 Cao |
-| G-3 | **GET list không có pagination** — `repo.findAll()` sẽ gây OOM nếu table lớn. `api-spec.md` cũng không đề cập pagination. **Đây là context gap ở cấp spec, cần quyết định từ PO** | ⚠️ Trung bình |
+| G-3 | **GET list không có pagination** — `repo.findAll()` sẽ gây OOM nếu table lớn. `02-api-spec.md` cũng không đề cập pagination. **Đây là context gap ở cấp spec, cần quyết định từ PO** | ⚠️ Trung bình |
 | G-4 | **Thiếu error mapping table** cho cả 2 endpoint | ⚠️ Trung bình |
 | G-5 | **Không chỉ rõ file path đích** — GET methods nằm trong class nào? | ⚠️ Trung bình |
 | G-6 | **`WorkOrderResponse.from(wo)`** — static factory method này chưa được define trong domain draft. Chỉ được define ở [`draft-dtos.md`](file:///c:/ai-native-oms-api/docs/drafts/draft-dtos.md) nhưng thiếu implementation code | ⚠️ Trung bình |
@@ -197,7 +197,7 @@ DRAFT ONLY — scoring target, never wired into app.
 ```markdown
 <!--
 Role: Senior Engineer. Task: GET /api/v1/workorders và GET /api/v1/workorders/{id}.
-Context files: docs/api-spec.md, docs/security-rules.md
+Context files: docs/02-api-spec.md, docs/00-security-rules.md
 Constraints: Phân quyền RBAC, trả WorkOrderResponse, 404 RFC 7807.
 DRAFT ONLY — scoring target, never wired into app.
 -->
@@ -310,7 +310,7 @@ DRAFT ONLY — scoring target, never wired into app.
 - Checklist trước khi implement (Section 5)
 - `@JsonIgnoreProperties(ignoreUnknown = false)` trên mọi Request DTO
 - AI Provenance comment header — best practice
-- Liên kết cross-reference đến `api-spec.md` và `domain-model.md`
+- Liên kết cross-reference đến `02-api-spec.md` và `01-domain-model.md`
 
 #### ⚠️ Lỗ hổng Ngữ cảnh
 
@@ -369,7 +369,7 @@ Thêm vào Section 3.1 sau record declaration:
 
 ### 🔴 Vấn đề Nghiêm Trọng #1: Không có Service Layer — Mâu thuẫn Kiến trúc
 
-[`draft-workorder-create.md`](file:///c:/ai-native-oms-api/docs/drafts/draft-workorder-create.md), [`draft-workorder-get.md`](file:///c:/ai-native-oms-api/docs/drafts/draft-workorder-get.md), [`draft-workorder-patch.md`](file:///c:/ai-native-oms-api/docs/drafts/draft-workorder-patch.md) đều cho Controller gọi `repo` trực tiếp. Nhưng [`br-analysis-wo.md`](file:///c:/ai-native-oms-api/docs/br-analysis-wo.md) mô tả kiến trúc 3 tầng (UI/API/Data). 
+[`draft-workorder-create.md`](file:///c:/ai-native-oms-api/docs/drafts/draft-workorder-create.md), [`draft-workorder-get.md`](file:///c:/ai-native-oms-api/docs/drafts/draft-workorder-get.md), [`draft-workorder-patch.md`](file:///c:/ai-native-oms-api/docs/drafts/draft-workorder-patch.md) đều cho Controller gọi `repo` trực tiếp. Nhưng [`01-br-analysis-wo.md`](file:///c:/ai-native-oms-api/docs/01-br-analysis-wo.md) mô tả kiến trúc 3 tầng (UI/API/Data). 
 
 **Quyết định cần từ bạn:** Controller → Repository (2-tier) hay Controller → Service → Repository (3-tier)?
 
@@ -394,7 +394,7 @@ Thêm vào Section 3.1 sau record declaration:
 | [`draft-dtos.md`](file:///c:/ai-native-oms-api/docs/drafts/draft-dtos.md) L:69-75 | `canTransitionTo()` | Strict: `OPEN→IN_PROGRESS` only, `IN_PROGRESS→DONE` only. **Cấm skip** |
 
 > [!CAUTION]
-> Hai file có logic mâu thuẫn nhau. `domain-model.md` nói "tuyến tính" → `draft-dtos.md` là đúng. File `draft-workorder-domain.md` cần sửa `advanceStatus()` để dùng `canTransitionTo()`.
+> Hai file có logic mâu thuẫn nhau. `01-domain-model.md` nói "tuyến tính" → `draft-dtos.md` là đúng. File `draft-workorder-domain.md` cần sửa `advanceStatus()` để dùng `canTransitionTo()`.
 
 ### ⚠️ Vấn đề #4: Tên DTO Request Không Thống Nhất
 
@@ -405,9 +405,9 @@ Thêm vào Section 3.1 sau record declaration:
 
 **Khuyến nghị:** Dùng `WorkOrderStatusRequest` (từ `draft-dtos.md`) làm source-of-truth.
 
-### ⚠️ Vấn đề #5: `api-spec.md` dùng `"id": "WO-10432"` (String prefix) nhưng Domain dùng `UUID`
+### ⚠️ Vấn đề #5: `02-api-spec.md` dùng `"id": "WO-10432"` (String prefix) nhưng Domain dùng `UUID`
 
-[`api-spec.md`](file:///c:/ai-native-oms-api/docs/api-spec.md) L:19 response example có `"id": "WO-10432"` nhưng entity dùng `UUID`. Đây là lỗi trong example JSON của spec hay đặc tả format hiển thị?
+[`02-api-spec.md`](file:///c:/ai-native-oms-api/docs/02-api-spec.md) L:19 response example có `"id": "WO-10432"` nhưng entity dùng `UUID`. Đây là lỗi trong example JSON của spec hay đặc tả format hiển thị?
 
 ---
 
@@ -444,7 +444,7 @@ Thêm vào Section 3.1 sau record declaration:
 | ⚠️ P1 | **Thêm step-by-step pseudo-code** vào 3 API drafts | `draft-workorder-create/get/patch.md` |
 | ⚠️ P1 | **Thêm error mapping table** vào 3 API drafts | `draft-workorder-create/get/patch.md` |
 | ⚠️ P1 | **Thêm `WorkOrderResponse.from()` implementation** | `draft-dtos.md` |
-| ⚠️ P1 | **Sửa `api-spec.md` example** — `id` nên là UUID, không phải `"WO-10432"` | `api-spec.md` |
+| ⚠️ P1 | **Sửa `02-api-spec.md` example** — `id` nên là UUID, không phải `"WO-10432"` | `02-api-spec.md` |
 | ⚠️ P2 | **Thêm target file path** vào tất cả drafts | Tất cả |
 | ⚠️ P2 | **Thêm import list** cho exception handler | `draft-global-exception-handler.md` |
 | ⚠️ P2 | **Sửa test row 4** — assert đúng handler cho invalid enum | `draft-workorder-tests.md` |

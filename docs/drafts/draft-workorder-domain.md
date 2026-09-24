@@ -1,6 +1,6 @@
 <!--
 Role: Senior Engineer. Task: Define WorkOrder entity, Enums, and Repository.
-Context files: docs/domain-model.md, docs/coding-rules.md
+Context files: docs/01-domain-model.md, docs/00-coding-rules.md
 Constraints: JPA Entity, UUID, Enum types. NO business logic leaking.
 Architecture: 3-tier (Controller → Service → Repository). Entity chỉ chứa invariant logic.
 DRAFT ONLY — scoring target, never wired into app.
@@ -45,7 +45,7 @@ DRAFT ONLY — scoring target, never wired into app.
 ## 4. Entity Code
 
 ```java
-// AI Provenance: generated from docs/domain-model.md, docs/coding-rules.md
+// AI Provenance: generated from docs/01-domain-model.md, docs/00-coding-rules.md
 package com.gpc.oms.domain;
 
 import jakarta.persistence.*;
@@ -88,7 +88,7 @@ public class WorkOrder {
         this.createdAt = Instant.now();
     }
     
-    // --- Getters (manual, không dùng Lombok — theo coding-rules.md) ---
+    // --- Getters (manual, không dùng Lombok — theo 00-coding-rules.md) ---
     public UUID getId() { return id; }
     public String getEquipmentId() { return equipmentId; }
     public String getDescription() { return description; }
@@ -118,10 +118,10 @@ public class WorkOrder {
 
 ### 5.1 `Priority` — `src/main/java/com/gpc/oms/domain/Priority.java`
 
-Khai báo trong `domain-model.md` — 4 mức độ nghiêm trọng của sự cố.
+Khai báo trong `01-domain-model.md` — 4 mức độ nghiêm trọng của sự cố.
 
 ```java
-// AI Provenance: generated from docs/domain-model.md §Entities
+// AI Provenance: generated from docs/01-domain-model.md §Entities
 package com.gpc.oms.domain;
 
 public enum Priority {
@@ -134,8 +134,8 @@ public enum Priority {
 
 ### 5.2 `WorkOrderStatus` — `src/main/java/com/gpc/oms/domain/WorkOrderStatus.java`
 
-Khai báo trong `domain-model.md` — máy trạng thái đơn hướng (one-way state machine).  
-`@JsonValue` serialize ra chuỗi khớp `api-spec.md` (ví dụ: `"Open"` thay vì `"OPEN"`).
+Khai báo trong `01-domain-model.md` — máy trạng thái đơn hướng (one-way state machine).  
+`@JsonValue` serialize ra chuỗi khớp `02-api-spec.md` (ví dụ: `"Open"` thay vì `"OPEN"`).
 
 **State Machine Rules (Strict Linear):**
 1. `OPEN` → `IN_PROGRESS` ✅
@@ -143,7 +143,7 @@ Khai báo trong `domain-model.md` — máy trạng thái đơn hướng (one-way
 3. Mọi chuyển đổi khác (skip, rollback) → ❌ `throw IllegalStateException`
 
 ```java
-// AI Provenance: generated from docs/domain-model.md §Invariants, docs/api-spec.md §4
+// AI Provenance: generated from docs/01-domain-model.md §Invariants, docs/02-api-spec.md §4
 package com.gpc.oms.domain;
 
 import com.fasterxml.jackson.annotation.JsonValue;
@@ -177,7 +177,7 @@ public enum WorkOrderStatus {
 ## 6. Repository — `src/main/java/com/gpc/oms/domain/WorkOrderRepository.java`
 
 ```java
-// AI Provenance: generated from docs/domain-model.md, docs/database-migration-spec.md §3
+// AI Provenance: generated from docs/01-domain-model.md, docs/02-database-migration-spec.md §3
 package com.gpc.oms.domain;
 
 import org.springframework.data.domain.Page;

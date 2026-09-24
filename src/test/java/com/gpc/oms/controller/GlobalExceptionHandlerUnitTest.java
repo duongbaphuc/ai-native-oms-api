@@ -1,4 +1,4 @@
-// AI Provenance: generated from docs/api-rules.md §2, docs/security-rules.md §4
+// AI Provenance: generated from docs/00-api-rules.md §2, docs/00-security-rules.md §4
 package com.gpc.oms.controller;
 
 import com.gpc.oms.exception.GlobalExceptionHandler;

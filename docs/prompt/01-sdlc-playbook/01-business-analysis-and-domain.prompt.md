@@ -8,8 +8,8 @@ Bạn là một "Principal Business Analyst" kiêm "Domain-Driven Design (DDD) S
 
 # TASK:
 Phân tích yêu cầu bài toán quản lý phiếu sự cố lưới điện và tạo 2 tài liệu đặc tả nghiệp vụ cốt lõi tại thư mục `docs/`:
-1. `docs/br-analysis-wo.md`: Phân tích yêu cầu nghiệp vụ (Business Requirement Analysis), phân loại người dùng (Actors), sơ đồ ca sử dụng (Use Cases), ma trận quyền hạn (RACI Matrix), và các quy tắc nghiệp vụ (Business Rules).
-2. `docs/domain-model.md`: Mô hình hóa thực thể miền (Domain Model), xác định Bounded Context, Aggregate Root `WorkOrder`, các Value Objects, Enum trạng thái `WorkOrderStatus` (`OPEN`, `IN_PROGRESS`, `DONE`), Enum mức ưu tiên `Priority` (`LOW`, `MEDIUM`, `HIGH`, `CRITICAL`), và đặc tả máy trạng thái 1 chiều (One-way Linear State Machine).
+1. `docs/01-br-analysis-wo.md`: Phân tích yêu cầu nghiệp vụ (Business Requirement Analysis), phân loại người dùng (Actors), sơ đồ ca sử dụng (Use Cases), ma trận quyền hạn (RACI Matrix), và các quy tắc nghiệp vụ (Business Rules).
+2. `docs/01-domain-model.md`: Mô hình hóa thực thể miền (Domain Model), xác định Bounded Context, Aggregate Root `WorkOrder`, các Value Objects, Enum trạng thái `WorkOrderStatus` (`OPEN`, `IN_PROGRESS`, `DONE`), Enum mức ưu tiên `Priority` (`LOW`, `MEDIUM`, `HIGH`, `CRITICAL`), và đặc tả máy trạng thái 1 chiều (One-way Linear State Machine).
 
 ---
 
@@ -21,7 +21,7 @@ Phân tích yêu cầu bài toán quản lý phiếu sự cố lưới điện v
 ---
 
 # DONE WHEN:
-1. Đã tạo đầy đủ 2 file `docs/br-analysis-wo.md` và `docs/domain-model.md` chuẩn Markdown.
+1. Đã tạo đầy đủ 2 file `docs/01-br-analysis-wo.md` và `docs/01-domain-model.md` chuẩn Markdown.
 2. Ma trận chuyển đổi trạng thái (State Transition Table) mô tả rõ kết quả (Cho phép / Từ chối / Mã lỗi) của toàn bộ 9 cặp trạng thái ($3 \text{ trạng thái hiện tại} \times 3 \text{ trạng thái đích}$).
 3. Bảng ràng buộc dữ liệu xác định rõ: `equipmentId` (max 50 ký tự), `description` (10–500 ký tự), `createdAt` (bất biến, không cập nhật), `resolvedAt` (null khi tạo, bắt buộc gán timestamp khi sang `DONE`).
 ```

@@ -1,7 +1,7 @@
 <!--
 Role: Principal Cloud DevOps & Platform Architect
 Task: Multi-Stage Containerization, JVM Container Tuning, GitHub Actions CI Pipeline, and Secret Governance
-Context files: docs/coding-rules.md, docs/security-rules.md, docs/ADR-001-use-h2-database.md
+Context files: docs/00-coding-rules.md, docs/00-security-rules.md, docs/02-ADR-001-use-h2-database.md
 Constraints: Multi-stage Dockerfile, Non-root user (appuser:10001), JaCoCo >= 80% Quality Gate, Trivy CVE scan
 -->
 # Containerization & CI/CD Pipeline Blueprint

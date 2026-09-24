@@ -1,7 +1,7 @@
 <!--
 Role: Principal Software Architect & Standards Lead
 Task: Define internal coding conventions, date/time timezone policy, object mapping rules, pagination standards, and resilience patterns
-Context files: docs/coding-rules.md, docs/api-rules.md, docs/domain-model.md, docs/api-spec.md
+Context files: docs/00-coding-rules.md, docs/00-api-rules.md, docs/01-domain-model.md, docs/02-api-spec.md
 Constraints: Java 17+, Spring Boot 3.3, UTC Instant, MapStruct / Static Factory (NO Reflection ModelMapper), RFC 7807 consistency
 -->
 # Internal Coding Standards & Technical Utilities Guide

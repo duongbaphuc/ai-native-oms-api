@@ -1,4 +1,4 @@
-// AI Provenance: generated from docs/domain-model.md, docs/database-migration-spec.md §3
+// AI Provenance: generated from docs/01-domain-model.md, docs/02-database-migration-spec.md §3
 package com.gpc.oms.domain;
 
 import org.springframework.data.domain.Page;

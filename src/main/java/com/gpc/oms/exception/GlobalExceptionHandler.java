@@ -1,4 +1,4 @@
-// AI Provenance: generated from docs/api-rules.md §2, docs/security-rules.md §4, docs/drafts/draft-global-exception-handler.md
+// AI Provenance: generated from docs/00-api-rules.md §2, docs/00-security-rules.md §4, docs/drafts/draft-global-exception-handler.md
 package com.gpc.oms.exception;
 
 import org.slf4j.Logger;

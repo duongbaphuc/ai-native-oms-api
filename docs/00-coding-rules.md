@@ -3,7 +3,7 @@
 <!--
 Role: Principal Java Software Architect & Senior Java Engineer at Oracle (Oracle Core Platform & OpenJDK Team)
 Task: Production-grade Java 17+ coding rules, JVM/GC optimization standards, and GoF design pattern guidelines with Good vs Bad Practice comparisons
-Context files: docs/domain-model.md, docs/api-spec.md, docs/security-rules.md, docs/internal-coding-standards.md
+Context files: docs/01-domain-model.md, docs/02-api-spec.md, docs/00-security-rules.md, docs/00-internal-coding-standards.md
 Constraints: Java 17 LTS, Spring Boot 3.3, Zero-Lombok, 100% Constructor Injection, RFC 7807 compliance, Pure Java Records
 -->
 

@@ -1,4 +1,4 @@
-// AI Provenance: generated from docs/api-spec.md, docs/coding-rules.md, docs/drafts/draft-workorder-*.md
+// AI Provenance: generated from docs/02-api-spec.md, docs/00-coding-rules.md, docs/drafts/draft-workorder-*.md
 package com.gpc.oms.controller;
 
 import com.gpc.oms.domain.WorkOrderStatus;

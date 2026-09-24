@@ -6,10 +6,10 @@ description: Generate a new REST endpoint adhering to AI-Native OMS architecture
 Follow the project's Spec-Driven Development workflow:
 
 1. **Context & Schemas:**
-   - Read the business requirements from `#file:docs/br-analysis-wo.md`.
-   - Read the endpoint contract from `#file:docs/api-spec.md`.
-   - Read the entity rules and invariants from `#file:docs/domain-model.md`.
-   - Strictly follow `#file:docs/coding-rules.md`, `#file:docs/api-rules.md`, `#file:docs/security-rules.md`, and `#file:docs/internal-coding-standards.md`.
+   - Read the business requirements from `#file:docs/01-br-analysis-wo.md`.
+   - Read the endpoint contract from `#file:docs/02-api-spec.md`.
+   - Read the entity rules and invariants from `#file:docs/01-domain-model.md`.
+   - Strictly follow `#file:docs/00-coding-rules.md`, `#file:docs/00-api-rules.md`, `#file:docs/00-security-rules.md`, and `#file:docs/00-internal-coding-standards.md`.
 
 2. **Implementation Sequence (3-Tier Architecture):**
    - **DTOs:** Create Java records with `@JsonIgnoreProperties(ignoreUnknown = false)` on requests, Bean Validation annotations (`@NotBlank`, `@NotNull`, `@Size`), and static factory mapping methods (`WorkOrderResponse.from()`, `PagedResponse.from()`).

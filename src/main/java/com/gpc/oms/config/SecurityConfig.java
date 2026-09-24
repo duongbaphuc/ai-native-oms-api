@@ -1,4 +1,4 @@
-// AI Provenance: generated from docs/security-auth-spec.md, docs/security-rules.md
+// AI Provenance: generated from docs/02-security-auth-spec.md, docs/00-security-rules.md
 package com.gpc.oms.config;
 
 import org.springframework.context.annotation.Bean;

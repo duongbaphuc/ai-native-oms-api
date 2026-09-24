@@ -1,7 +1,7 @@
 <!--
 Role: Senior Engineer. Task: POST /api/v1/workorders tạo WorkOrder.
-Context files: docs/coding-rules.md, docs/api-rules.md, docs/security-rules.md.
-Constraints: schema đúng docs/api-spec.md (equipmentId, priority), lỗi RFC 7807, @Valid, JPA only.
+Context files: docs/00-coding-rules.md, docs/00-api-rules.md, docs/00-security-rules.md.
+Constraints: schema đúng docs/02-api-spec.md (equipmentId, priority), lỗi RFC 7807, @Valid, JPA only.
 Architecture: 3-tier — Controller delegate sang WorkOrderService.
 DRAFT ONLY — scoring target, never wired into app.
 -->
@@ -19,7 +19,7 @@ DRAFT ONLY — scoring target, never wired into app.
 ### Controller Layer (`WorkOrderController.create`)
 1. Annotation: `@PostMapping` + `@PreAuthorize("hasAnyRole('DISPATCHER', 'TECHNICIAN', 'ADMIN')")`
 2. Nhận `@Valid @RequestBody WorkOrderRequest req` — Spring tự validate trước khi vào method
-3. Log: `log.info("create workorder equipmentIdHash={}", req.equipmentId().hashCode())` — KHÔNG log raw equipmentId (PII policy, xem `security-rules.md §4`)
+3. Log: `log.info("create workorder equipmentIdHash={}", req.equipmentId().hashCode())` — KHÔNG log raw equipmentId (PII policy, xem `00-security-rules.md §4`)
 4. Delegate: gọi `workOrderService.createWorkOrder(req)` — KHÔNG chứa business logic trong Controller
 5. Return `ResponseEntity.created(URI.create("/api/v1/workorders/" + response.id())).body(response)`
 
@@ -44,7 +44,7 @@ DRAFT ONLY — scoring target, never wired into app.
 ## Controller Code
 
 ```java
-// AI Provenance: generated from docs/api-spec.md §1, docs/coding-rules.md, docs/security-rules.md
+// AI Provenance: generated from docs/02-api-spec.md §1, docs/00-coding-rules.md, docs/00-security-rules.md
 package com.gpc.oms.controller;
 
 import com.gpc.oms.dto.WorkOrderRequest;

@@ -1,4 +1,4 @@
-// AI Provenance: generated from docs/internal-coding-standards.md, docs/api-spec.md
+// AI Provenance: generated from docs/00-internal-coding-standards.md, docs/02-api-spec.md
 package com.gpc.oms.dto;
 
 import com.gpc.oms.domain.Priority;

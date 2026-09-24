@@ -1,13 +1,13 @@
 <!--
 Role: Senior Engineer.
 Task: Định nghĩa toàn bộ DTOs (Data Transfer Objects) cho Outage Work Order API.
-Context files: docs/api-spec.md, docs/domain-model.md, docs/coding-rules.md, docs/api-rules.md, docs/security-rules.md.
+Context files: docs/02-api-spec.md, docs/01-domain-model.md, docs/00-coding-rules.md, docs/00-api-rules.md, docs/00-security-rules.md.
 Constraints:
   - Java records (immutable), không dùng class thông thường.
   - Strict schema: @JsonIgnoreProperties(ignoreUnknown = false) trên mọi Request DTO.
   - Bean Validation: @NotBlank, @NotNull, @Size — chỉ ở boundary (Controller), không rải vào Service.
-  - Fields phải khớp 1:1 với docs/api-spec.md, không được tự ý thêm field.
-  - Enum values phải khớp docs/domain-model.md.
+  - Fields phải khớp 1:1 với docs/02-api-spec.md, không được tự ý thêm field.
+  - Enum values phải khớp docs/01-domain-model.md.
   - AI Provenance phải được ghi chú trong header mỗi file.
 DRAFT ONLY — scoring target, chưa được wire vào application.
 -->
@@ -15,7 +15,7 @@ DRAFT ONLY — scoring target, chưa được wire vào application.
 # Draft: DTOs — Outage Work Order API
 
 Tài liệu này định nghĩa toàn bộ Data Transfer Objects (DTOs) sẽ được implement cho dự án.
-Mọi field, kiểu dữ liệu và annotation phải khớp với [`docs/api-spec.md`](../api-spec.md) và [`docs/domain-model.md`](../domain-model.md).
+Mọi field, kiểu dữ liệu và annotation phải khớp với [`docs/02-api-spec.md`](../02-api-spec.md) và [`docs/01-domain-model.md`](../01-domain-model.md).
 
 ## Target Files
 
@@ -45,7 +45,7 @@ Hai Enums `Priority` và `WorkOrderStatus` thuộc `package com.gpc.oms.domain`,
 ### 2.1 `WorkOrderRequest` — `POST /api/v1/workorders`
 
 **Target file:** `src/main/java/com/gpc/oms/dto/WorkOrderRequest.java`  
-Nguồn spec: [`api-spec.md §1`](../api-spec.md).
+Nguồn spec: [`02-api-spec.md §1`](../02-api-spec.md).
 
 **Schema Table:**
 
@@ -62,7 +62,7 @@ Nguồn spec: [`api-spec.md §1`](../api-spec.md).
 - KHÔNG có field `status`, `id`, `createdAt` — không được tự ý thêm.
 
 ```java
-// AI Provenance: generated from docs/api-spec.md §1, docs/domain-model.md, docs/coding-rules.md
+// AI Provenance: generated from docs/02-api-spec.md §1, docs/01-domain-model.md, docs/00-coding-rules.md
 package com.gpc.oms.dto;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
@@ -112,7 +112,7 @@ public record WorkOrderRequest(
 ### 2.2 `WorkOrderStatusRequest` — `PATCH /api/v1/workorders/{id}/status`
 
 **Target file:** `src/main/java/com/gpc/oms/dto/WorkOrderStatusRequest.java`  
-Nguồn spec: [`api-spec.md §4`](../api-spec.md).
+Nguồn spec: [`02-api-spec.md §4`](../02-api-spec.md).
 
 **Schema Table:**
 
@@ -127,7 +127,7 @@ Nguồn spec: [`api-spec.md §4`](../api-spec.md).
 - Validation logic chuyển trạng thái (one-way) nằm ở **Entity layer** (`advanceStatus()`), không phải DTO.
 
 ```java
-// AI Provenance: generated from docs/api-spec.md §4, docs/domain-model.md §Invariants
+// AI Provenance: generated from docs/02-api-spec.md §4, docs/01-domain-model.md §Invariants
 package com.gpc.oms.dto;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
@@ -157,7 +157,7 @@ public record WorkOrderStatusRequest(
 ### 3.1 `WorkOrderResponse` — Dùng chung cho tất cả endpoints
 
 **Target file:** `src/main/java/com/gpc/oms/dto/WorkOrderResponse.java`  
-Nguồn spec: [`api-spec.md §1–§4`](../api-spec.md).
+Nguồn spec: [`02-api-spec.md §1–§4`](../02-api-spec.md).
 
 **Schema Table:**
 
@@ -173,12 +173,12 @@ Nguồn spec: [`api-spec.md §1–§4`](../api-spec.md).
 
 **Ràng buộc:**
 - Immutable record — không có setter.
-- Fields khớp 1:1 với api-spec.md response schema.
+- Fields khớp 1:1 với 02-api-spec.md response schema.
 - `resolvedAt` là `Instant` (nullable) — tự động gán khi `status = DONE`.
 - Không expose JPA entity trực tiếp ra ngoài — luôn convert sang DTO này.
 
 ```java
-// AI Provenance: generated from docs/api-spec.md §1–§4, docs/domain-model.md
+// AI Provenance: generated from docs/02-api-spec.md §1–§4, docs/01-domain-model.md
 package com.gpc.oms.dto;
 
 import com.gpc.oms.domain.Priority;
@@ -238,7 +238,7 @@ public record WorkOrderResponse(
 ### 3.2 `PagedResponse<T>` — Generic Pagination Wrapper
 
 **Target file:** `src/main/java/com/gpc/oms/dto/PagedResponse.java`  
-Nguồn spec: [`internal-coding-standards.md §3`](../internal-coding-standards.md), [`api-spec.md §2`](../api-spec.md).
+Nguồn spec: [`00-internal-coding-standards.md §3`](../00-internal-coding-standards.md), [`02-api-spec.md §2`](../02-api-spec.md).
 
 **Schema Table:**
 
@@ -253,7 +253,7 @@ Nguồn spec: [`internal-coding-standards.md §3`](../internal-coding-standards.
 | `isLast` | `boolean` | No | `true` nếu là trang cuối cùng |
 
 ```java
-// AI Provenance: generated from docs/internal-coding-standards.md §3, docs/api-spec.md §2
+// AI Provenance: generated from docs/00-internal-coding-standards.md §3, docs/02-api-spec.md §2
 package com.gpc.oms.dto;
 
 import org.springframework.data.domain.Page;
@@ -308,6 +308,6 @@ public record PagedResponse<T>(
 - [ ] `WorkOrderStatus` serialize ra `"Open"` / `"InProgress"` / `"Done"` (dùng `@JsonValue`).
 - [ ] Enum convention: UPPER_SNAKE nội bộ (`OPEN`, `IN_PROGRESS`, `DONE`).
 - [ ] `resolvedAt` có kiểu `Instant`, KHÔNG phải `String` hay `LocalDateTime`.
-- [ ] Không có field nào tự thêm ngoài `api-spec.md`.
+- [ ] Không có field nào tự thêm ngoài `02-api-spec.md`.
 - [ ] `canTransitionTo()` là source-of-truth, được kiểm tra ở Entity `advanceStatus()`, không ở DTO hay controller.
 - [ ] DTO class name thống nhất: `WorkOrderStatusRequest` (KHÔNG `StatusUpdateRequest`).

@@ -1,6 +1,6 @@
 <!--
 Role: Senior Engineer. Task: PATCH /api/v1/workorders/{id}/status
-Context files: docs/domain-model.md, docs/api-spec.md, docs/api-rules.md, docs/coding-rules.md
+Context files: docs/01-domain-model.md, docs/02-api-spec.md, docs/00-api-rules.md, docs/00-coding-rules.md
 Constraints: One-way state machine rule (strict linear), HTTP 422 mapping RFC 7807 on invalid state.
 Architecture: 3-tier — Controller delegate sang WorkOrderService.
 DRAFT ONLY — scoring target, never wired into app.

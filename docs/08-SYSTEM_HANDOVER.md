@@ -1,7 +1,7 @@
 # HỒ SƠ BÀN GIAO KỸ THUẬT & VẬN HÀNH HỆ THỐNG
 ## Outage Management System - Work Order API Service (`oms-api-demo`)
 
-> **Tài liệu tham chiếu chuẩn (Single Source of Truth):** `docs/SYSTEM_HANDOVER.md`  
+> **Tài liệu tham chiếu chuẩn (Single Source of Truth):** `docs/08-SYSTEM_HANDOVER.md`  
 > **Phiên bản:** `1.0.0-RELEASE`  
 > **Thời điểm lập hồ sơ:** 2026-09-24  
 > **Đơn vị bàn giao:** AI-Native Engineering Core Team  
@@ -250,7 +250,7 @@ Toàn bộ các URN định danh loại lỗi được quản lý tập trung d�
 
 > [!IMPORTANT]
 > **Hồ Sơ Đánh Giá An Ninh Toàn Diện (Security Handover Dossier):**  
-> Xem chi tiết kết quả thẩm định theo chuẩn OWASP API Security Top 10 (2023), danh mục lỗ hổng & tình trạng khắc phục 100% P0 (SEC-01, SEC-02, SEC-04), cùng biên bản ký nhận bàn giao an ninh tại [`docs/SECURITY_HANDOVER_REPORT.md`](SECURITY_HANDOVER_REPORT.md).  
+> Xem chi tiết kết quả thẩm định theo chuẩn OWASP API Security Top 10 (2023), danh mục lỗ hổng & tình trạng khắc phục 100% P0 (SEC-01, SEC-02, SEC-04), cùng biên bản ký nhận bàn giao an ninh tại [`docs/09-SECURITY_HANDOVER_REPORT.md`](09-SECURITY_HANDOVER_REPORT.md).  
 > **Security Posture Score:** **`98.0 / 100` (GRADE A+ - APPROVED FOR PRODUCTION DEPLOYMENT)**.
 
 ### 5.1 Kiến Trúc Bảo Mật & Ranh Giới Mạng (Perimeter Defense)
@@ -446,7 +446,7 @@ Vị trí báo cáo chi tiết: `target/site/jacoco/index.html`.
 - Hệ thống ghi nhận mọi log thông qua SLF4J / Logback với định dạng tiêu chuẩn:
   `[TIMESTAMP] [LEVEL] [PID] [THREAD] [LOGGER] [correlationId] MESSAGE`
 - Tệp `CorrelationIdFilter` tự động trích xuất header `X-Correlation-Id` từ client hoặc tự sinh chuỗi UUID ngẫu nhiên đưa vào MDC context.
-- Các thông tin bảo mật và nhạy cảm (như thiết bị định danh chi tiết) được băm (`hashCode()`) hoặc bảo vệ trong log theo quy định tại `docs/observability-and-logging.md`.
+- Các thông tin bảo mật và nhạy cảm (như thiết bị định danh chi tiết) được băm (`hashCode()`) hoặc bảo vệ trong log theo quy định tại `docs/02-observability-and-logging.md`.
 
 ### 8.2 Sổ Tay Xử Lý Sự Cố Thường Gặp (Incident Playbook)
 
@@ -484,7 +484,7 @@ Vị trí báo cáo chi tiết: `target/site/jacoco/index.html`.
 
 ### 9.1 Quy Trình Bổ Sung Tính Năng Chuẩn (Spec-Driven SDLC SOP)
 Khi cần mở rộng thêm thực thể hoặc endpoint mới:
-1. **Cập nhật Đặc tả kỹ thuật:** Soạn thảo bản thảo mô tả API tại `docs/api-spec.md` và domain rules tại `docs/domain-model.md`.
+1. **Cập nhật Đặc tả kỹ thuật:** Soạn thảo bản thảo mô tả API tại `docs/02-api-spec.md` và domain rules tại `docs/01-domain-model.md`.
 2. **Viết Migration Script:** Tạo tệp `src/main/resources/db/migration/V2__<description>.sql` (không chỉnh sửa file V1 đã release).
 3. **Hiện thực hóa Mã nguồn:** Tạo DTO record immutable $\rightarrow$ Domain Entity $\rightarrow$ Repository $\rightarrow$ Service $\rightarrow$ Controller.
 4. **Viết Test Đạt 100% Coverage:** Tạo đầy đủ Unit test, WebMvcTest slice và Integration test.
@@ -507,7 +507,7 @@ Khi cần mở rộng thêm thực thể hoặc endpoint mới:
 | JaCoCo Line và Branch Coverage đạt ngưỡng quy định | 100% Line, 100% Branch (12/12 classes) | [x] ĐẠT |
 | Cấu trúc bảng và chỉ mục DB đồng bộ qua Flyway | Schema V1 khởi tạo chính xác | [x] ĐẠT |
 | Giao diện Test Console hoạt động mượt mà trên browser | Đã kiểm chứng tại `http://localhost:8080/` | [x] ĐẠT |
-| Tài liệu bàn giao đầy đủ chi tiết, không còn placeholder | Hoàn tất tại `docs/SYSTEM_HANDOVER.md` | [x] ĐẠT |
+| Tài liệu bàn giao đầy đủ chi tiết, không còn placeholder | Hoàn tất tại `docs/08-SYSTEM_HANDOVER.md` | [x] ĐẠT |
 
 ---
 **XÁC NHẬN BÀN GIAO KỸ THUẬT THÀNH CÔNG**  

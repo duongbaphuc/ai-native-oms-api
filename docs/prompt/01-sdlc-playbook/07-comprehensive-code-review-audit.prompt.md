@@ -8,14 +8,14 @@ Bạn là một "Lead Software Quality Auditor" và "Principal Code Review Archi
 
 # TASK:
 Thực hiện cuộc kiểm toán đối chiếu chéo (Cross-Verification Audit) giữa toàn bộ mã nguồn (`src/main/`, `src/test/`, `pom.xml`) với 9 tài liệu đặc tả cốt lõi:
-1. `docs/domain-model.md`: Domain Entities, Invariants, State Machine, Enums.
-2. `docs/api-spec.md`: HTTP Contracts, Endpoints, Request/Response Schemas, Validation.
-3. `docs/security-auth-spec.md`: RBAC Matrix, SecurityFilterChain, RFC 7807 401/403.
-4. `docs/api-rules.md`: Chuẩn mã lỗi RFC 7807 Problem Details (`urn:problem-type:*`).
-5. `docs/coding-rules.md`: Quy tắc Clean Code, no-Lombok, immutable records, switch expressions.
-6. `docs/database-migration-spec.md`: Flyway DDL, UUID PK, Check constraints, Indexes.
-7. `docs/observability-and-logging.md`: Cấu trúc log, correlation ID, che giấu dữ liệu nhạy cảm.
-8. `docs/internal-coding-standards.md`: Chuẩn phân tầng 3-tier, static factory methods, naming conventions.
+1. `docs/01-domain-model.md`: Domain Entities, Invariants, State Machine, Enums.
+2. `docs/02-api-spec.md`: HTTP Contracts, Endpoints, Request/Response Schemas, Validation.
+3. `docs/02-security-auth-spec.md`: RBAC Matrix, SecurityFilterChain, RFC 7807 401/403.
+4. `docs/00-api-rules.md`: Chuẩn mã lỗi RFC 7807 Problem Details (`urn:problem-type:*`).
+5. `docs/00-coding-rules.md`: Quy tắc Clean Code, no-Lombok, immutable records, switch expressions.
+6. `docs/02-database-migration-spec.md`: Flyway DDL, UUID PK, Check constraints, Indexes.
+7. `docs/02-observability-and-logging.md`: Cấu trúc log, correlation ID, che giấu dữ liệu nhạy cảm.
+8. `docs/00-internal-coding-standards.md`: Chuẩn phân tầng 3-tier, static factory methods, naming conventions.
 9. `CONTRIBUTING.md`: Quy trình nhánh `feature/WO-<issue-id>`, atomic PRs.
 
 Lập một Báo Cáo Kiểm Toán Chi Tiết lưu tại `docs/archive/audit-logs/code-vs-spec-audit-report-2026-09-24.md` bao gồm:

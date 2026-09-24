@@ -1,4 +1,4 @@
-// AI Provenance: generated from docs/api-spec.md §1–§4, docs/domain-model.md
+// AI Provenance: generated from docs/02-api-spec.md §1–§4, docs/01-domain-model.md
 package com.gpc.oms.dto;
 
 import com.gpc.oms.domain.Priority;

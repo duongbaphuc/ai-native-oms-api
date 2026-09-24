@@ -1,4 +1,4 @@
-// AI Provenance: generated from docs/api-spec.md §5, docs/api-rules.md §2
+// AI Provenance: generated from docs/02-api-spec.md §5, docs/00-api-rules.md §2
 package com.gpc.oms.exception;
 
 import java.net.URI;

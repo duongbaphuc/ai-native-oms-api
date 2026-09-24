@@ -1,7 +1,7 @@
 # Prompt: Guard Demo Credentials Behind Non-Production Profile (Issue #21 / Finding F-02)
 > **Tác giả / Contributor:** `tudtbis92`  
 > **Pull Request:** [#25](https://github.com/duongbaphuc/ai-native-oms-api/pull/25)  
-> **Tài liệu đối chiếu:** `docs/security-rules.md`, `docs/devops-pipeline-spec.md §4`  
+> **Tài liệu đối chiếu:** `docs/00-security-rules.md`, `docs/10-devops-pipeline-spec.md §4`  
 
 ```markdown
 # ROLE:

@@ -11,15 +11,15 @@ Thực hiện quy trình tiếp nhận, xử lý và đóng gói giải pháp ch
 
 1. **Bước 1: Tiếp Nhận Issue & Phân Tích Nguyên Nhân Gốc (Triaging & Root Cause Analysis):**
    - Đọc kỹ mô tả trong GitHub Issue (hoặc yêu cầu của PO/Lead).
-   - Truy vết ngược lại nguồn chân lý (Single Source of Truth) trong `docs/`: `CONTEXT_INDEX.md`, `api-spec.md`, `domain-model.md`, `security-rules.md`.
+   - Truy vết ngược lại nguồn chân lý (Single Source of Truth) trong `docs/`: `03-CONTEXT_INDEX.md`, `02-api-spec.md`, `01-domain-model.md`, `00-security-rules.md`.
    - Xác định rõ nguyên nhân cốt lõi: Đây là lỗi do thiếu ràng buộc kiểm thực (Validation Gap), lỗi cấu hình ranh giới (Security Misconfiguration), lỗi lệch chuẩn đặc tả (Spec Drift) hay yêu cầu mở rộng chức năng mới?
 
 2. **Bước 2: Cập Nhật Tài Liệu Đặc Tả Trước Khi Sửa Code (Spec-First Evolution):**
    - **QUY TẮC BẤT DI BẤT DỊCH: TUYỆT ĐỐI KHÔNG SỬA CODE KHI CHƯA CẬP NHẬT ĐẶC TẢ.**
    - Cập nhật tài liệu markdown tương ứng trong `docs/`:
-     * Nếu sửa logic API $\rightarrow$ Cập nhật `docs/api-spec.md` (mã HTTP status, schema, ma trận lỗi).
-     * Nếu sửa quy tắc miền $\rightarrow$ Cập nhật `docs/domain-model.md` (invariants, state transitions).
-     * Nếu sửa cấu hình hạ tầng $\rightarrow$ Cập nhật `docs/database-migration-spec.md` hoặc `docs/security-auth-spec.md`.
+     * Nếu sửa logic API $\rightarrow$ Cập nhật `docs/02-api-spec.md` (mã HTTP status, schema, ma trận lỗi).
+     * Nếu sửa quy tắc miền $\rightarrow$ Cập nhật `docs/01-domain-model.md` (invariants, state transitions).
+     * Nếu sửa cấu hình hạ tầng $\rightarrow$ Cập nhật `docs/02-database-migration-spec.md` hoặc `docs/02-security-auth-spec.md`.
      * Nếu là module riêng lẻ $\rightarrow$ Cập nhật bản thảo tương ứng trong `docs/drafts/`.
 
 3. **Bước 3: Viết Bài Kiểm Thử Tái Hiện Lỗi Thất Bại (Test-Driven Failure Reproduction):**

@@ -26,7 +26,7 @@
 
 Các file cấp kiến trúc, quy tắc, và đặc tả gốc.
 
-#### [domain-model.md](file:///c:/ai-native-oms-api/docs/domain-model.md) — ⭐ 98/100
+#### [01-domain-model.md](file:///c:/ai-native-oms-api/docs/01-domain-model.md) — ⭐ 98/100
 
 **Điểm mạnh:**
 - Bảng schema 4 cột đầy đủ (Thuộc tính / Kiểu / Ràng buộc & Annotation / Mô tả)
@@ -40,12 +40,12 @@ Các file cấp kiến trúc, quy tắc, và đặc tả gốc.
 
 | # | Lỗ hổng | Mức độ | Hậu quả |
 |---|---|---|---|
-| DM-1 | **`@Column(length)` thiếu trên `priority` và `status`** — bảng schema ghi `@Enumerated(EnumType.STRING), @Column(nullable = false, length = 20)` nhưng `database-migration-spec.md` khai báo `VARCHAR(20)`. Khớp nhau, nhưng nên thêm `length = 20` vào annotation để Copilot không sinh `VARCHAR(255)` | ⚠️ Nhỏ | AI có thể bỏ qua length trên enum column |
+| DM-1 | **`@Column(length)` thiếu trên `priority` và `status`** — bảng schema ghi `@Enumerated(EnumType.STRING), @Column(nullable = false, length = 20)` nhưng `02-database-migration-spec.md` khai báo `VARCHAR(20)`. Khớp nhau, nhưng nên thêm `length = 20` vào annotation để Copilot không sinh `VARCHAR(255)` | ⚠️ Nhỏ | AI có thể bỏ qua length trên enum column |
 | DM-2 | **Thiếu `@Table(name = "work_orders")`** trong pseudo-code `advanceStatus()` — tuy phần 1 đã ghi "Bảng CSDL: `work_orders`" nhưng khác section, Copilot có thể miss | ⚠️ Nhỏ | Redundancy giúp AI nhất quán hơn |
 
 ---
 
-#### [api-spec.md](file:///c:/ai-native-oms-api/docs/api-spec.md) — ⭐ 97/100
+#### [02-api-spec.md](file:///c:/ai-native-oms-api/docs/02-api-spec.md) — ⭐ 97/100
 
 **Điểm mạnh:**
 - 4 endpoints đều có: Schema Table (Request/Response), Step-by-step Logic, Ma trận Ngoại lệ
@@ -58,13 +58,13 @@ Các file cấp kiến trúc, quy tắc, và đặc tả gốc.
 
 | # | Lỗ hổng | Mức độ | Hậu quả |
 |---|---|---|---|
-| AS-1 | **GET list endpoint:** Response mô tả "trả về `List<WorkOrderResponse>` **hoặc** `PagedResponse<WorkOrderResponse>`" — từ "hoặc" tạo mơ hồ. Copilot phải đoán dùng cái nào. `internal-coding-standards.md` đã define `PagedResponse<T>` nhưng api-spec không chốt. | ⚠️ Trung bình | AI tự chọn 1 trong 2, có thể không khớp service/test |
+| AS-1 | **GET list endpoint:** Response mô tả "trả về `List<WorkOrderResponse>` **hoặc** `PagedResponse<WorkOrderResponse>`" — từ "hoặc" tạo mơ hồ. Copilot phải đoán dùng cái nào. `00-internal-coding-standards.md` đã define `PagedResponse<T>` nhưng api-spec không chốt. | ⚠️ Trung bình | AI tự chọn 1 trong 2, có thể không khớp service/test |
 | AS-2 | **GET list thiếu step-by-step logic** cho Service layer — có Query Parameters table nhưng không có pseudo-code xử lý filter `status` param | ⚠️ Trung bình | AI bỏ qua filter logic, trả `findAll()` luôn |
-| AS-3 | **`description` min length** — Request schema ghi `@Size(min = 10, max = 500)` nhưng `domain-model.md` Entity schema **không ghi min length**. Validation ở boundary (Controller) có min=10, nhưng Entity `@Column` không enforce → có thể inconsistent nếu data vào từ nguồn khác | ⚠️ Nhỏ | Chỉ là semantic mismatch, functional vẫn đúng |
+| AS-3 | **`description` min length** — Request schema ghi `@Size(min = 10, max = 500)` nhưng `01-domain-model.md` Entity schema **không ghi min length**. Validation ở boundary (Controller) có min=10, nhưng Entity `@Column` không enforce → có thể inconsistent nếu data vào từ nguồn khác | ⚠️ Nhỏ | Chỉ là semantic mismatch, functional vẫn đúng |
 
 ---
 
-#### [database-migration-spec.md](file:///c:/ai-native-oms-api/docs/database-migration-spec.md) — ⭐ 98/100
+#### [02-database-migration-spec.md](file:///c:/ai-native-oms-api/docs/02-database-migration-spec.md) — ⭐ 98/100
 
 **Điểm mạnh:**
 - Bảng Data Types Mapping 6 dòng (Java → PostgreSQL → H2) — cực kỳ hữu ích
@@ -77,7 +77,7 @@ Các file cấp kiến trúc, quy tắc, và đặc tả gốc.
 
 ---
 
-#### [security-auth-spec.md](file:///c:/ai-native-oms-api/docs/security-auth-spec.md) — ⭐ 96/100
+#### [02-security-auth-spec.md](file:///c:/ai-native-oms-api/docs/02-security-auth-spec.md) — ⭐ 96/100
 
 **Điểm mạnh:**
 - JWT Claims Schema bảng 6 dòng với ví dụ cụ thể
@@ -96,7 +96,7 @@ Các file cấp kiến trúc, quy tắc, và đặc tả gốc.
 
 ---
 
-#### [observability-and-logging.md](file:///c:/ai-native-oms-api/docs/observability-and-logging.md) — ⭐ 95/100
+#### [02-observability-and-logging.md](file:///c:/ai-native-oms-api/docs/02-observability-and-logging.md) — ⭐ 95/100
 
 **Điểm mạnh:**
 - Log Event Schema table 11 dòng (JSON key → type → source)
@@ -114,7 +114,7 @@ Các file cấp kiến trúc, quy tắc, và đặc tả gốc.
 
 ---
 
-#### [internal-coding-standards.md](file:///c:/ai-native-oms-api/docs/internal-coding-standards.md) — ⭐ 97/100
+#### [00-internal-coding-standards.md](file:///c:/ai-native-oms-api/docs/00-internal-coding-standards.md) — ⭐ 97/100
 
 **Điểm mạnh:**
 - Date/Time Policy table 4 dòng (Database/Entity/DTO Response/DTO Request)
@@ -128,7 +128,7 @@ Các file cấp kiến trúc, quy tắc, và đặc tả gốc.
 
 ---
 
-#### [devops-pipeline-spec.md](file:///c:/ai-native-oms-api/docs/devops-pipeline-spec.md) — ⭐ 96/100
+#### [10-devops-pipeline-spec.md](file:///c:/ai-native-oms-api/docs/10-devops-pipeline-spec.md) — ⭐ 96/100
 
 **Điểm mạnh:**
 - Multi-stage Dockerfile hoàn chỉnh, non-root user (UID 10001)
@@ -149,11 +149,11 @@ Các file cấp kiến trúc, quy tắc, và đặc tả gốc.
 
 | File | Điểm | Nhận xét |
 |---|:---:|---|
-| [coding-rules.md](file:///c:/ai-native-oms-api/docs/coding-rules.md) | 94/100 | Đầy đủ quy tắc coding, SLF4J, PII ban. Thiếu Target Files (file này là rules, acceptable). |
-| [security-rules.md](file:///c:/ai-native-oms-api/docs/security-rules.md) | 95/100 | 5 sections: Secrets, SQL Injection, RBAC, PII, Prompt Hygiene. Có Target Files header. |
-| [api-rules.md](file:///c:/ai-native-oms-api/docs/api-rules.md) | 97/100 | RFC 7807 Error Catalog bảng 7 dòng, Strict Schema validation. |
-| [ADR-001-use-h2-database.md](file:///c:/ai-native-oms-api/docs/ADR-001-use-h2-database.md) | 90/100 | ADR chuẩn format (Context → Decision → Consequences). Đúng mục đích. |
-| [br-analysis-wo.md](file:///c:/ai-native-oms-api/docs/br-analysis-wo.md) | 95/100 | Raw BR → Table-driven entity → RBAC alignment → 3-tier decomposition. Rõ ràng. |
+| [00-coding-rules.md](file:///c:/ai-native-oms-api/docs/00-coding-rules.md) | 94/100 | Đầy đủ quy tắc coding, SLF4J, PII ban. Thiếu Target Files (file này là rules, acceptable). |
+| [00-security-rules.md](file:///c:/ai-native-oms-api/docs/00-security-rules.md) | 95/100 | 5 sections: Secrets, SQL Injection, RBAC, PII, Prompt Hygiene. Có Target Files header. |
+| [00-api-rules.md](file:///c:/ai-native-oms-api/docs/00-api-rules.md) | 97/100 | RFC 7807 Error Catalog bảng 7 dòng, Strict Schema validation. |
+| [02-ADR-001-use-h2-database.md](file:///c:/ai-native-oms-api/docs/02-ADR-001-use-h2-database.md) | 90/100 | ADR chuẩn format (Context → Decision → Consequences). Đúng mục đích. |
+| [01-br-analysis-wo.md](file:///c:/ai-native-oms-api/docs/01-br-analysis-wo.md) | 95/100 | Raw BR → Table-driven entity → RBAC alignment → 3-tier decomposition. Rõ ràng. |
 
 ---
 
@@ -185,7 +185,7 @@ Các file cấp triển khai chi tiết, chứa code sketch và pseudo-code.
 
 | # | Lỗ hổng | Mức độ | Hậu quả |
 |---|---|---|---|
-| DTO-1 | **`description` validation mismatch** — DTO ghi `@Size(max=500)` nhưng `api-spec.md` ghi `@Size(min=10, max=500)`. Draft thiếu `min=10`. | ⚠️ Trung bình | AI sinh DTO thiếu min-length validation |
+| DTO-1 | **`description` validation mismatch** — DTO ghi `@Size(max=500)` nhưng `02-api-spec.md` ghi `@Size(min=10, max=500)`. Draft thiếu `min=10`. | ⚠️ Trung bình | AI sinh DTO thiếu min-length validation |
 
 ---
 
@@ -222,7 +222,7 @@ Các file cấp triển khai chi tiết, chứa code sketch và pseudo-code.
 
 | # | Lỗ hổng | Mức độ | Hậu quả |
 |---|---|---|---|
-| DS-1 | **`getAllWorkOrders()` thiếu `Pageable` param** — ghi warning `findAll()` không pagination, nhưng `internal-coding-standards.md` đã define `PagedResponse<T>` chuẩn. Draft nên chốt: dùng `Pageable` hay không? | ⚠️ Trung bình | AI có thể sinh `findAll()` không có pagination |
+| DS-1 | **`getAllWorkOrders()` thiếu `Pageable` param** — ghi warning `findAll()` không pagination, nhưng `00-internal-coding-standards.md` đã define `PagedResponse<T>` chuẩn. Draft nên chốt: dùng `Pageable` hay không? | ⚠️ Trung bình | AI có thể sinh `findAll()` không có pagination |
 | DS-2 | **`updateStatus()` thiếu log** cho case NOT_FOUND — chỉ log success, không log when entity not found (trước khi throw) | ⚠️ Nhỏ | Thiếu trace khi debug 404 |
 | DS-3 | **`ResponseStatusException` vs Custom Exception** — Service throw `ResponseStatusException` (Spring Web dependency) vi phạm nguyên tắc "Service không phụ thuộc tầng Controller". Nên dùng custom `ResourceNotFoundException` rồi `GlobalExceptionHandler` map sang 404 | ⚠️ Trung bình | Coupling Service → Spring Web |
 
@@ -241,7 +241,7 @@ Các file cấp triển khai chi tiết, chứa code sketch và pseudo-code.
 
 | # | Lỗ hổng | Mức độ | Hậu quả |
 |---|---|---|---|
-| DC-1 | **RBAC mismatch** — Draft ghi `@PreAuthorize("hasRole('TECHNICIAN') or hasRole('DISPATCHER')")` nhưng `api-spec.md` ghi quyền là `DISPATCHER, TECHNICIAN, **ADMIN**`. Draft **thiếu ADMIN** | ⚠️ Trung bình | AI sinh code thiếu quyền cho ADMIN |
+| DC-1 | **RBAC mismatch** — Draft ghi `@PreAuthorize("hasRole('TECHNICIAN') or hasRole('DISPATCHER')")` nhưng `02-api-spec.md` ghi quyền là `DISPATCHER, TECHNICIAN, **ADMIN**`. Draft **thiếu ADMIN** | ⚠️ Trung bình | AI sinh code thiếu quyền cho ADMIN |
 | DC-2 | **Thiếu `Location` header** trong code — api-spec ghi "trả về header `Location: /api/v1/workorders/{id}`" nhưng code chỉ return body, không set header | ⚠️ Trung bình | AI bỏ sót header chuẩn RESTful |
 | DC-3 | **RFC 7807 `type` URI khác nhau** — Draft dùng `https://api.oms.gpc.com/errors/validation`, nhưng api-spec dùng `urn:problem-type:validation-error`. **Hai convention mâu thuẫn** | 🔴 Cao | AI chọn sai URI, response không nhất quán |
 
@@ -259,9 +259,9 @@ Các file cấp triển khai chi tiết, chứa code sketch và pseudo-code.
 
 | # | Lỗ hổng | Mức độ | Hậu quả |
 |---|---|---|---|
-| DG-1 | **RBAC sai** — `getAll()` ghi `@PreAuthorize("hasRole('DISPATCHER')")` chỉ cho DISPATCHER. Nhưng `api-spec.md` và `security-auth-spec.md` cho phép cả `DISPATCHER, TECHNICIAN, ADMIN` | 🔴 Cao | AI sinh code chặn TECHNICIAN/ADMIN xem danh sách |
+| DG-1 | **RBAC sai** — `getAll()` ghi `@PreAuthorize("hasRole('DISPATCHER')")` chỉ cho DISPATCHER. Nhưng `02-api-spec.md` và `02-security-auth-spec.md` cho phép cả `DISPATCHER, TECHNICIAN, ADMIN` | 🔴 Cao | AI sinh code chặn TECHNICIAN/ADMIN xem danh sách |
 | DG-2 | **`getById()` RBAC thiếu ADMIN** — giống DC-1 | ⚠️ Trung bình | Thiếu quyền ADMIN |
-| DG-3 | **Thiếu filter logic** — `api-spec.md` ghi GET list có `@RequestParam status`, nhưng draft chỉ `findAll()` không filter | ⚠️ Trung bình | AI sinh endpoint không filter được |
+| DG-3 | **Thiếu filter logic** — `02-api-spec.md` ghi GET list có `@RequestParam status`, nhưng draft chỉ `findAll()` không filter | ⚠️ Trung bình | AI sinh endpoint không filter được |
 | DG-4 | **RFC 7807 `type` URI** — cùng vấn đề DC-3, dùng `https://api.oms.gpc.com/errors/...` thay vì `urn:problem-type:...` | 🔴 Cao | Inconsistent với api-spec |
 
 ---
@@ -278,7 +278,7 @@ Các file cấp triển khai chi tiết, chứa code sketch và pseudo-code.
 
 | # | Lỗ hổng | Mức độ | Hậu quả |
 |---|---|---|---|
-| DPT-1 | **RBAC thiếu ADMIN** — `api-spec.md` cho phép `TECHNICIAN, ADMIN` nhưng draft ghi `TECHNICIAN or DISPATCHER`. Vừa thiếu ADMIN vừa thêm sai DISPATCHER | 🔴 Cao | AI sinh authorization sai |
+| DPT-1 | **RBAC thiếu ADMIN** — `02-api-spec.md` cho phép `TECHNICIAN, ADMIN` nhưng draft ghi `TECHNICIAN or DISPATCHER`. Vừa thiếu ADMIN vừa thêm sai DISPATCHER | 🔴 Cao | AI sinh authorization sai |
 | DPT-2 | **RFC 7807 URI** — cùng vấn đề toàn cục DC-3 | 🔴 Cao | Inconsistent |
 
 ---
@@ -297,7 +297,7 @@ Các file cấp triển khai chi tiết, chứa code sketch và pseudo-code.
 
 | # | Lỗ hổng | Mức độ | Hậu quả |
 |---|---|---|---|
-| DE-1 | **RFC 7807 `type` URI** — dùng `https://api.oms.gpc.com/errors/...` nhưng `api-rules.md` catalog dùng `urn:problem-type:...` | 🔴 Cao | Handler trả URI khác spec |
+| DE-1 | **RFC 7807 `type` URI** — dùng `https://api.oms.gpc.com/errors/...` nhưng `00-api-rules.md` catalog dùng `urn:problem-type:...` | 🔴 Cao | Handler trả URI khác spec |
 | DE-2 | **Handler #4 thiếu `title` field** — RFC 7807 yêu cầu `title` nhưng `handleResponseStatusException` chỉ set `type`, `status`, `detail`. Thiếu `problem.setTitle(...)` | ⚠️ Trung bình | Response RFC 7807 không đầy đủ |
 | DE-3 | **Handler #1 set `detail` = "Validation Failed"** — nhưng RFC 7807 `detail` nên là "Validation failed for field: {fieldName}". Hiện tại `detail` giống `title` | ⚠️ Nhỏ | Minor, `invalidParams` bổ sung chi tiết |
 
@@ -317,9 +317,9 @@ Các file cấp triển khai chi tiết, chứa code sketch và pseudo-code.
 
 | # | Lỗ hổng | Mức độ | Hậu quả |
 |---|---|---|---|
-| DT-1 | **Row 8: TECHNICIAN cannot list → 403** — mâu thuẫn với `api-spec.md` cho phép TECHNICIAN xem list. Test case này sẽ fail nếu code đúng spec | 🔴 Cao | Test sai requirement |
+| DT-1 | **Row 8: TECHNICIAN cannot list → 403** — mâu thuẫn với `02-api-spec.md` cho phép TECHNICIAN xem list. Test case này sẽ fail nếu code đúng spec | 🔴 Cao | Test sai requirement |
 | DT-2 | **Thiếu test case 401 Unauthorized** — Row 3 ghi "không auth" → 403, nhưng thực tế không có token → 401 (Spring Security default). Test nên phân biệt 401 (no auth) vs 403 (wrong role) | ⚠️ Trung bình | Test bỏ sót 401 case |
-| DT-3 | **`@WithMockUser(roles = "DISPATCHER")` cho PATCH** — nhưng `api-spec.md` chỉ cho `TECHNICIAN, ADMIN`. DISPATCHER không được PATCH | ⚠️ Trung bình | Test dùng sai role |
+| DT-3 | **`@WithMockUser(roles = "DISPATCHER")` cho PATCH** — nhưng `02-api-spec.md` chỉ cho `TECHNICIAN, ADMIN`. DISPATCHER không được PATCH | ⚠️ Trung bình | Test dùng sai role |
 
 ---
 
@@ -345,8 +345,8 @@ Các file cấp triển khai chi tiết, chứa code sketch và pseudo-code.
 
 | Nguồn | Convention | Ví dụ |
 |---|---|---|
-| `api-rules.md` (Error Catalog) | `urn:problem-type:{name}` | `urn:problem-type:validation-error` |
-| `api-spec.md` (Endpoint spec) | `urn:problem-type:{name}` | `urn:problem-type:validation-error` |
+| `00-api-rules.md` (Error Catalog) | `urn:problem-type:{name}` | `urn:problem-type:validation-error` |
+| `02-api-spec.md` (Endpoint spec) | `urn:problem-type:{name}` | `urn:problem-type:validation-error` |
 | Tất cả Draft files | `https://api.oms.gpc.com/errors/{name}` | `https://api.oms.gpc.com/errors/validation` |
 | `draft-global-exception-handler.md` | `https://api.oms.gpc.com/errors/{name}` | `https://api.oms.gpc.com/errors/validation` |
 
@@ -355,7 +355,7 @@ Các file cấp triển khai chi tiết, chứa code sketch và pseudo-code.
 
 ### 🔴 GAP #2 — RBAC Permission Mâu Thuẫn Giữa Spec Và Draft
 
-| Endpoint | `api-spec.md` | `security-auth-spec.md` | Draft file | Sai lệch |
+| Endpoint | `02-api-spec.md` | `02-security-auth-spec.md` | Draft file | Sai lệch |
 |---|---|---|---|---|
 | `POST /workorders` | `DISPATCHER, TECHNICIAN, ADMIN` | `DISPATCHER, TECHNICIAN, ADMIN` | `TECHNICIAN, DISPATCHER` | **Thiếu ADMIN** |
 | `GET /workorders` (list) | `DISPATCHER, TECHNICIAN, ADMIN` | `DISPATCHER, TECHNICIAN, ADMIN` | `DISPATCHER` only | **Thiếu TECHNICIAN + ADMIN** |
@@ -364,8 +364,8 @@ Các file cấp triển khai chi tiết, chứa code sketch và pseudo-code.
 
 ### ⚠️ GAP #3 — Pagination Chưa Được Chốt
 
-- `api-spec.md` (§2) define Query Parameters cho pagination (`page`, `size`, `status`)
-- `internal-coding-standards.md` define `PagedResponse<T>` hoàn chỉnh
+- `02-api-spec.md` (§2) define Query Parameters cho pagination (`page`, `size`, `status`)
+- `00-internal-coding-standards.md` define `PagedResponse<T>` hoàn chỉnh
 - `draft-workorder-service.md` vẫn dùng `repo.findAll()` + open warning
 - `draft-workorder-get.md` vẫn trả `List<WorkOrderResponse>` không pagination
 
@@ -375,14 +375,14 @@ Các file cấp triển khai chi tiết, chứa code sketch và pseudo-code.
 
 `draft-workorder-service.md` throw `ResponseStatusException` (thuộc `org.springframework.web.server`) trong Service layer. Điều này vi phạm nguyên tắc separation of concerns: Service phụ thuộc Spring Web layer. 
 
-`api-spec.md` ghi throw `ResourceNotFoundException` nhưng class này chưa được define trong bất kỳ draft nào.
+`02-api-spec.md` ghi throw `ResourceNotFoundException` nhưng class này chưa được define trong bất kỳ draft nào.
 
 ### ⚠️ GAP #5 — Thiếu Target Files Cho Security & Observability Specs
 
 | File spec | Thiếu Target Files |
 |---|---|
-| `security-auth-spec.md` | `SecurityConfig.java`, `JwtAuthenticationFilter.java`, `CustomAccessDeniedHandler.java`, `CustomAuthenticationEntryPoint.java` |
-| `observability-and-logging.md` | `CorrelationIdFilter.java`, `logback-spring.xml`, `application.yml` (metrics) |
+| `02-security-auth-spec.md` | `SecurityConfig.java`, `JwtAuthenticationFilter.java`, `CustomAccessDeniedHandler.java`, `CustomAuthenticationEntryPoint.java` |
+| `02-observability-and-logging.md` | `CorrelationIdFilter.java`, `logback-spring.xml`, `application.yml` (metrics) |
 
 ---
 
@@ -390,7 +390,7 @@ Các file cấp triển khai chi tiết, chứa code sketch và pseudo-code.
 
 ### Fix #1 — Thống nhất RFC 7807 `type` URI
 
-Chọn **một** convention và apply toàn bộ. Khuyến nghị: giữ `urn:problem-type:*` (từ `api-rules.md`) vì đúng chuẩn RFC 7807.
+Chọn **một** convention và apply toàn bộ. Khuyến nghị: giữ `urn:problem-type:*` (từ `00-api-rules.md`) vì đúng chuẩn RFC 7807.
 
 **Sửa trong [draft-global-exception-handler.md](file:///c:/ai-native-oms-api/docs/drafts/draft-global-exception-handler.md):**
 
@@ -466,7 +466,7 @@ Apply tương tự cho: `draft-workorder-create.md`, `draft-workorder-get.md`, `
 Thêm file mới vào bảng Production Code:
 
 ```markdown
-| 11 | `ResourceNotFoundException.java` | `com.gpc.oms.exception` | `src/main/java/com/gpc/oms/exception/ResourceNotFoundException.java` | NEW | `api-spec.md` §3 |
+| 11 | `ResourceNotFoundException.java` | `com.gpc.oms.exception` | `src/main/java/com/gpc/oms/exception/ResourceNotFoundException.java` | NEW | `02-api-spec.md` §3 |
 ```
 
 Và cập nhật `draft-workorder-service.md` để dùng `ResourceNotFoundException` thay vì `ResponseStatusException`:

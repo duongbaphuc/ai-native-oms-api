@@ -19,4 +19,4 @@ Thư mục này đóng vai trò mục lục và hướng dẫn tra cứu cho cá
 ## Hướng Dẫn Sử Dụng Trong IDE
 1. Mở GitHub Copilot Chat trong Visual Studio Code hoặc Antigravity IDE.
 2. Gõ `/` để xem danh sách các lệnh khả dụng.
-3. Chọn `/implement-endpoint` hoặc `/review-code` và kèm theo ngữ cảnh file bạn muốn thao tác (ví dụ: `#file:docs/api-spec.md`).
+3. Chọn `/implement-endpoint` hoặc `/review-code` và kèm theo ngữ cảnh file bạn muốn thao tác (ví dụ: `#file:docs/02-api-spec.md`).
