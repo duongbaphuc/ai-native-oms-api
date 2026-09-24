@@ -24,6 +24,15 @@ public class SecurityConfig {
                 .requestMatchers("/h2-console/**").permitAll()
                 .anyRequest().authenticated()
             )
+            .exceptionHandling(exceptions -> exceptions
+                .authenticationEntryPoint((request, response, authException) -> {
+                    response.setStatus(401);
+                    response.setContentType("application/problem+json");
+                    response.getWriter().write("""
+                        {"type":"urn:problem-type:unauthorized","title":"Unauthorized","status":401,"detail":"Authentication token is missing or expired","instance":"%s"}"""
+                        .formatted(request.getRequestURI()));
+                })
+            )
             .httpBasic(Customizer.withDefaults());
         return http.build();
     }
