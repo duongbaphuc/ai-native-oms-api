@@ -127,6 +127,48 @@ public interface OrderProcessor {
   }
 
   /**
+   * Xử lý dữ liệu đơn hàng từ InputStream và ánh xạ trực tiếp sang Aggregate Root Order.
+   *
+   * @param orderId     mã định danh đơn hàng
+   * @param inputStream luồng dữ liệu byte CSV
+   * @param config      cấu hình ánh xạ cột
+   * @return đối tượng Order hoàn chỉnh
+   */
+  default Order processToOrder(String orderId, InputStream inputStream, CsvConfig config) {
+    return process(inputStream, config).toOrder(orderId);
+  }
+
+  /**
+   * Xử lý dữ liệu đơn hàng từ InputStream và ánh xạ trực tiếp sang Aggregate Root Order với MetadataConfig.
+   *
+   * @param orderId     mã định danh đơn hàng
+   * @param inputStream luồng dữ liệu byte CSV
+   * @param config      cấu hình metadata
+   * @return đối tượng Order hoàn chỉnh
+   */
+  default Order processToOrder(
+      String orderId,
+      InputStream inputStream,
+      com.gpc.order.processor.api.config.MetadataConfig config) {
+    return process(inputStream, config).toOrder(orderId);
+  }
+
+  /**
+   * Xử lý dữ liệu đơn hàng từ tệp tin CSV và ánh xạ trực tiếp sang Aggregate Root Order với MetadataConfig.
+   *
+   * @param orderId  mã định danh đơn hàng
+   * @param filePath đường dẫn tệp tin CSV
+   * @param config   cấu hình metadata
+   * @return đối tượng Order hoàn chỉnh
+   */
+  default Order processToOrder(
+      String orderId,
+      Path filePath,
+      com.gpc.order.processor.api.config.MetadataConfig config) {
+    return process(filePath, config).toOrder(orderId);
+  }
+
+  /**
    * Factory method tiện ích lấy bộ xử lý cho định dạng CSV.
    *
    * @return một thể hiện mặc định của CsvOrderProcessor
