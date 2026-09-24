@@ -166,7 +166,7 @@ graph TD
 ```
 
 ### 4.1 Thẩm Tra Chuỗi Bộ Lọc Bảo Mật (`SecurityFilterChain`)
-- **Phiên bản:** Spring Security 6.3.3 trên nền tảng Spring Boot 3.3.4.
+- **Phiên bản:** Spring Security 6.3.4 trên nền tảng Spring Boot 3.3.5.
 - **Mô hình Session:** Thiết lập `SessionCreationPolicy.STATELESS` trên toàn bộ các chains, hoàn toàn không tạo hoặc lưu trữ `HttpSession` ở server, phù hợp tuyệt đối cho RESTful Microservices.
 - **CSRF Defense:** Cấu hình `csrf.disable()` được áp dụng hợp lệ theo hướng dẫn bảo mật của OWASP dành cho Token-based / Stateless REST APIs (không sử dụng session cookies để xác thực).
 - **Phòng chống Clickjacking:** Đã kích hoạt header `X-Frame-Options: SAMEORIGIN` thông qua `headers.frameOptions(frame -> frame.sameOrigin())` để hỗ trợ hiển thị giao diện kiểm thử cục bộ trong khi vẫn ngăn chặn các domain ngoại lai nhúng iframe.

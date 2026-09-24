@@ -41,11 +41,11 @@ Dịch vụ **Outage Work Order API** là một microservice cốt lõi trong h�
 | Hạng mục | Công nghệ / Thư viện | Phiên bản | Ghi chú kỹ thuật |
 |---|---|---|---|
 | **Ngôn ngữ** | Java (OpenJDK / Temurin) | `17 LTS` | Sử dụng Records, Pattern Matching switch, Text Blocks, Compact Constructors |
-| **Framework nền tảng** | Spring Boot | `3.3.4` | Bao gồm Web, Security, Data JPA, Validation |
+| **Framework nền tảng** | Spring Boot | `3.3.5` | Bao gồm Web, Security, Data JPA, Validation |
 | **Cơ sở dữ liệu** | H2 Database Engine | `2.2.224` | Chế độ In-Memory, tương thích cú pháp PostgreSQL |
 | **Quản trị Schema** | Flyway Migration | `10.x` | Quản lý phiên bản migration tự động qua DDL |
-| **Bảo mật & Phân quyền** | Spring Security | `6.3.3` | HTTP Basic, Stateless Session, Method Security (`@PreAuthorize`) |
-| **Kiểm thử tự động** | JUnit 5 + Mockito + AssertJ | Latest Spring Boot | 86 automated test cases (Unit, Slice, Integration, Fixture-driven) |
+| **Bảo mật & Phân quyền** | Spring Security | `6.3.4` | HTTP Basic, Stateless Session, Method Security (`@PreAuthorize`) |
+| **Kiểm thử tự động** | JUnit 5 + Mockito + AssertJ | Latest Spring Boot | 89 automated test cases (Unit, Slice, Integration, Fixture-driven) |
 | **Đo lường Coverage** | JaCoCo Maven Plugin | `0.8.12` | Thực thi Quality Gate: **100% Line & 100% Branch Coverage** trên 12 monitored classes |
 | **Công cụ đóng gói** | Apache Maven | `3.8+` | Kèm theo Maven Wrapper (`mvnw.cmd` / `mvnw`) |
 
@@ -254,7 +254,7 @@ Toàn bộ các URN định danh loại lỗi được quản lý tập trung d�
 > **Security Posture Score:** **`98.0 / 100` (GRADE A+ - APPROVED FOR PRODUCTION DEPLOYMENT)**.
 
 ### 5.1 Kiến Trúc Bảo Mật & Ranh Giới Mạng (Perimeter Defense)
-- **Framework nền tảng:** Spring Security 6.3.3 trên nền tảng Spring Boot 3.3.4.
+- **Framework nền tảng:** Spring Security 6.3.4 trên nền tảng Spring Boot 3.3.5.
 - **Mô hình Session:** Thiết lập phiên không trạng thái hoàn toàn (`SessionCreationPolicy.STATELESS`), không sử dụng HTTP Session hay cookie để xác thực, tối ưu cho kiến trúc RESTful Microservices.
 - **CSRF Policy:** Vô hiệu hóa CSRF (`csrf.disable()`) theo đúng khuyến nghị của OWASP dành cho Token-based / Stateless REST APIs.
 - **Phòng chống Clickjacking:** Kích hoạt header an ninh `X-Frame-Options: SAMEORIGIN` bảo vệ các trang web console nội bộ khỏi các cuộc tấn công nhúng frame lừa đảo từ bên ngoài.
