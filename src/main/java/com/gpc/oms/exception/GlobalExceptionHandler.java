@@ -24,12 +24,12 @@ public class GlobalExceptionHandler {
     // Trigger: @NotBlank, @NotNull, @Size violations
     // Response: invalidParams[] chứa field name + reason
     @ExceptionHandler(MethodArgumentNotValidException.class)
-    public ProblemDetail handleValidationErrors(MethodArgumentNotValidException ex) {
+    public ProblemDetail handleValidationErrors(final MethodArgumentNotValidException ex) {
         log.warn("Validation failed: {}", ex.getMessage());
-        ProblemDetail problem = ProblemDetail.forStatusAndDetail(HttpStatus.BAD_REQUEST, "Validation Failed");
+        final ProblemDetail problem = ProblemDetail.forStatusAndDetail(HttpStatus.BAD_REQUEST, "Validation Failed");
         problem.setType(URI.create("urn:problem-type:validation-error"));
         
-        List<Map<String, String>> invalidParams = ex.getBindingResult().getFieldErrors().stream()
+        final List<Map<String, String>> invalidParams = ex.getBindingResult().getFieldErrors().stream()
             .map(error -> Map.of(
                 "name", error.getField(),
                 "reason", error.getDefaultMessage() != null ? error.getDefaultMessage() : "Invalid value"
@@ -43,9 +43,9 @@ public class GlobalExceptionHandler {
     // Trigger: priority: "URGENT", body không parse được, ignoreUnknown=false reject
     // Response: invalidParams[].name="body"
     @ExceptionHandler(HttpMessageNotReadableException.class)
-    public ProblemDetail handleMalformedJson(HttpMessageNotReadableException ex) {
+    public ProblemDetail handleMalformedJson(final HttpMessageNotReadableException ex) {
         log.warn("Malformed request body");
-        ProblemDetail problem = ProblemDetail.forStatusAndDetail(HttpStatus.BAD_REQUEST, "Malformed Request Body");
+        final ProblemDetail problem = ProblemDetail.forStatusAndDetail(HttpStatus.BAD_REQUEST, "Malformed Request Body");
         problem.setType(URI.create("urn:problem-type:malformed-json"));
         problem.setProperty("invalidParams",
             List.of(Map.of("name", "body", "reason", "Request body is malformed or contains an invalid enum value")));
@@ -57,9 +57,9 @@ public class GlobalExceptionHandler {
     // Spring MVC wrap thành MethodArgumentTypeMismatchException
     // Response: invalidParams[].name = tên param (vd: "status")
     @ExceptionHandler(MethodArgumentTypeMismatchException.class)
-    public ProblemDetail handleQueryParamTypeMismatch(MethodArgumentTypeMismatchException ex) {
+    public ProblemDetail handleQueryParamTypeMismatch(final MethodArgumentTypeMismatchException ex) {
         log.warn("Query parameter type mismatch: {}", ex.getName());
-        ProblemDetail problem = ProblemDetail.forStatusAndDetail(HttpStatus.BAD_REQUEST, "Validation Failed");
+        final ProblemDetail problem = ProblemDetail.forStatusAndDetail(HttpStatus.BAD_REQUEST, "Validation Failed");
         problem.setType(URI.create("urn:problem-type:validation-error"));
         problem.setProperty("invalidParams",
             List.of(Map.of("name", ex.getName(), "reason", "Invalid value for parameter '" + ex.getName() + "'")));
@@ -70,9 +70,9 @@ public class GlobalExceptionHandler {
     // Trigger: AccessDeniedException từ Spring Security khi role không đủ
     // Import: org.springframework.security.access.AccessDeniedException (KHÔNG phải java.nio.file.AccessDeniedException)
     @ExceptionHandler(AccessDeniedException.class)
-    public ProblemDetail handleAccessDenied(AccessDeniedException ex) {
+    public ProblemDetail handleAccessDenied(final AccessDeniedException ex) {
         log.warn("Access denied");
-        ProblemDetail problem = ProblemDetail.forStatusAndDetail(HttpStatus.FORBIDDEN, "Access Denied");
+        final ProblemDetail problem = ProblemDetail.forStatusAndDetail(HttpStatus.FORBIDDEN, "Access Denied");
         problem.setType(URI.create("urn:problem-type:forbidden"));
         return problem;
     }
@@ -80,9 +80,9 @@ public class GlobalExceptionHandler {
     // Handler #5: 404 — Resource không tìm thấy
     // Trigger: Service throw ResourceNotFoundException khi findById trả empty
     @ExceptionHandler(ResourceNotFoundException.class)
-    public ProblemDetail handleResourceNotFound(ResourceNotFoundException ex) {
+    public ProblemDetail handleResourceNotFound(final ResourceNotFoundException ex) {
         log.warn("Resource not found: {}", ex.getMessage());
-        ProblemDetail problem = ProblemDetail.forStatusAndDetail(HttpStatus.NOT_FOUND, ex.getMessage());
+        final ProblemDetail problem = ProblemDetail.forStatusAndDetail(HttpStatus.NOT_FOUND, ex.getMessage());
         problem.setType(URI.create("urn:problem-type:not-found"));
         return problem;
     }
@@ -90,9 +90,9 @@ public class GlobalExceptionHandler {
     // Handler #6: 422 — Vi phạm state machine (invalid state transition)
     // Trigger: Entity throw IllegalStateException qua advanceStatus(), Service re-throw
     @ExceptionHandler(IllegalStateException.class)
-    public ProblemDetail handleIllegalStateTransition(IllegalStateException ex) {
+    public ProblemDetail handleIllegalStateTransition(final IllegalStateException ex) {
         log.warn("Illegal state transition: {}", ex.getMessage());
-        ProblemDetail problem = ProblemDetail.forStatusAndDetail(HttpStatus.UNPROCESSABLE_ENTITY, ex.getMessage());
+        final ProblemDetail problem = ProblemDetail.forStatusAndDetail(HttpStatus.UNPROCESSABLE_ENTITY, ex.getMessage());
         problem.setType(URI.create("urn:problem-type:invalid-state-transition"));
         return problem;
     }
@@ -101,9 +101,9 @@ public class GlobalExceptionHandler {
     // Trigger: mọi Exception không khớp handler #1-#6
     // Response: message chung, KHÔNG lộ stack trace / SQL / class name
     @ExceptionHandler(Exception.class)
-    public ProblemDetail handleUnexpected(Exception ex) {
+    public ProblemDetail handleUnexpected(final Exception ex) {
         log.error("Unexpected error", ex); // full stacktrace CHỈ ở server log, KHÔNG trả về client
-        ProblemDetail problem = ProblemDetail.forStatusAndDetail(
+        final ProblemDetail problem = ProblemDetail.forStatusAndDetail(
             HttpStatus.INTERNAL_SERVER_ERROR, "An unexpected error occurred");
         problem.setType(URI.create("urn:problem-type:internal-error"));
         return problem;
