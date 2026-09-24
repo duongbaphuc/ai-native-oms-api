@@ -108,4 +108,37 @@ class WorkOrderTest {
             .isInstanceOf(IllegalStateException.class)
             .hasMessage("Invalid state transition from DONE to OPEN");
     }
+
+    @Test
+    @DisplayName("constructor rejects null equipmentId with NullPointerException")
+    void constructor_rejectsNullEquipmentId() {
+        assertThatThrownBy(() -> new WorkOrder(null, "Description", Priority.HIGH))
+            .isInstanceOf(NullPointerException.class)
+            .hasMessage("equipmentId must not be null");
+    }
+
+    @Test
+    @DisplayName("constructor rejects null description with NullPointerException")
+    void constructor_rejectsNullDescription() {
+        assertThatThrownBy(() -> new WorkOrder("EQ-01", null, Priority.HIGH))
+            .isInstanceOf(NullPointerException.class)
+            .hasMessage("description must not be null");
+    }
+
+    @Test
+    @DisplayName("constructor rejects null priority with NullPointerException")
+    void constructor_rejectsNullPriority() {
+        assertThatThrownBy(() -> new WorkOrder("EQ-01", "Description", null))
+            .isInstanceOf(NullPointerException.class)
+            .hasMessage("priority must not be null");
+    }
+
+    @Test
+    @DisplayName("advanceStatus rejects null next status with NullPointerException")
+    void advanceStatus_rejectsNullNextStatus() {
+        final WorkOrder wo = new WorkOrder("EQ-77", "Quá tải máy biến áp", Priority.HIGH);
+        assertThatThrownBy(() -> wo.advanceStatus(null))
+            .isInstanceOf(NullPointerException.class)
+            .hasMessage("newStatus must not be null");
+    }
 }

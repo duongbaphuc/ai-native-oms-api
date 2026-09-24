@@ -10,6 +10,7 @@ import com.gpc.oms.dto.WorkOrderRequest;
 import com.gpc.oms.dto.WorkOrderResponse;
 import com.gpc.oms.dto.WorkOrderStatusRequest;
 import com.gpc.oms.exception.ResourceNotFoundException;
+import com.gpc.oms.testutil.WorkOrderTestFixtures;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
@@ -48,11 +49,11 @@ class WorkOrderServiceTest {
         @Test
         @DisplayName("createWorkOrder saves entity and returns populated WorkOrderResponse")
         void createWorkOrder_success() {
-            WorkOrderRequest request = new WorkOrderRequest("EQ-100", "Faulty transformer", Priority.CRITICAL);
-            WorkOrder saved = new WorkOrder("EQ-100", "Faulty transformer", Priority.CRITICAL);
+            final WorkOrderRequest request = WorkOrderTestFixtures.createRequest("EQ-100", "Faulty transformer", Priority.CRITICAL);
+            final WorkOrder saved = WorkOrderTestFixtures.createEntity("EQ-100", "Faulty transformer", Priority.CRITICAL);
             when(repo.save(any(WorkOrder.class))).thenReturn(saved);
 
-            WorkOrderResponse response = service.createWorkOrder(request);
+            final WorkOrderResponse response = service.createWorkOrder(request);
 
             assertThat(response).isNotNull();
             assertThat(response.equipmentId()).isEqualTo("EQ-100");
@@ -70,12 +71,12 @@ class WorkOrderServiceTest {
         @Test
         @DisplayName("getWorkOrders with status != null delegates to repo.findByStatus()")
         void getWorkOrders_withStatusFilter_callsFindByStatus() {
-            Pageable pageable = PageRequest.of(0, 10);
-            WorkOrder wo = new WorkOrder("EQ-100", "Faulty transformer", Priority.CRITICAL);
-            Page<WorkOrder> page = new PageImpl<>(List.of(wo), pageable, 1);
+            final Pageable pageable = PageRequest.of(0, 10);
+            final WorkOrder wo = WorkOrderTestFixtures.createEntity("EQ-100", "Faulty transformer", Priority.CRITICAL);
+            final Page<WorkOrder> page = new PageImpl<>(List.of(wo), pageable, 1);
             when(repo.findByStatus(WorkOrderStatus.OPEN, pageable)).thenReturn(page);
 
-            PagedResponse<WorkOrderResponse> result = service.getWorkOrders(pageable, WorkOrderStatus.OPEN);
+            final PagedResponse<WorkOrderResponse> result = service.getWorkOrders(pageable, WorkOrderStatus.OPEN);
 
             assertThat(result.content()).hasSize(1);
             assertThat(result.content().get(0).equipmentId()).isEqualTo("EQ-100");
@@ -86,12 +87,12 @@ class WorkOrderServiceTest {
         @Test
         @DisplayName("getWorkOrders with status == null delegates to repo.findAll()")
         void getWorkOrders_withoutStatusFilter_callsFindAll() {
-            Pageable pageable = PageRequest.of(0, 10);
-            WorkOrder wo = new WorkOrder("EQ-200", "Line sagging", Priority.MEDIUM);
-            Page<WorkOrder> page = new PageImpl<>(List.of(wo), pageable, 1);
+            final Pageable pageable = PageRequest.of(0, 10);
+            final WorkOrder wo = WorkOrderTestFixtures.createEntity("EQ-200", "Line sagging", Priority.MEDIUM);
+            final Page<WorkOrder> page = new PageImpl<>(List.of(wo), pageable, 1);
             when(repo.findAll(pageable)).thenReturn(page);
 
-            PagedResponse<WorkOrderResponse> result = service.getWorkOrders(pageable, null);
+            final PagedResponse<WorkOrderResponse> result = service.getWorkOrders(pageable, null);
 
             assertThat(result.content()).hasSize(1);
             assertThat(result.content().get(0).equipmentId()).isEqualTo("EQ-200");
@@ -107,11 +108,11 @@ class WorkOrderServiceTest {
         @Test
         @DisplayName("getWorkOrderById when found returns mapped WorkOrderResponse")
         void getWorkOrderById_found_returnsResponse() {
-            UUID id = UUID.randomUUID();
-            WorkOrder wo = new WorkOrder("EQ-300", "Cable snapped", Priority.HIGH);
+            final UUID id = UUID.randomUUID();
+            final WorkOrder wo = WorkOrderTestFixtures.createEntity("EQ-300", "Cable snapped", Priority.HIGH);
             when(repo.findById(id)).thenReturn(Optional.of(wo));
 
-            WorkOrderResponse response = service.getWorkOrderById(id);
+            final WorkOrderResponse response = service.getWorkOrderById(id);
 
             assertThat(response).isNotNull();
             assertThat(response.equipmentId()).isEqualTo("EQ-300");
@@ -122,7 +123,7 @@ class WorkOrderServiceTest {
         @Test
         @DisplayName("getWorkOrderById when not found throws ResourceNotFoundException")
         void getWorkOrderById_notFound_throwsException() {
-            UUID id = UUID.randomUUID();
+            final UUID id = UUID.randomUUID();
             when(repo.findById(id)).thenReturn(Optional.empty());
 
             assertThatThrownBy(() -> service.getWorkOrderById(id))
@@ -140,13 +141,13 @@ class WorkOrderServiceTest {
         @Test
         @DisplayName("updateStatus with valid transition advances status, saves, and returns DTO")
         void updateStatus_validTransition_savesAndReturnsDto() {
-            UUID id = UUID.randomUUID();
-            WorkOrder wo = new WorkOrder("EQ-400", "Underground cable fault", Priority.HIGH);
+            final UUID id = UUID.randomUUID();
+            final WorkOrder wo = WorkOrderTestFixtures.createEntity("EQ-400", "Underground cable fault", Priority.HIGH);
             when(repo.findById(id)).thenReturn(Optional.of(wo));
             when(repo.save(wo)).thenReturn(wo);
 
-            WorkOrderStatusRequest req = new WorkOrderStatusRequest(WorkOrderStatus.IN_PROGRESS);
-            WorkOrderResponse response = service.updateStatus(id, req);
+            final WorkOrderStatusRequest req = WorkOrderTestFixtures.createStatusRequest(WorkOrderStatus.IN_PROGRESS);
+            final WorkOrderResponse response = service.updateStatus(id, req);
 
             assertThat(response).isNotNull();
             assertThat(response.status()).isEqualTo(WorkOrderStatus.IN_PROGRESS);
@@ -157,10 +158,10 @@ class WorkOrderServiceTest {
         @Test
         @DisplayName("updateStatus when work order does not exist throws ResourceNotFoundException")
         void updateStatus_notFound_throwsException() {
-            UUID id = UUID.randomUUID();
+            final UUID id = UUID.randomUUID();
             when(repo.findById(id)).thenReturn(Optional.empty());
 
-            WorkOrderStatusRequest req = new WorkOrderStatusRequest(WorkOrderStatus.IN_PROGRESS);
+            final WorkOrderStatusRequest req = WorkOrderTestFixtures.createStatusRequest(WorkOrderStatus.IN_PROGRESS);
             assertThatThrownBy(() -> service.updateStatus(id, req))
                 .isInstanceOf(ResourceNotFoundException.class)
                 .hasMessage("WorkOrder not found with id: " + id);
@@ -172,12 +173,12 @@ class WorkOrderServiceTest {
         @Test
         @DisplayName("updateStatus with invalid transition rethrows IllegalStateException")
         void updateStatus_invalidTransition_rethrowsIllegalStateException() {
-            UUID id = UUID.randomUUID();
-            WorkOrder wo = new WorkOrder("EQ-500", "Meter defect", Priority.LOW);
+            final UUID id = UUID.randomUUID();
+            final WorkOrder wo = WorkOrderTestFixtures.createEntity("EQ-500", "Meter defect", Priority.LOW);
             when(repo.findById(id)).thenReturn(Optional.of(wo));
 
             // Attempt OPEN -> DONE (invalid transition)
-            WorkOrderStatusRequest req = new WorkOrderStatusRequest(WorkOrderStatus.DONE);
+            final WorkOrderStatusRequest req = WorkOrderTestFixtures.createStatusRequest(WorkOrderStatus.DONE);
 
             assertThatThrownBy(() -> service.updateStatus(id, req))
                 .isInstanceOf(IllegalStateException.class)

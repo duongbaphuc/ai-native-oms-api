@@ -162,3 +162,35 @@ Khi hệ thống tích hợp với các dịch vụ bên ngoài (vd: Hệ thốn
    - **Khoảng trễ khởi điểm (Initial Interval):** `500ms`.
    - **Hệ số tăng (Multiplier):** `2.0` (Lần 1: 500ms, Lần 2: 1000ms, Lần 3: 2000ms).
    - **Độ trễ tối đa (Max Interval):** `3000ms`.
+
+---
+
+## 6. Modern Java 17 Idioms, JVM Performance & Code Reusability Guide
+
+### 6.1. Modern Java 17 Syntax Idioms
+1. **Compact Constructors for Records:** Sử dụng compact constructor `public RecordName { ... }` khi cần validate hoặc normalize dữ liệu đầu vào.
+2. **Enhanced Switch Expressions:** Sử dụng cú pháp arrow `->` trả về giá trị trực tiếp, loại trừ hoàn toàn câu lệnh `break` và lỗi fall-through.
+3. **Java Text Blocks:** Sử dụng `"""` cho multi-line templates (JSON RFC 7807 fallback, SQL scripts) thay vì phép cộng chuỗi `+`.
+
+### 6.2. JVM & GC Performance Optimization
+1. **Pre-sizing Collections:** Khi đã biết trước số lượng phần tử, bắt buộc khởi tạo với `initialCapacity` để triệt tiêu chi phí mảng co giãn (array resizing / copying):
+   - `List`: `new ArrayList<>(fieldErrors.size())`
+   - `Map`: `new HashMap<>((int) (expectedSize / 0.75f) + 1)`
+2. **JIT Escape Analysis:** Đặt từ khóa `final` cho 100% method parameters và immutable local variables để hỗ trợ JIT C2 Compiler thực hiện Scalar Replacement và Stack Allocation.
+3. **Fast-path Validation:** Sử dụng `Objects.requireNonNull(arg, "message")` tại đầu các constructors và public methods để bẫy lỗi sớm với chi phí CPU tối thiểu.
+4. **Tránh Enum Array Cloning:** `Enum.values()` tạo ra một mảng clone mới sau mỗi lần gọi. Trong các hàm chuyển đổi hot-path, cache mảng tĩnh: `private static final WorkOrderStatus[] VALUES = WorkOrderStatus.values();`.
+
+### 6.3. Code Reusability & DRY Principles
+1. **Centralized Problem Types (`ProblemTypes.java`):** Gom toàn bộ các URI định danh lỗi RFC 7807 (`urn:problem-type:...`) thành hằng số `public static final URI` dùng chung, loại bỏ magic strings và tối ưu hóa thời gian parse URI:
+   ```java
+   public final class ProblemTypes {
+       public static final URI VALIDATION_ERROR = URI.create("urn:problem-type:validation-error");
+       public static final URI MALFORMED_JSON = URI.create("urn:problem-type:malformed-json");
+       public static final URI UNAUTHORIZED = URI.create("urn:problem-type:unauthorized");
+       public static final URI FORBIDDEN = URI.create("urn:problem-type:forbidden");
+       public static final URI NOT_FOUND = URI.create("urn:problem-type:not-found");
+       public static final URI INVALID_STATE_TRANSITION = URI.create("urn:problem-type:invalid-state-transition");
+       public static final URI INTERNAL_ERROR = URI.create("urn:problem-type:internal-error");
+   }
+   ```
+2. **Object Mother / Test Fixture Pattern (`WorkOrderTestFixtures.java`):** Tái sử dụng việc khởi tạo thực thể và DTO mẫu trong toàn bộ tầng kiểm thử Unit & Integration Tests, triệt tiêu mã boilerplate lặp lại.

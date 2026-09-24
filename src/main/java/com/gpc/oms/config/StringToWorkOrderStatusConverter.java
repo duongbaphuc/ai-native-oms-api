@@ -8,12 +8,14 @@ import org.springframework.stereotype.Component;
 @Component
 public class StringToWorkOrderStatusConverter implements Converter<String, WorkOrderStatus> {
 
+    private static final WorkOrderStatus[] VALUES = WorkOrderStatus.values();
+
     @Override
-    public WorkOrderStatus convert(String source) {
+    public WorkOrderStatus convert(final String source) {
         if (source == null || source.isBlank()) {
             return null;
         }
-        for (WorkOrderStatus status : WorkOrderStatus.values()) {
+        for (final WorkOrderStatus status : VALUES) {
             if (status.name().equalsIgnoreCase(source) || status.getValue().equalsIgnoreCase(source)) {
                 return status;
             }
