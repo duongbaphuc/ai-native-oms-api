@@ -40,13 +40,13 @@ Dịch vụ **Outage Work Order API** là một microservice cốt lõi trong h�
 
 | Hạng mục | Công nghệ / Thư viện | Phiên bản | Ghi chú kỹ thuật |
 |---|---|---|---|
-| **Ngôn ngữ** | Java (OpenJDK / Temurin) | `17 LTS` | Sử dụng Records, Pattern Matching switch, Text Blocks |
+| **Ngôn ngữ** | Java (OpenJDK / Temurin) | `17 LTS` | Sử dụng Records, Pattern Matching switch, Text Blocks, Compact Constructors |
 | **Framework nền tảng** | Spring Boot | `3.3.4` | Bao gồm Web, Security, Data JPA, Validation |
 | **Cơ sở dữ liệu** | H2 Database Engine | `2.2.224` | Chế độ In-Memory, tương thích cú pháp PostgreSQL |
 | **Quản trị Schema** | Flyway Migration | `10.x` | Quản lý phiên bản migration tự động qua DDL |
 | **Bảo mật & Phân quyền** | Spring Security | `6.3.3` | HTTP Basic, Stateless Session, Method Security (`@PreAuthorize`) |
-| **Kiểm thử tự động** | JUnit 5 + Mockito + AssertJ | Latest Spring Boot | 71 automated test cases (Unit, Slice, Integration) |
-| **Đo lường Coverage** | JaCoCo Maven Plugin | `0.8.12` | Thực thi Quality Gate: **100% Line & 100% Branch Coverage** |
+| **Kiểm thử tự động** | JUnit 5 + Mockito + AssertJ | Latest Spring Boot | 86 automated test cases (Unit, Slice, Integration, Fixture-driven) |
+| **Đo lường Coverage** | JaCoCo Maven Plugin | `0.8.12` | Thực thi Quality Gate: **100% Line & 100% Branch Coverage** trên 12 monitored classes |
 | **Công cụ đóng gói** | Apache Maven | `3.8+` | Kèm theo Maven Wrapper (`mvnw.cmd` / `mvnw`) |
 
 ---
@@ -92,11 +92,11 @@ c:\ai-native-oms-api\src\main\java\com\gpc\oms
 ├── OmsApiApplication.java                   [Entry Point] Khởi động Spring Boot Application
 ├── config/
 │   ├── SecurityConfig.java                  [Security] Dual SecurityFilterChain (h2ConsoleChain !prod & filterChain), RFC 7807 401
-│   └── StringToWorkOrderStatusConverter.java [Converter] Web conversion chuỗi query param sang WorkOrderStatus Enum
+│   └── StringToWorkOrderStatusConverter.java [Converter] Web conversion chuỗi query param sang WorkOrderStatus Enum (kèm cache values array)
 ├── controller/
 │   └── WorkOrderController.java             [REST API] Tiếp nhận HTTP request, phân quyền @PreAuthorize
 ├── domain/
-│   ├── WorkOrder.java                       [Entity] Aggregate Root, bảo vệ bất biến & quản lý chuyển đổi trạng thái
+│   ├── WorkOrder.java                       [Entity] Aggregate Root, bảo vệ bất biến & quản lý chuyển đổi trạng thái với fast-path null-check
 │   ├── Priority.java                        [Enum] 4 mức độ ưu tiên (LOW, MEDIUM, HIGH, CRITICAL)
 │   ├── WorkOrderStatus.java                [Enum] 3 trạng thái (OPEN, IN_PROGRESS, DONE) & hàm canTransitionTo
 │   └── WorkOrderRepository.java             [Repository] Spring Data JPA interface tương tác với H2/PostgreSQL
@@ -106,11 +106,38 @@ c:\ai-native-oms-api\src\main\java\com\gpc\oms
 │   ├── WorkOrderResponse.java               [DTO] Immutable record trả về cho client với static factory mapper
 │   └── PagedResponse.java                   [DTO] Generic record bọc dữ liệu phân trang
 ├── exception/
-│   ├── GlobalExceptionHandler.java          [Advice] Bắt toàn bộ 7 nhóm ngoại lệ và chuyển hóa về RFC 7807 ProblemDetail
+│   ├── GlobalExceptionHandler.java          [Advice] Bắt toàn bộ 7 nhóm ngoại lệ và chuyển hóa về RFC 7807 ProblemDetail (pre-sized collections)
+│   ├── ProblemTypes.java                    [Constants] Tập trung hóa các URN RFC 7807 Problem Type URI (DRY, Zero Magic Strings, Zero Allocations)
 │   └── ResourceNotFoundException.java       [Exception] Ngoại lệ ném ra khi không tìm thấy UUID phiếu
 └── service/
     └── WorkOrderService.java                [Service] Transactional orchestration & logic miền ứng dụng
+
+c:\ai-native-oms-api\src\test\java\com\gpc\oms
+└── testutil/
+    └── WorkOrderTestFixtures.java           [Fixtures] Object Mother Pattern cung cấp static factory methods tạo mock entities & DTOs tái sử dụng
 ```
+
+### 2.3 Các Mẫu Thiết Kế (Design Patterns) & Chuẩn Mực Kỹ Thuật Áp Dụng
+Hệ thống tuân thủ nghiêm ngặt chuẩn mực thiết kế của **Senior Java Engineer tại Oracle** và các nguyên lý trong **Effective Java (Joshua Bloch)**:
+1. **Static Factory Method Pattern (Item 1, Effective Java):**
+   - Áp dụng trên các DTOs bất biến (`WorkOrderResponse.from(WorkOrder wo)`, `PagedResponse.from(Page<T> page)`).
+   - Đóng gói logic ánh xạ tường minh với kiểm tra fail-fast `Objects.requireNonNull()`, loại bỏ hoàn toàn các thư viện reflection mapping (`ModelMapper`) tốn tài nguyên.
+2. **State Pattern / Finite State Machine (DDD Domain Invariants):**
+   - Enum `WorkOrderStatus` định nghĩa tường minh ma trận chuyển trạng thái hợp lệ qua hàm `canTransitionTo(targetStatus)`.
+   - Domain Aggregate Root `WorkOrder.advanceStatus(newStatus)` thực thi chốt chặn bất biến nghiệp vụ, chỉ cho phép dòng chuyển dịch đơn hướng `OPEN` $\rightarrow$ `IN_PROGRESS` $\rightarrow$ `DONE` và ném `IllegalStateException` khi vi phạm.
+3. **Pure Immutable Records (Java 17 LTS):**
+   - 100% Request và Response DTOs sử dụng Java 17 `record`.
+   - Tự động sở hữu các đặc tính bất biến, `equals()`, `hashCode()`, `toString()` và Compact Constructors để kiểm tra ràng buộc đầu vào mà không cần mã thừa (Boilerplate-free).
+4. **Centralized Constants Pattern & DRY Principles:**
+   - Lớp `ProblemTypes` đóng gói toàn bộ các URN RFC 7807 (`URI` constants) dùng chung giữa `GlobalExceptionHandler`, Controller và `SecurityConfig`.
+   - Triệt tiêu 100% Magic Strings và loại bỏ chi phí phân tích chuỗi lặp lại qua `URI.create()`.
+5. **JVM Performance & GC Tuning Best Practices:**
+   - **Pre-sizing Collections:** Khởi tạo `ArrayList` với `initialCapacity` chính xác khi biết trước kích thước dữ liệu (`new ArrayList<>(fieldErrors.size())`), tránh mảng co dãn liên tục trong bộ nhớ Heap.
+   - **Array Caching:** Caching mảng `WorkOrderStatus.values()` tĩnh trong `StringToWorkOrderStatusConverter` để tránh chi phí clone mảng trên mỗi HTTP request.
+   - **JIT Escape Analysis Optimization:** Áp dụng từ khóa `final` cho 100% parameters và biến cục bộ để hỗ trợ trình biên dịch JIT tối ưu hóa Escape Analysis và Inline Caching.
+6. **Object Mother / Test Fixtures Pattern:**
+   - Xây dựng lớp tiện ích `WorkOrderTestFixtures` trong `src/test/java/com/gpc/oms/testutil/` cung cấp các static factory methods tạo đối tượng kiểm thử mẫu (`createDefaultWorkOrder()`, `createDefaultRequest()`, `createDoneWorkOrder()`).
+   - Giúp toàn bộ test suite có độ cô đọng cao (High Signal-to-Noise Ratio) và loại bỏ trùng lặp mã khởi tạo.
 
 ---
 
@@ -204,17 +231,18 @@ Khi có lỗi xảy ra, hệ thống trả về HTTP Body dạng JSON theo chu�
 ```
 
 #### Ma Trận Mã Lỗi Hệ Thống (RFC 7807 Error Catalog)
+Toàn bộ các URN định danh loại lỗi được quản lý tập trung dưới dạng hằng số `java.net.URI` bất biến tại lớp [`ProblemTypes.java`](file:///c:/ai-native-oms-api/src/main/java/com/gpc/oms/exception/ProblemTypes.java):
 
-| HTTP Status | Problem Type URN | Title / Mô Tả Khi Xảy Ra Lỗi | Handler Phụ Trách |
-|---|---|---|---|
-| `400 Bad Request` | `urn:problem-type:validation-error` | Validation Failed (thiếu trường bắt buộc hoặc vi phạm độ dài `@Valid`) | `handleValidationErrors` |
-| `400 Bad Request` | `urn:problem-type:malformed-json` | Malformed Request Body (JSON sai cú pháp, giá trị enum không hợp lệ) | `handleMalformedJson` |
-| `400 Bad Request` | `urn:problem-type:validation-error` | Validation Failed (Query param hoặc path param sai kiểu dữ liệu) | `handleQueryParamTypeMismatch` |
-| `401 Unauthorized` | `urn:problem-type:unauthorized` | Unauthorized (Thiếu hoặc sai thông tin xác thực) | `CustomAuthenticationEntryPoint` |
-| `403 Forbidden` | `urn:problem-type:forbidden` | Access Denied (Tài khoản không có quyền hạn phù hợp trong RBAC) | `handleAccessDenied` |
-| `404 Not Found` | `urn:problem-type:not-found` | Resource Not Found (Phiếu công tác không tồn tại với ID chỉ định) | `handleResourceNotFound` |
-| `422 Unprocessable Entity` | `urn:problem-type:invalid-state-transition` | Illegal State Transition (Vi phạm quy tắc máy trạng thái một chiều) | `handleIllegalStateTransition` |
-| `500 Internal Server Error` | `urn:problem-type:internal-error` | An unexpected error occurred (Lỗi hệ thống bất khả kháng, che giấu stacktrace) | `handleUnexpected` |
+| HTTP Status | Problem Type URN | Hằng Số `ProblemTypes` | Title / Mô Tả Khi Xảy Ra Lỗi | Handler Phụ Trách |
+|---|---|---|---|---|
+| `400 Bad Request` | `urn:problem-type:validation-error` | `ProblemTypes.VALIDATION_ERROR` | Validation Failed (thiếu trường bắt buộc hoặc vi phạm độ dài `@Valid`) | `handleValidationErrors` |
+| `400 Bad Request` | `urn:problem-type:malformed-json` | `ProblemTypes.MALFORMED_JSON` | Malformed Request Body (JSON sai cú pháp, giá trị enum không hợp lệ) | `handleMalformedJson` |
+| `400 Bad Request` | `urn:problem-type:validation-error` | `ProblemTypes.VALIDATION_ERROR` | Validation Failed (Query param hoặc path param sai kiểu dữ liệu) | `handleQueryParamTypeMismatch` |
+| `401 Unauthorized` | `urn:problem-type:unauthorized` | `ProblemTypes.UNAUTHORIZED` | Unauthorized (Thiếu hoặc sai thông tin xác thực) | `CustomAuthenticationEntryPoint` |
+| `403 Forbidden` | `urn:problem-type:forbidden` | `ProblemTypes.FORBIDDEN` | Access Denied (Tài khoản không có quyền hạn phù hợp trong RBAC) | `handleAccessDenied` |
+| `404 Not Found` | `urn:problem-type:not-found` | `ProblemTypes.NOT_FOUND` | Resource Not Found (Phiếu công tác không tồn tại với ID chỉ định) | `handleResourceNotFound` |
+| `422 Unprocessable Entity` | `urn:problem-type:invalid-state-transition` | `ProblemTypes.INVALID_STATE_TRANSITION` | Illegal State Transition (Vi phạm quy tắc máy trạng thái một chiều) | `handleIllegalStateTransition` |
+| `500 Internal Server Error` | `urn:problem-type:internal-error` | `ProblemTypes.INTERNAL_ERROR` | An unexpected error occurred (Lỗi hệ thống bất khả kháng, che giấu stacktrace) | `handleUnexpected` |
 
 ---
 
@@ -286,7 +314,7 @@ Toàn bộ 03 phát hiện mức Major/P0 đã được đội ngũ kỹ sư x�
 # 1. Làm sạch và biên dịch mã nguồn
 mvn clean compile
 
-# 2. Chạy toàn bộ 78 automated tests
+# 2. Chạy toàn bộ 86 automated tests
 mvn test
 
 # 3. Chạy kiểm tra toàn diện, build package và thẩm định JaCoCo Quality Gate (100% Coverage)
@@ -349,7 +377,7 @@ curl -X PATCH http://localhost:8080/api/v1/workorders/{WORK_ORDER_ID}/status \
 ## 7. HỒ SƠ CHẤT LƯỢNG & BÁO CÁO KIỂM THỬ TỰ ĐỘNG
 
 ### 7.1 Kim Tự Tháp Kiểm Thử (Testing Pyramid)
-Toàn bộ mã nguồn được bảo vệ bởi **78 bài kiểm thử tự động**, phân chia theo các tầng chuyên biệt của Testing Pyramid, đạt tỷ lệ thành công 100% (78/78 Green):
+Toàn bộ mã nguồn được bảo vệ bởi **86 bài kiểm thử tự động**, phân chia theo các tầng chuyên biệt của Testing Pyramid, đạt tỷ lệ thành công 100% (86/86 Green):
 
 ```
                           ▲
@@ -359,19 +387,20 @@ Toàn bộ mã nguồn được bảo vệ bởi **78 bài kiểm thử tự đ�
                       / Slice \   WorkOrderControllerTest (15 tests)
                      /  Tests  \  WorkOrderRepositoryTest (4 tests)
                     /-----------\ H2Console Security Tests (2 tests)
-                   / Unit Tests  \ WorkOrderTest (8), WorkOrderStatusTest (11), PriorityTest (2)
-                  /_______________\ DtoMappingTest (10), WorkOrderServiceTest (8), Exception Tests (7), Config (4)
+                   / Unit Tests  \ WorkOrderTest (12), WorkOrderStatusTest (11), PriorityTest (2)
+                  /_______________\ DtoMappingTest (12), WorkOrderServiceTest (8), Exception Tests (9), Config (3)
 ```
 
 | Tên Lớp Kiểm Thử | Tầng Kiểm Thử | Số Ca Test | Trạng Thái |
 |---|---|---|---|
-| `WorkOrderTest` | Domain Unit Test | 8 | PASS (100%) |
+| `WorkOrderTest` | Domain Unit Test | 12 | PASS (100%) |
 | `WorkOrderStatusTest` | State Machine Unit Test (3x3 transition matrix) | 11 | PASS (100%) |
 | `PriorityTest` | Domain Enum Unit Test | 2 | PASS (100%) |
-| `DtoMappingTest` | DTO Record & Factory Mapper Test | 10 | PASS (100%) |
+| `DtoMappingTest` | DTO Record & Factory Mapper Test | 12 | PASS (100%) |
 | `ResourceNotFoundExceptionTest` | Exception Class Unit Test | 1 | PASS (100%) |
+| `ProblemTypesTest` | RFC 7807 Constants & Reflection Unit Test | 2 | PASS (100%) |
 | `StringToWorkOrderStatusConverterTest` | Web Config Converter Test | 3 | PASS (100%) |
-| `WorkOrderServiceTest` | Service Unit Test (Mockito) | 8 | PASS (100%) |
+| `WorkOrderServiceTest` | Service Unit Test (Mockito + Fixtures) | 8 | PASS (100%) |
 | `GlobalExceptionHandlerUnitTest` | Exception Advice Direct Unit Test | 6 | PASS (100%) |
 | `WorkOrderControllerTest` | Web Slice Test (`@WebMvcTest`) | 15 | PASS (100%) |
 | `WorkOrderRepositoryTest` | Persistence Slice Test (`@DataJpaTest`) | 4 | PASS (100%) |
@@ -379,7 +408,7 @@ Toàn bộ mã nguồn được bảo vệ bởi **78 bài kiểm thử tự đ�
 | `H2ConsoleProdAccessTest` | Security Slice Test (`prod` admin authorization) | 1 | PASS (100%) |
 | `OmsApiApplicationTests` | Spring Context Bootstrap Test | 1 | PASS (100%) |
 | `WorkOrderIntegrationTest` | End-to-End Integration Test (`@SpringBootTest`) | 7 | PASS (100%) |
-| **TỔNG CỘNG** | **Toàn bộ kim tự tháp kiểm thử** | **78** | **78/78 PASS (0 Failures, 0 Errors, 0 Skipped)** |
+| **TỔNG CỘNG** | **Toàn bộ kim tự tháp kiểm thử** | **86** | **86/86 PASS (0 Failures, 0 Errors, 0 Skipped)** |
 
 ### 7.2 Báo Cáo Đo Lường Độ Bao Phủ JaCoCo (JaCoCo Coverage Metrics)
 Dự án tích hợp cấu hình chốt chặn chất lượng (Quality Gate) nghiêm ngặt trong `pom.xml`. Mỗi khi thực hiện `mvn verify`, mã nguồn phải đạt:
@@ -388,16 +417,16 @@ Dự án tích hợp cấu hình chốt chặn chất lượng (Quality Gate) ng
 
 Vị trí báo cáo chi tiết: `target/site/jacoco/index.html`.
 
-#### Chi Tiết Đo Lường Từng Package Nghiệp Vụ Cốt Lõi (11 Classes)
+#### Chi Tiết Đo Lường Từng Package Nghiệp Vụ Cốt Lõi (12 Classes)
 
 | Package | Số Lớp | Methods | Lines | Branches | Instructions | Độ Bao Phủ |
 |---|---|---|---|---|---|---|
-| `com.gpc.oms.domain` | 3 | 15 | 38/38 | 11/11 | 149/149 | **100.0%** |
+| `com.gpc.oms.exception` | 3 | 11 | 50/50 | 4/4 | 191/191 | **100.0%** |
+| `com.gpc.oms.domain` | 3 | 15 | 39/39 | 11/11 | 162/162 | **100.0%** |
+| `com.gpc.oms.dto` | 4 | 6 | 22/22 | n/a | 110/110 | **100.0%** |
 | `com.gpc.oms.service` | 1 | 8 | 24/24 | 2/2 | 109/109 | **100.0%** |
 | `com.gpc.oms.controller` | 1 | 6 | 17/17 | n/a | 87/87 | **100.0%** |
-| `com.gpc.oms.dto` | 4 | 6 | 20/20 | n/a | 102/102 | **100.0%** |
-| `com.gpc.oms.exception` | 2 | 11 | 42/42 | 2/2 | 159/159 | **100.0%** |
-| **TỔNG HỢP TOÀN DỰ ÁN** | **11** | **46** | **141/141 (100%)** | **15/15 (100%)** | **606/606 (100%)** | **100.0% (PERFECT)** |
+| **TỔNG HỢP TOÀN DỰ ÁN** | **12** | **46** | **152/152 (100%)** | **17/17 (100%)** | **659/659 (100%)** | **100.0% (PERFECT)** |
 
 ---
 
@@ -464,8 +493,8 @@ Khi cần mở rộng thêm thực thể hoặc endpoint mới:
 | Tiêu Chí Nghiệm Thu | Kết Quả Đánh Giá | Tình Trạng |
 |---|---|---|
 | Mã nguồn biên dịch thành công không cảnh báo | `BUILD SUCCESS` | [x] ĐẠT |
-| Toàn bộ 78 automated test cases thực thi thành công | 78 Passed, 0 Failed, 0 Skipped | [x] ĐẠT |
-| JaCoCo Line và Branch Coverage đạt ngưỡng quy định | 100% Line, 100% Branch | [x] ĐẠT |
+| Toàn bộ 86 automated test cases thực thi thành công | 86 Passed, 0 Failed, 0 Skipped | [x] ĐẠT |
+| JaCoCo Line và Branch Coverage đạt ngưỡng quy định | 100% Line, 100% Branch (12/12 classes) | [x] ĐẠT |
 | Cấu trúc bảng và chỉ mục DB đồng bộ qua Flyway | Schema V1 khởi tạo chính xác | [x] ĐẠT |
 | Giao diện Test Console hoạt động mượt mà trên browser | Đã kiểm chứng tại `http://localhost:8080/` | [x] ĐẠT |
 | Tài liệu bàn giao đầy đủ chi tiết, không còn placeholder | Hoàn tất tại `docs/SYSTEM_HANDOVER.md` | [x] ĐẠT |
