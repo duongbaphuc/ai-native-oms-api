@@ -24,6 +24,7 @@ class WorkOrderTest {
     @Test
     void advanceStatus_rejectsSkip_openToDone() {
         WorkOrder wo = new WorkOrder("EQ-77", "Quá tải", Priority.HIGH);
+        // OPEN → DONE (skip IN_PROGRESS) — PHẢI bị cấm
         assertThrows(IllegalStateException.class, () -> wo.advanceStatus(WorkOrderStatus.DONE));
     }
 
@@ -32,6 +33,7 @@ class WorkOrderTest {
         WorkOrder wo = new WorkOrder("EQ-77", "Quá tải", Priority.HIGH);
         wo.advanceStatus(WorkOrderStatus.IN_PROGRESS);
         wo.advanceStatus(WorkOrderStatus.DONE);
+        // DONE → IN_PROGRESS (rollback) — PHẢI bị cấm
         assertThrows(IllegalStateException.class, () -> wo.advanceStatus(WorkOrderStatus.IN_PROGRESS));
     }
 
@@ -39,6 +41,7 @@ class WorkOrderTest {
     void advanceStatus_rejectsRollback_inProgressToOpen() {
         WorkOrder wo = new WorkOrder("EQ-77", "Quá tải", Priority.HIGH);
         wo.advanceStatus(WorkOrderStatus.IN_PROGRESS);
+        // IN_PROGRESS → OPEN (rollback) — PHẢI bị cấm
         assertThrows(IllegalStateException.class, () -> wo.advanceStatus(WorkOrderStatus.OPEN));
     }
 

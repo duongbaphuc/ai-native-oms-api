@@ -11,24 +11,25 @@ public class WorkOrder {
     @Id
     @GeneratedValue(strategy = GenerationType.UUID)
     private UUID id;
-
+    
     @Column(nullable = false, length = 50)
     private String equipmentId;
-
+    
     @Column(nullable = false, length = 500)
     private String description;
-
+    
     @Enumerated(EnumType.STRING)
-    @Column(nullable = false)
+    @Column(nullable = false, length = 20)
     private Priority priority;
-
+    
     @Enumerated(EnumType.STRING)
-    @Column(nullable = false)
+    @Column(nullable = false, length = 20)
     private WorkOrderStatus status;
-
-    @Column(nullable = false)
+    
+    @Column(nullable = false, updatable = false)
     private Instant createdAt;
-
+    
+    @Column(nullable = true)
     private Instant resolvedAt;
 
     protected WorkOrder() {} // JPA only — không gọi từ application code
@@ -40,7 +41,7 @@ public class WorkOrder {
         this.status = WorkOrderStatus.OPEN;
         this.createdAt = Instant.now();
     }
-
+    
     // --- Getters (manual, không dùng Lombok — theo coding-rules.md) ---
     public UUID getId() { return id; }
     public String getEquipmentId() { return equipmentId; }
@@ -49,7 +50,7 @@ public class WorkOrder {
     public WorkOrderStatus getStatus() { return status; }
     public Instant getCreatedAt() { return createdAt; }
     public Instant getResolvedAt() { return resolvedAt; }
-
+    
     /**
      * Chuyển trạng thái theo quy tắc bất biến (one-way state machine).
      * Delegate validation sang WorkOrderStatus.canTransitionTo().

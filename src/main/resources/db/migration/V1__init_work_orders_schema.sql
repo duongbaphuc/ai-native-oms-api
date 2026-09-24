@@ -16,9 +16,9 @@ CREATE TABLE IF NOT EXISTS work_orders (
 );
 
 -- Chỉ mục hỗ trợ truy vấn lọc theo trạng thái và sắp xếp thời gian tạo
-CREATE INDEX IF NOT EXISTS idx_work_orders_status_created_at
+CREATE INDEX IF NOT EXISTS idx_work_orders_status_created_at 
     ON work_orders (status, created_at DESC);
 
 -- Chỉ mục hỗ trợ tra cứu lịch sử sự cố theo mã thiết bị
-CREATE INDEX IF NOT EXISTS idx_work_orders_equipment_id
+CREATE INDEX IF NOT EXISTS idx_work_orders_equipment_id 
     ON work_orders (equipment_id);

@@ -15,7 +15,7 @@ public record WorkOrderRequest(
     String equipmentId,
 
     @NotBlank(message = "description must not be blank")
-    @Size(max = 500, message = "description must not exceed 500 characters")
+    @Size(min = 10, max = 500, message = "description must be between 10 and 500 characters")
     String description,
 
     @NotNull(message = "priority must not be null; valid values: LOW, MEDIUM, HIGH, CRITICAL")

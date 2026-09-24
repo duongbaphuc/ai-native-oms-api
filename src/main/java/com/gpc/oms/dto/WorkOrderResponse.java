@@ -9,13 +9,13 @@ import java.time.Instant;
 import java.util.UUID;
 
 public record WorkOrderResponse(
-    UUID id,
-    String equipmentId,
-    String description,
-    Priority priority,
-    WorkOrderStatus status,
-    Instant createdAt,
-    Instant resolvedAt // null cho đến khi status = DONE
+    UUID             id,
+    String           equipmentId,
+    String           description,
+    Priority         priority,
+    WorkOrderStatus  status,
+    Instant          createdAt,
+    Instant          resolvedAt   // null cho đến khi status = DONE
 ) {
 
     /**

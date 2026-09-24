@@ -10,10 +10,14 @@ public enum WorkOrderStatus {
 
     private final String value;
 
-    WorkOrderStatus(String value) { this.value = value; }
+    WorkOrderStatus(String value) {
+        this.value = value;
+    }
 
     @JsonValue
-    public String getValue() { return value; }
+    public String getValue() {
+        return value;
+    }
 
     /**
      * Kiểm tra tính hợp lệ của chuyển trạng thái.
@@ -21,9 +25,9 @@ public enum WorkOrderStatus {
      */
     public boolean canTransitionTo(WorkOrderStatus next) {
         return switch (this) {
-            case OPEN -> next == IN_PROGRESS;
+            case OPEN        -> next == IN_PROGRESS;
             case IN_PROGRESS -> next == DONE;
-            case DONE -> false; // terminal — không có chuyển tiếp nào hợp lệ
+            case DONE        -> false; // terminal — không có chuyển tiếp nào hợp lệ
         };
     }
 }
