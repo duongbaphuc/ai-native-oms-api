@@ -32,9 +32,28 @@ public final class CsvTotals {
     private CsvTotals() {
     }
 
+    /**
+     * Summary totals for an order CSV.
+     *
+     * <p>All three values are {@link BigDecimal} at scale 2 with
+     * {@link RoundingMode#HALF_UP} rounding applied once over the full-precision
+     * accumulation (per-line values are not rounded before summing).
+     *
+     * @param goods total of quantity times unit_price over all data rows
+     * @param vat total value-added tax over all data rows
+     * @param payable goods plus vat
+     */
     public record Totals(BigDecimal goods, BigDecimal vat, BigDecimal payable) {
     }
 
+    /**
+     * Scans the header row of CSV text.
+     *
+     * @param csv UTF-8 CSV text whose first non-blank row is the header;
+     *            a leading BOM is stripped and every cell is trimmed
+     * @return header names in file order after trimming
+     * @throws IllegalArgumentException on empty input or duplicate headers
+     */
     public static List<String> scanHeaders(String csv) {
         if (csv == null || csv.strip().isEmpty()) {
             throw new IllegalArgumentException("Empty CSV input");
@@ -61,6 +80,16 @@ public final class CsvTotals {
         }
     }
 
+    /**
+     * Scans the header row of a CSV file.
+     *
+     * <p>String-vs-Path identical: same trimmed header list as
+     * {@link #scanHeaders(String)} for the same bytes.
+     *
+     * @param csv path to a UTF-8 CSV file whose first non-blank row is the header
+     * @return header names in file order after trimming
+     * @throws IllegalArgumentException on empty input, duplicate headers, or unreadable file
+     */
     public static List<String> scanHeaders(Path csv) {
         if (csv == null) {
             throw new IllegalArgumentException("CSV path must not be null");
@@ -89,14 +118,56 @@ public final class CsvTotals {
         }
     }
 
+    /**
+     * Calculates totals from CSV text.
+     *
+     * @param csv UTF-8 CSV text; must contain a header row plus at least one data row
+     * @param mapping logical-to-header map for product, quantity, unit_price, vat_rate;
+     *            {@code null} or empty means identity defaults per D-01
+     *            (product to product, quantity to quantity, unit_price to unit_price,
+     *            vat_rate to vat_rate); a partial map throws
+     * @return summary {@link Totals}; no file is written
+     * @throws IllegalArgumentException with {@code Row N} messages per D-09
+     *             (physical line number, header is line 1) for any bad row,
+     *             and D-12 VAT auto-percent applies (values greater than 1 read as percent)
+     */
     public static Totals calculate(String csv, Map<String, String> mapping) {
         return calculate(csv, mapping, null);
     }
 
+    /**
+     * Calculates totals from a CSV file.
+     *
+     * <p>String-vs-Path identical: same {@link Totals} and same
+     * {@code IllegalArgumentException} type and message as
+     * {@link #calculate(String, Map)} for the same input.
+     *
+     * @param csv path to a UTF-8 CSV file; streamed line-by-line, never fully loaded
+     * @param mapping logical-to-header map; {@code null} or empty means identity defaults
+     * @return summary {@link Totals}; no file is written
+     * @throws IllegalArgumentException with {@code Row N} messages per D-09;
+     *             D-12 VAT auto-percent applies
+     */
     public static Totals calculate(Path csv, Map<String, String> mapping) {
         return calculate(csv, mapping, null);
     }
 
+    /**
+     * Calculates totals from CSV text and writes the result CSV file.
+     *
+     * @param csv UTF-8 CSV text; must contain a header row plus at least one data row
+     * @param mapping logical-to-header map; {@code null} or empty means identity defaults
+     * @param csvOut target path for the result file, or {@code null} for no side output;
+     *            per D-20 an existing file is overwritten, parent dirs are created,
+     *            output is UTF-8 with trailing newline; a parentless relative path is allowed
+     * @return summary {@link Totals}
+     * @throws IllegalArgumentException with {@code Row N} messages per D-09;
+     *             D-12 VAT auto-percent applies; result rows carry
+     *             {@code line_total,vat_amount,payable} plus a trailing TOTAL row.
+     *             Known limitation: cells starting with {@code =}, {@code +},
+     *             {@code -} or {@code @} are written as-is and Excel may interpret
+     *             them as formulas on reopen (no defuse logic in v1.1)
+     */
     public static Totals calculate(String csv, Map<String, String> mapping, Path csvOut) {
         if (csv == null || csv.strip().isEmpty()) {
             throw new IllegalArgumentException("Empty CSV input");
@@ -109,6 +180,23 @@ public final class CsvTotals {
         }
     }
 
+    /**
+     * Calculates totals from a CSV file and writes the result CSV file.
+     *
+     * <p>String-vs-Path identical: same {@link Totals}, same
+     * {@code IllegalArgumentException} type and message, and byte-identical
+     * result file as {@link #calculate(String, Map, Path)} for the same input.
+     *
+     * @param csv path to a UTF-8 CSV file; streamed line-by-line, never fully loaded
+     * @param mapping logical-to-header map; {@code null} or empty means identity defaults
+     * @param csvOut target path for the result file, or {@code null} for no side output;
+     *            per D-20 an existing file is overwritten, parent dirs are created,
+     *            output is UTF-8 with trailing newline; a parentless relative path is allowed
+     * @return summary {@link Totals}
+     * @throws IllegalArgumentException with {@code Row N} messages per D-09;
+     *             D-12 VAT auto-percent applies. Known limitation: formula-injection
+     *             cells are written as-is (see above), no defuse logic in v1.1
+     */
     public static Totals calculate(Path csv, Map<String, String> mapping, Path csvOut) {
         if (csv == null) {
             throw new IllegalArgumentException("CSV path must not be null");

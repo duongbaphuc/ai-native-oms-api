@@ -110,3 +110,18 @@ TOTAL,,,,,25.00,2.50,27.50
 
 - Ô product có literal `TOTAL` sẽ không phân biệt được với dòng tổng trong file kết quả.
 - Formula injection khi mở lại bằng Excel: ô product bắt đầu bằng `=`, `+`, `-`, `@` (ví dụ `=CMD(...)`) sẽ bị Excel diễn giải thành công thức khi mở file. v1.1 chỉ document, không thêm logic defuse; caller cần cảnh giác khi mở file kết quả bằng spreadsheet.
+
+### Ma trận String-vs-Path (String-vs-Path parity matrix)
+
+Đã chứng minh bằng parity harness (Phase 2): cùng input thì 6 overload cho kết quả đồng nhất.
+
+| Cặp overload | So sánh | Kết quả |
+|---|---|---|
+| `scanHeaders(String)` vs `scanHeaders(Path)` | header list | identical |
+| `calculate(String, mapping)` vs `calculate(Path, mapping)` | `Totals` | identical |
+| `calculate(String, mapping, csvOut)` vs `calculate(Path, mapping, csvOut)` | file bytes (BOM strip, trim, quote escape, TOTAL row, trailing newline) | identical |
+| bad input cả 2 phía | exception type + message | identical `IllegalArgumentException` |
+
+### Zero-dep (PKG-01)
+
+Lib chỉ dùng JDK (`java.io`, `java.math`, `java.nio`, `java.util`), không import Spring, không thêm entry nào vào `pom.xml` dependencies so với `origin/main`.
