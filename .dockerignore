@@ -1,0 +1,31 @@
+# Git & VCS
+.git
+.gitignore
+.gitattributes
+
+# GitHub & IDE Configurations
+.github
+.vscode
+.idea
+*.iml
+*.swp
+
+# Build Artifacts & Logs
+target/
+*.log
+
+# Documentation & Specifications
+docs/
+*.md
+CONTRIBUTING.md
+README.md
+
+# Scripts & Other Projects
+scripts/
+csv-order-processor/
+
+# Environment Secrets
+*.env
+*.pem
+*.key
+*.p12
