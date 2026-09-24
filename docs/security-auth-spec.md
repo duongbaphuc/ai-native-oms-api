@@ -3,6 +3,11 @@ Role: Principal Security Architect & DevSecOps Engineer
 Task: Define SecurityFilterChain, JWT Claims Schema, RBAC Matrix, Rate Limiting, and Testing Context
 Context files: docs/security-rules.md, docs/api-rules.md, docs/coding-rules.md, docs/api-spec.md
 Constraints: Spring Security 6.x (Spring Boot 3.3), Stateless REST, RFC 7807 for 401/403, zero-trust perimeter
+Target Files:
+- src/main/java/com/gpc/oms/config/SecurityConfig.java
+- src/main/java/com/gpc/oms/config/JwtAuthenticationConverter.java
+- src/main/java/com/gpc/oms/security/CustomAuthenticationEntryPoint.java
+- src/main/java/com/gpc/oms/security/CustomAccessDeniedHandler.java
 -->
 # Security, Authentication & Authorization Specification
 

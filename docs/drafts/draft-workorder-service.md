@@ -49,19 +49,20 @@ Entity (state machine, domain rules)
 |---|---|---|
 | `@Valid` fail | Controller + `GlobalExceptionHandler` | 400 |
 | Auth fail | Spring Security + `GlobalExceptionHandler` | 403 |
+| ID not found | Service throws `ResourceNotFoundException` → `GlobalExceptionHandler` | 404 |
 | DB error | `GlobalExceptionHandler` (fallback 500) | 500 |
 
 ---
 
-## Method 2: `getAllWorkOrders() → List<WorkOrderResponse>`
+## Method 2: `getWorkOrders(Pageable pageable, WorkOrderStatus status) → PagedResponse<WorkOrderResponse>`
 
 ### Step-by-step Logic
-1. Gọi `repo.findAll()`
-2. Map mỗi entity sang DTO: `.stream().map(WorkOrderResponse::from).toList()`
-3. Return list
-
-> [!WARNING]
-> `findAll()` không có pagination. Nếu table > 10K rows, cần thêm `Pageable` param. Quyết định cần xác nhận với PO.
+1. Kiểm tra tham số lọc trạng thái:
+   - Nếu `status != null` → gọi `repo.findByStatus(status, pageable)`
+   - Nếu `status == null` → gọi `repo.findAll(pageable)`
+2. Ánh xạ từng entity sang DTO qua `page.map(WorkOrderResponse::from)`
+3. Đóng gói kết quả phân trang qua `PagedResponse.from(pageDto)`
+4. Return `PagedResponse<WorkOrderResponse>`
 
 ---
 
@@ -69,14 +70,14 @@ Entity (state machine, domain rules)
 
 ### Step-by-step Logic
 1. Gọi `repo.findById(id)`
-2. Nếu `Optional.empty()` → `throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Work Order Not Found")`
+2. Nếu `Optional.empty()` → `throw new ResourceNotFoundException("WorkOrder not found with id: " + id)`
 3. Convert entity sang DTO: `WorkOrderResponse.from(entity)`
 4. Return DTO
 
 ### Error Mapping
 | Điều kiện | HTTP | RFC 7807 type |
 |---|---|---|
-| ID không tồn tại | 404 | `.../errors/not-found` |
+| ID không tồn tại | 404 | `urn:problem-type:not-found` |
 
 ---
 
@@ -84,39 +85,41 @@ Entity (state machine, domain rules)
 
 ### Step-by-step Logic
 1. Gọi `repo.findById(id)`
-2. Nếu `Optional.empty()` → `throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Work Order Not Found")`
+2. Nếu `Optional.empty()` → `throw new ResourceNotFoundException("WorkOrder not found with id: " + id)`
 3. Gọi `entity.advanceStatus(req.status())` — delegate state machine check sang Entity
-4. Nếu `IllegalStateException` bị throw → catch và wrap thành `ResponseStatusException(HttpStatus.UNPROCESSABLE_ENTITY, ex.getMessage())`
+4. Nếu `IllegalStateException` bị throw → re-throw trực tiếp để `GlobalExceptionHandler` map thành HTTP 422
 5. Persist updated entity: `repo.save(entity)`
 6. Convert sang DTO: `WorkOrderResponse.from(saved)`
 7. Return DTO
 
 ### Error Mapping
-| Điều kiện | HTTP | RFC 7807 type |
+| Condition | HTTP | RFC 7807 type |
 |---|---|---|
-| ID không tồn tại | 404 | `.../errors/not-found` |
-| State transition vi phạm (skip/rollback) | 422 | `.../errors/invalid-state-transition` |
+| ID không tồn tại | 404 | `urn:problem-type:not-found` |
+| State transition vi phạm (skip/rollback) | 422 | `urn:problem-type:invalid-state-transition` |
 
 ---
 
 ## Service Code
 
 ```java
-// AI Provenance: generated from docs/coding-rules.md, docs/api-rules.md, docs/domain-model.md
+// AI Provenance: generated from docs/coding-rules.md, docs/api-rules.md, docs/domain-model.md, docs/internal-coding-standards.md
 package com.gpc.oms.service;
 
 import com.gpc.oms.domain.WorkOrder;
 import com.gpc.oms.domain.WorkOrderRepository;
+import com.gpc.oms.domain.WorkOrderStatus;
+import com.gpc.oms.dto.PagedResponse;
 import com.gpc.oms.dto.WorkOrderRequest;
 import com.gpc.oms.dto.WorkOrderResponse;
 import com.gpc.oms.dto.WorkOrderStatusRequest;
+import com.gpc.oms.exception.ResourceNotFoundException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.http.HttpStatus;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
-import org.springframework.web.server.ResponseStatusException;
 
-import java.util.List;
 import java.util.UUID;
 
 @Service
@@ -135,26 +138,27 @@ public class WorkOrderService {
         return WorkOrderResponse.from(saved);
     }
 
-    public List<WorkOrderResponse> getAllWorkOrders() {
-        return repo.findAll().stream()
-                .map(WorkOrderResponse::from)
-                .toList();
+    public PagedResponse<WorkOrderResponse> getWorkOrders(Pageable pageable, WorkOrderStatus status) {
+        Page<WorkOrder> page = (status != null)
+                ? repo.findByStatus(status, pageable)
+                : repo.findAll(pageable);
+        return PagedResponse.from(page.map(WorkOrderResponse::from));
     }
 
     public WorkOrderResponse getWorkOrderById(UUID id) {
         WorkOrder entity = repo.findById(id)
-                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Work Order Not Found"));
+                .orElseThrow(() -> new ResourceNotFoundException("WorkOrder not found with id: " + id));
         return WorkOrderResponse.from(entity);
     }
 
     public WorkOrderResponse updateStatus(UUID id, WorkOrderStatusRequest req) {
         WorkOrder entity = repo.findById(id)
-                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Work Order Not Found"));
+                .orElseThrow(() -> new ResourceNotFoundException("WorkOrder not found with id: " + id));
 
         try {
             entity.advanceStatus(req.status());
         } catch (IllegalStateException ex) {
-            throw new ResponseStatusException(HttpStatus.UNPROCESSABLE_ENTITY, ex.getMessage());
+            throw ex; // Re-throw — GlobalExceptionHandler sẽ map thành 422
         }
 
         WorkOrder saved = repo.save(entity);
@@ -169,6 +173,8 @@ public class WorkOrderService {
 - [ ] Constructor Injection (không `@Autowired` trên field)
 - [ ] `@Service` annotation
 - [ ] Log chỉ `id` + `status`, KHÔNG log PII (equipmentId raw, description)
+- [ ] Phân trang với `PagedResponse<WorkOrderResponse>` và hỗ trợ lọc `status`
 - [ ] State machine logic delegate sang `entity.advanceStatus()`, KHÔNG duplicate trong Service
-- [ ] `ResponseStatusException` cho 404, 422 — để `GlobalExceptionHandler` map thành RFC 7807
-- [ ] Return `WorkOrderResponse` DTO, KHÔNG return Entity
+- [ ] `ResourceNotFoundException` cho 404 — để `GlobalExceptionHandler` map thành RFC 7807
+- [ ] `IllegalStateException` cho 422 — re-throw, `GlobalExceptionHandler` map thành RFC 7807
+- [ ] Return DTO (`WorkOrderResponse` / `PagedResponse`), KHÔNG return Entity

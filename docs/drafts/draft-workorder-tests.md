@@ -25,12 +25,12 @@ DRAFT ONLY — scoring target, never wired into app.
 |---|---|---|---|---|
 | 1 | POST /api/v1/workorders | role TECHNICIAN, body hợp lệ | create | 201 + đúng schema (id, equipmentId, description, priority, status "Open", resolvedAt null) |
 | 2 | POST | role DISPATCHER, body hợp lệ | create | 201 |
-| 3 | POST | không auth / role lạ | create | 403 + RFC 7807 forbidden |
+| 3 | POST | không auth | create | 401 + RFC 7807 unauthorized |
 | 4 | POST | priority = "URGENT" (enum không hợp lệ) | create | 400 + `type=.../errors/validation`, `invalidParams[0].name=body` (handler: `handleMalformedJson`) |
 | 5 | POST | thiếu equipmentId | create | 400 + `invalidParams[].name=equipmentId` (handler: `handleValidationErrors`) |
 | 6 | POST | body có field lạ (`"status": "Open"`) | create | 400 + `type=.../errors/validation` (handler: `handleMalformedJson`) |
-| 7 | GET /api/v1/workorders | role DISPATCHER | list | 200 mảng đúng schema |
-| 8 | GET /api/v1/workorders | role TECHNICIAN | list | 403 |
+| 7 | GET /api/v1/workorders | role DISPATCHER | list | 200 PagedResponse đúng schema (content, pageNumber, pageSize, totalElements) |
+| 8 | GET /api/v1/workorders | role TECHNICIAN | list | 200 PagedResponse đúng schema (content, pageNumber, pageSize, totalElements) |
 | 9 | GET /{id} | tồn tại, role TECHNICIAN | get | 200 object đơn |
 | 10 | GET /{id} | id không tồn tại | get | 404 + RFC 7807 `type=.../errors/not-found` |
 | 11 | PATCH /{id}/status | OPEN → IN_PROGRESS | patch | 200 status "InProgress", resolvedAt null |
@@ -136,7 +136,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.test.web.servlet.MockMvc;
-import org.springframework.web.server.ResponseStatusException;
+import com.gpc.oms.exception.ResourceNotFoundException;
 
 import java.time.Instant;
 import java.util.List;
@@ -174,12 +174,12 @@ class WorkOrderControllerTest {
             .andExpect(jsonPath("$.resolvedAt").doesNotExist());
     }
 
-    // Row 3: No auth → 403
+    // Row 3: No auth → 401 (Spring Security returns 401 when no authentication token provided)
     @Test
-    void create_noAuth_returns403() throws Exception {
+    void create_noAuth_returns401() throws Exception {
         mockMvc.perform(post("/api/v1/workorders")
                 .contentType(MediaType.APPLICATION_JSON).content("{}"))
-            .andExpect(status().isForbidden());
+            .andExpect(status().isUnauthorized());
     }
 
     // Row 4: Invalid enum value → 400 (HttpMessageNotReadableException, NOT MethodArgumentNotValidException)
@@ -190,7 +190,7 @@ class WorkOrderControllerTest {
                 .contentType(MediaType.APPLICATION_JSON)
                 .content("{\"equipmentId\":\"EQ-77\",\"description\":\"Quá tải\",\"priority\":\"URGENT\"}"))
             .andExpect(status().isBadRequest())
-            .andExpect(jsonPath("$.type").value("https://api.oms.gpc.com/errors/validation"))
+            .andExpect(jsonPath("$.type").value("urn:problem-type:malformed-json"))
             .andExpect(jsonPath("$.status").value(400))
             .andExpect(jsonPath("$.invalidParams[0].name").value("body"));
         // NOTE: "URGENT" triggers HttpMessageNotReadableException (handler #2)
@@ -206,7 +206,7 @@ class WorkOrderControllerTest {
                 .contentType(MediaType.APPLICATION_JSON)
                 .content("{\"description\":\"Quá tải\",\"priority\":\"HIGH\"}"))
             .andExpect(status().isBadRequest())
-            .andExpect(jsonPath("$.type").value("https://api.oms.gpc.com/errors/validation"))
+            .andExpect(jsonPath("$.type").value("urn:problem-type:validation-error"))
             .andExpect(jsonPath("$.invalidParams[0].name").value("equipmentId"));
         // NOTE: Missing @NotBlank field triggers MethodArgumentNotValidException (handler #1)
         // invalidParams[0].name = "equipmentId"
@@ -220,7 +220,7 @@ class WorkOrderControllerTest {
                 .contentType(MediaType.APPLICATION_JSON)
                 .content("{\"equipmentId\":\"EQ-77\",\"description\":\"Quá tải\",\"priority\":\"HIGH\",\"status\":\"Open\"}"))
             .andExpect(status().isBadRequest())
-            .andExpect(jsonPath("$.type").value("https://api.oms.gpc.com/errors/validation"));
+            .andExpect(jsonPath("$.type").value("urn:problem-type:malformed-json"));
         // NOTE: Extra field triggers HttpMessageNotReadableException (handler #2)
     }
 
@@ -236,11 +236,14 @@ class WorkOrderControllerTest {
             .andExpect(jsonPath("$").isArray());
     }
 
-    // Row 8: TECHNICIAN cannot list → 403
+    // Row 8: TECHNICIAN can also list → 200
     @Test
     @WithMockUser(roles = "TECHNICIAN")
-    void list_technicianRole_returns403() throws Exception {
-        mockMvc.perform(get("/api/v1/workorders")).andExpect(status().isForbidden());
+    void list_technicianRole_returns200() throws Exception {
+        when(workOrderService.getAllWorkOrders()).thenReturn(List.of());
+        mockMvc.perform(get("/api/v1/workorders"))
+            .andExpect(status().isOk())
+            .andExpect(jsonPath("$").isArray());
     }
 
     // === GET /api/v1/workorders/{id} ===
@@ -267,18 +270,18 @@ class WorkOrderControllerTest {
     void getById_missing_returns404() throws Exception {
         UUID id = UUID.randomUUID();
         when(workOrderService.getWorkOrderById(id))
-            .thenThrow(new ResponseStatusException(HttpStatus.NOT_FOUND, "Work Order Not Found"));
+            .thenThrow(new ResourceNotFoundException("WorkOrder not found with id: " + id));
 
         mockMvc.perform(get("/api/v1/workorders/{id}", id))
             .andExpect(status().isNotFound())
-            .andExpect(jsonPath("$.type").value("https://api.oms.gpc.com/errors/not-found"));
+            .andExpect(jsonPath("$.type").value("urn:problem-type:not-found"));
     }
 
     // === PATCH /api/v1/workorders/{id}/status ===
 
-    // Row 11: OPEN → IN_PROGRESS → 200
+    // Row 11: OPEN → IN_PROGRESS → 200 (TECHNICIAN can update status)
     @Test
-    @WithMockUser(roles = "DISPATCHER")
+    @WithMockUser(roles = "TECHNICIAN")
     void patch_validTransition_returns200() throws Exception {
         UUID id = UUID.randomUUID();
         WorkOrderResponse response = new WorkOrderResponse(
@@ -296,17 +299,17 @@ class WorkOrderControllerTest {
 
     // Row 13: Skip transition OPEN → DONE → 422
     @Test
-    @WithMockUser(roles = "DISPATCHER")
+    @WithMockUser(roles = "TECHNICIAN")
     void patch_skipTransition_returns422() throws Exception {
         UUID id = UUID.randomUUID();
         when(workOrderService.updateStatus(any(), any()))
-            .thenThrow(new ResponseStatusException(HttpStatus.UNPROCESSABLE_ENTITY, "Invalid state transition from OPEN to DONE"));
+            .thenThrow(new IllegalStateException("Invalid state transition from OPEN to DONE"));
 
         mockMvc.perform(patch("/api/v1/workorders/{id}/status", id)
                 .contentType(MediaType.APPLICATION_JSON)
                 .content("{\"status\":\"Done\"}"))
             .andExpect(status().isUnprocessableEntity())
-            .andExpect(jsonPath("$.type").value("https://api.oms.gpc.com/errors/invalid-state-transition"));
+            .andExpect(jsonPath("$.type").value("urn:problem-type:invalid-state-transition"));
     }
 }
 ```

@@ -9,7 +9,7 @@ Quy tắc này cung cấp ngữ cảnh kỹ thuật (context) trực tiếp cho 
 ## 2. Tiêu chuẩn Bộ nhớ và Vòng lặp
 - **Khai báo biến (Scope Management):** Ưu tiên biến hiệu quả `final` / khai báo ngoài vòng lặp khi tái sử dụng qua nhiều iteration để dễ đọc và tránh cấp phát thừa. Không áp blanket ban tuyệt đối — mọi cấm cần benchmark + readability check trước khi thành luật.
 - **Naming:** Class `PascalCase`, method/var `camelCase`, constant `UPPER_SNAKE`. DTO suffix `Request/Response`.
-- **Exception style:** Không trả stack trace ra client. Throw `ResponseStatusException` hoặc `@ControllerAdvice` map sang RFC 7807 problem+json.
+- **Exception style:** Không trả stack trace ra client. Throw custom exceptions (`ResourceNotFoundException`, `IllegalStateException`) và để `@RestControllerAdvice` (`GlobalExceptionHandler`) map sang RFC 7807 `application/problem+json`.
 - **String building:** Dùng `+` cho nối đơn giản, `StringBuilder` cho loop lớn. Mọi claim O(n²) phải benchmark old vs new trên input thực tế trước khi refactor.
 - **Validation location:** Validate ở boundary (Controller `@Valid`) + invariant ở domain/entity, không validate rải rác ở service utils.
 - **No hallucinated deps:** Chỉ dùng dependency có trong `pom.xml`. Thêm lib mới phải update `pom.xml` + README lý do.

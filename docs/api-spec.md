@@ -8,11 +8,12 @@ Target Files:
 - src/main/java/com/gpc/oms/dto/WorkOrderRequest.java
 - src/main/java/com/gpc/oms/dto/WorkOrderStatusRequest.java
 - src/main/java/com/gpc/oms/dto/WorkOrderResponse.java
+- src/main/java/com/gpc/oms/dto/PagedResponse.java
 - src/main/java/com/gpc/oms/exception/GlobalExceptionHandler.java
 -->
 # Đặc tả Hợp đồng API (API Specification)
 
-Tài liệu này xác định các giao ước RESTful API chính thức của phân hệ Outage Work Order. Toàn bộ request/response bắt buộc sử dụng định dạng JSON UTF-8 và tuân thủ chuẩn lỗi **RFC 7807 Problem Details**.
+Tài liệu này xác định các giao ước RESTful API chính thức của phân hệ Outage Work Order. Toàn bộ request/response bắt buộc sử định dạng JSON UTF-8 và tuân thủ chuẩn lỗi **RFC 7807 Problem Details**.
 
 ---
 
@@ -74,9 +75,17 @@ Tài liệu này xác định các giao ước RESTful API chính thức của p
 | `size` | `Integer` | Không | `20` | Số lượng bản ghi tối đa mỗi trang (max 100) |
 | `status` | `WorkOrderStatus` | Không | `null` | Lọc theo trạng thái (`OPEN`, `IN_PROGRESS`, `DONE`) |
 
-### Phản hồi Thành công (HTTP 200 OK)
+### Bảng Schema Phản hồi Thành công (`PagedResponse<WorkOrderResponse>` - HTTP 200 OK)
 
-Trả về mảng danh sách `List<WorkOrderResponse>` hoặc đối tượng phân trang `PagedResponse<WorkOrderResponse>`.
+| Tên Trường | Kiểu Dữ liệu | Nullable | Mô tả |
+|---|---|---|---|
+| `content` | `List<WorkOrderResponse>` | Không | Danh sách các phiếu sự cố trong trang hiện tại |
+| `pageNumber` | `Integer` | Không | Chỉ số trang hiện tại (0-indexed) |
+| `pageSize` | `Integer` | Không | Số lượng phần tử tối đa trên mỗi trang |
+| `totalElements` | `Long` | Không | Tổng số bản ghi thỏa mãn điều kiện lọc |
+| `totalPages` | `Integer` | Không | Tổng số trang |
+| `isFirst` | `Boolean` | Không | `true` nếu là trang đầu tiên |
+| `isLast` | `Boolean` | Không | `true` nếu là trang cuối cùng |
 
 ---
 

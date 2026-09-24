@@ -20,12 +20,15 @@ Outage Work Order API — microservice quản lý sự kiện mất điện (OMS
 
 ## Testing
 - JUnit 5 + Spring Boot Test. `@WebMvcTest` for controller tests, `@DataJpaTest` for repository tests.
-- Every endpoint must have tests for: success case, validation failure (400), unauthorized (403).
+- Every endpoint must have tests for: success case, validation failure (400), unauthorized (401), forbidden (403), not found (404), invalid state transition (422).
 - Run `mvn test` — all tests must pass before any PR.
 
 ## References
+- Business Requirements Analysis: [docs/br-analysis-wo.md](../docs/br-analysis-wo.md)
 - Domain Model: [docs/domain-model.md](../docs/domain-model.md)
 - API Specification: [docs/api-spec.md](../docs/api-spec.md)
+- Database Migration Specification: [docs/database-migration-spec.md](../docs/database-migration-spec.md)
+- Internal Coding Standards: [docs/internal-coding-standards.md](../docs/internal-coding-standards.md)
 - Coding Rules: [docs/coding-rules.md](../docs/coding-rules.md)
 - API Design Rules: [docs/api-rules.md](../docs/api-rules.md)
 - Security Rules: [docs/security-rules.md](../docs/security-rules.md)

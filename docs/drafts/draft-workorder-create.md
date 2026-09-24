@@ -17,11 +17,11 @@ DRAFT ONLY — scoring target, never wired into app.
 ## Step-by-step Logic
 
 ### Controller Layer (`WorkOrderController.create`)
-1. Annotation: `@PostMapping` + `@PreAuthorize("hasRole('TECHNICIAN') or hasRole('DISPATCHER')")`
+1. Annotation: `@PostMapping` + `@PreAuthorize("hasAnyRole('DISPATCHER', 'TECHNICIAN', 'ADMIN')")`
 2. Nhận `@Valid @RequestBody WorkOrderRequest req` — Spring tự validate trước khi vào method
 3. Log: `log.info("create workorder equipmentIdHash={}", req.equipmentId().hashCode())` — KHÔNG log raw equipmentId (PII policy, xem `security-rules.md §4`)
 4. Delegate: gọi `workOrderService.createWorkOrder(req)` — KHÔNG chứa business logic trong Controller
-5. Return `ResponseEntity.status(HttpStatus.CREATED).body(response)`
+5. Return `ResponseEntity.created(URI.create("/api/v1/workorders/" + response.id())).body(response)`
 
 ### Service Layer (`WorkOrderService.createWorkOrder`)
 → Xem chi tiết tại [`draft-workorder-service.md`](draft-workorder-service.md) §Method 1.
@@ -30,11 +30,11 @@ DRAFT ONLY — scoring target, never wired into app.
 
 | Điều kiện vi phạm | HTTP Status | RFC 7807 `type` | Message / Detail |
 |---|---|---|---|
-| Body thiếu field bắt buộc (`@NotBlank`, `@NotNull`) | 400 | `https://api.oms.gpc.com/errors/validation` | `invalidParams` chứa field name + reason |
-| Body có field lạ (`ignoreUnknown=false`) | 400 | `https://api.oms.gpc.com/errors/validation` | `Malformed Request Body` |
-| Enum value không hợp lệ (vd: `"URGENT"`) | 400 | `https://api.oms.gpc.com/errors/validation` | `invalidParams[].name=body` |
-| Không có auth hoặc role không đủ | 403 | `https://api.oms.gpc.com/errors/forbidden` | `Access Denied` |
-| Lỗi hệ thống không mong đợi | 500 | `https://api.oms.gpc.com/errors/internal` | `An unexpected error occurred` |
+| Body thiếu field bắt buộc (`@NotBlank`, `@NotNull`) | 400 | `urn:problem-type:validation-error` | `invalidParams` chứa field name + reason |
+| Body có field lạ (`ignoreUnknown=false`) | 400 | `urn:problem-type:malformed-json` | `Malformed Request Body` |
+| Enum value không hợp lệ (vd: `"URGENT"`) | 400 | `urn:problem-type:malformed-json` | `invalidParams[].name=body` |
+| Không có auth hoặc role không đủ | 403 | `urn:problem-type:forbidden` | `Access Denied` |
+| Lỗi hệ thống không mong đợi | 500 | `urn:problem-type:internal-error` | `An unexpected error occurred` |
 
 ## Architectural Constraint
 
@@ -69,11 +69,11 @@ public class WorkOrderController {
     }
 
     @PostMapping
-    @PreAuthorize("hasRole('TECHNICIAN') or hasRole('DISPATCHER')")
+    @PreAuthorize("hasAnyRole('DISPATCHER', 'TECHNICIAN', 'ADMIN')")
     public ResponseEntity<WorkOrderResponse> create(@Valid @RequestBody WorkOrderRequest req) {
         log.info("create workorder equipmentIdHash={}", req.equipmentId().hashCode());
         WorkOrderResponse response = workOrderService.createWorkOrder(req);
-        return ResponseEntity.status(HttpStatus.CREATED).body(response);
+        return ResponseEntity.created(URI.create("/api/v1/workorders/" + response.id())).body(response);
     }
 }
 ```
@@ -82,7 +82,7 @@ public class WorkOrderController {
 
 - [ ] Controller inject `WorkOrderService` (không `WorkOrderRepository`)
 - [ ] `@Valid` trên `@RequestBody`
-- [ ] `@PreAuthorize("hasRole('TECHNICIAN') or hasRole('DISPATCHER')")`
+- [ ] `@PreAuthorize("hasAnyRole('DISPATCHER', 'TECHNICIAN', 'ADMIN')")`
 - [ ] `HttpStatus.CREATED` (không dùng magic number `201`)
 - [ ] Log hash của equipmentId, KHÔNG log raw value
 - [ ] Business logic nằm trong Service, KHÔNG trong Controller

@@ -3,6 +3,10 @@ Role: Principal SRE & Observability Architect
 Task: Structured Logging Standard, Correlation ID Lifecycle, PII Masking, and Micrometer Metrics
 Context files: docs/coding-rules.md, docs/security-rules.md, docs/api-rules.md
 Constraints: Logback JSON / ECS format, SLF4J MDC, PII-free logs, Spring Boot Actuator & Prometheus
+Target Files:
+- src/main/java/com/gpc/oms/filter/CorrelationIdFilter.java
+- src/main/resources/logback-spring.xml
+- src/main/resources/application.yml (actuator & metrics config)
 -->
 # Observability, Structured Logging & Metrics Standard
 

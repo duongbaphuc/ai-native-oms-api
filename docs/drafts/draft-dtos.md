@@ -21,78 +21,22 @@ Mọi field, kiểu dữ liệu và annotation phải khớp với [`docs/api-sp
 
 | # | File | Path | Action |
 |---|---|---|---|
-| 1 | `Priority.java` | `src/main/java/com/gpc/oms/domain/Priority.java` | NEW |
-| 2 | `WorkOrderStatus.java` | `src/main/java/com/gpc/oms/domain/WorkOrderStatus.java` | NEW |
-| 3 | `WorkOrderRequest.java` | `src/main/java/com/gpc/oms/dto/WorkOrderRequest.java` | NEW |
-| 4 | `WorkOrderStatusRequest.java` | `src/main/java/com/gpc/oms/dto/WorkOrderStatusRequest.java` | NEW |
-| 5 | `WorkOrderResponse.java` | `src/main/java/com/gpc/oms/dto/WorkOrderResponse.java` | NEW |
+| 1 | `WorkOrderRequest.java` | `src/main/java/com/gpc/oms/dto/WorkOrderRequest.java` | NEW |
+| 2 | `WorkOrderStatusRequest.java` | `src/main/java/com/gpc/oms/dto/WorkOrderStatusRequest.java` | NEW |
+| 3 | `WorkOrderResponse.java` | `src/main/java/com/gpc/oms/dto/WorkOrderResponse.java` | NEW |
+| 4 | `PagedResponse.java` | `src/main/java/com/gpc/oms/dto/PagedResponse.java` | NEW |
 
 ---
 
-## 1. Domain Enums (Shared)
+## 1. Domain Enums (Shared References)
 
-Hai enums này thuộc `package com.gpc.oms.domain`, được sử dụng chung bởi tất cả DTOs và Entity.
+Hai Enums `Priority` và `WorkOrderStatus` thuộc `package com.gpc.oms.domain`, được định nghĩa là **Single Source of Truth** tại [`draft-workorder-domain.md`](draft-workorder-domain.md) §5. Tầng DTO import và sử dụng trực tiếp các Enums này:
 
-### 1.1 `Priority`
-
-Khai báo trong `domain-model.md` — 4 mức độ nghiêm trọng của sự cố.
-
-```java
-// AI Provenance: generated from docs/domain-model.md §Entities
-package com.gpc.oms.domain;
-
-public enum Priority {
-    LOW,
-    MEDIUM,
-    HIGH,
-    CRITICAL
-}
-```
-
-### 1.2 `WorkOrderStatus`
-
-Khai báo trong `domain-model.md` — máy trạng thái đơn hướng (one-way state machine).
-`@JsonValue` serialise ra chuỗi khớp api-spec.md (ví dụ: `"Open"` thay vì `"OPEN"`).
-
-**State Machine (strict linear):**
-1. `OPEN` → `IN_PROGRESS` ✅
-2. `IN_PROGRESS` → `DONE` ✅
-3. Mọi chuyển đổi khác → ❌ return `false`
-
-```java
-// AI Provenance: generated from docs/domain-model.md §Invariants, docs/api-spec.md §4
-package com.gpc.oms.domain;
-
-import com.fasterxml.jackson.annotation.JsonValue;
-
-public enum WorkOrderStatus {
-    OPEN("Open"),
-    IN_PROGRESS("InProgress"),
-    DONE("Done");
-
-    private final String value;
-
-    WorkOrderStatus(String value) { this.value = value; }
-
-    @JsonValue
-    public String getValue() { return value; }
-
-    /**
-     * Kiểm tra tính hợp lệ của chuyển trạng thái.
-     * Bắt buộc: OPEN → IN_PROGRESS → DONE. Lùi hoặc nhảy cóc bị cấm tuyệt đối.
-     */
-    public boolean canTransitionTo(WorkOrderStatus next) {
-        return switch (this) {
-            case OPEN        -> next == IN_PROGRESS;
-            case IN_PROGRESS -> next == DONE;
-            case DONE        -> false; // terminal — không có chuyển tiếp nào hợp lệ
-        };
-    }
-}
-```
+- **`com.gpc.oms.domain.Priority`:** `LOW`, `MEDIUM`, `HIGH`, `CRITICAL`
+- **`com.gpc.oms.domain.WorkOrderStatus`:** `OPEN("Open")`, `IN_PROGRESS("InProgress")`, `DONE("Done")` với Jackson `@JsonValue`.
 
 > [!IMPORTANT]
-> `canTransitionTo()` là **source-of-truth** duy nhất cho state machine logic. Được gọi bởi `WorkOrder.advanceStatus()` tại **domain/entity layer**, không phải controller. Vi phạm → ném `IllegalStateException` → Service catch → `ResponseStatusException(422)` → `GlobalExceptionHandler` trả **422 Unprocessable Entity** (RFC 7807).
+> `canTransitionTo()` trong Enum `WorkOrderStatus` là **source-of-truth** duy nhất cho state machine logic, được gọi bởi `WorkOrder.advanceStatus()` tại **domain/entity layer**. Vi phạm → ném `IllegalStateException` → Service re-throw → `GlobalExceptionHandler` trả **422 Unprocessable Entity** (RFC 7807 `urn:problem-type:invalid-state-transition`).
 
 ---
 
@@ -108,7 +52,7 @@ Nguồn spec: [`api-spec.md §1`](../api-spec.md).
 | Field | Type | Annotation | Description |
 |---|---|---|---|
 | `equipmentId` | `String` | `@NotBlank`, `@Size(max=50)` | Mã thiết bị lưới điện |
-| `description` | `String` | `@NotBlank`, `@Size(max=500)` | Mô tả sự cố |
+| `description` | `String` | `@NotBlank`, `@Size(min=10, max=500)` | Mô tả sự cố (tối thiểu 10, tối đa 500 ký tự) |
 | `priority` | `Priority` | `@NotNull` | Mức độ: LOW, MEDIUM, HIGH, CRITICAL |
 
 **Ràng buộc:**
@@ -135,7 +79,7 @@ public record WorkOrderRequest(
     String equipmentId,
 
     @NotBlank(message = "description must not be blank")
-    @Size(max = 500, message = "description must not exceed 500 characters")
+    @Size(min = 10, max = 500, message = "description must be between 10 and 500 characters")
     String description,
 
     @NotNull(message = "priority must not be null; valid values: LOW, MEDIUM, HIGH, CRITICAL")
@@ -290,6 +234,53 @@ public record WorkOrderResponse(
 }
 ```
 
+### 3.2 `PagedResponse<T>` — Generic Pagination Wrapper
+
+**Target file:** `src/main/java/com/gpc/oms/dto/PagedResponse.java`  
+Nguồn spec: [`internal-coding-standards.md §3`](../internal-coding-standards.md), [`api-spec.md §2`](../api-spec.md).
+
+**Schema Table:**
+
+| Field | Type | Nullable | Description |
+|---|---|---|---|
+| `content` | `List<T>` | No | Danh sách đối tượng dữ liệu trong trang hiện tại |
+| `pageNumber` | `int` | No | Chỉ số trang hiện tại (0-indexed) |
+| `pageSize` | `int` | No | Số lượng bản ghi tối đa mỗi trang |
+| `totalElements` | `long` | No | Tổng số bản ghi thỏa điều kiện lọc trong CSDL |
+| `totalPages` | `int` | No | Tổng số trang |
+| `isFirst` | `boolean` | No | `true` nếu là trang đầu tiên |
+| `isLast` | `boolean` | No | `true` nếu là trang cuối cùng |
+
+```java
+// AI Provenance: generated from docs/internal-coding-standards.md §3, docs/api-spec.md §2
+package com.gpc.oms.dto;
+
+import org.springframework.data.domain.Page;
+import java.util.List;
+
+public record PagedResponse<T>(
+    List<T> content,
+    int pageNumber,
+    int pageSize,
+    long totalElements,
+    int totalPages,
+    boolean isFirst,
+    boolean isLast
+) {
+    public static <T> PagedResponse<T> from(Page<T> page) {
+        return new PagedResponse<>(
+            page.getContent(),
+            page.getNumber(),
+            page.getSize(),
+            page.getTotalElements(),
+            page.getTotalPages(),
+            page.isFirst(),
+            page.isLast()
+        );
+    }
+}
+```
+
 ---
 
 ## 4. Bảng Tổng Hợp Validation
@@ -297,7 +288,7 @@ public record WorkOrderResponse(
 | DTO | Field | Annotation | Mô tả vi phạm → HTTP |
 |---|---|---|---|
 | `WorkOrderRequest` | `equipmentId` | `@NotBlank`, `@Size(max=50)` | Trống hoặc vượt 50 ký tự → **400** |
-| `WorkOrderRequest` | `description` | `@NotBlank`, `@Size(max=500)` | Trống hoặc vượt 500 ký tự → **400** |
+| `WorkOrderRequest` | `description` | `@NotBlank`, `@Size(min=10, max=500)` | Trống, dưới 10, hoặc vượt 500 ký tự → **400** |
 | `WorkOrderRequest` | `priority` | `@NotNull` | Null hoặc giá trị lạ → **400** |
 | `WorkOrderRequest` | *(extra field)* | `ignoreUnknown=false` | Field không khai báo → **400** |
 | `WorkOrderStatusRequest` | `status` | `@NotNull` | Null hoặc giá trị lạ → **400** |

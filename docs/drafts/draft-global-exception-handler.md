@@ -3,9 +3,10 @@ Role: Senior Engineer. Task: Tạo GlobalExceptionHandler trả lỗi theo chu�
 Context files: docs/api-rules.md, docs/security-rules.md
 Constraints: 
 - Map MethodArgumentNotValidException (400) -> invalidParams chi tiết.
-- Map ResponseStatusException -> lấy status và message tương ứng.
-- Map AccessDeniedException (403) -> @PreAuthorize fail.
 - Map HttpMessageNotReadableException (400) -> malformed JSON / invalid enum.
+- Map AccessDeniedException (403) -> @PreAuthorize fail.
+- Map ResourceNotFoundException (404) -> ID không tồn tại trong CSDL.
+- Map IllegalStateException (422) -> vi phạm quy tắc chuyển trạng thái state machine.
 - Fallback Exception (500) -> không lộ stack trace / chi tiết nội bộ.
 - Tuyệt đối không trả về Stack Trace hoặc PII.
 - Sử dụng ProblemDetail của Spring Boot 3.
@@ -25,14 +26,15 @@ DRAFT ONLY — scoring target, never wired into app.
 
 | # | Exception Class | HTTP | RFC 7807 `type` | Trigger | Ưu tiên |
 |---|---|---|---|---|---|
-| 1 | `MethodArgumentNotValidException` | 400 | `.../errors/validation` | `@Valid` fail (`@NotBlank`, `@NotNull`, `@Size`) | Cao nhất (specific) |
-| 2 | `HttpMessageNotReadableException` | 400 | `.../errors/validation` | JSON malformed, enum value không hợp lệ, `ignoreUnknown=false` reject | Cao |
-| 3 | `AccessDeniedException` | 403 | `.../errors/forbidden` | `@PreAuthorize` fail (role không đủ) | Cao |
-| 4 | `ResponseStatusException` | Varies | Varies (404/422/...) | Service throw cho NOT_FOUND, UNPROCESSABLE_ENTITY | Trung bình |
-| 5 | `Exception` | 500 | `.../errors/internal` | Fallback — bắt mọi exception không xử lý | Thấp nhất (catch-all) |
+| 1 | `MethodArgumentNotValidException` | 400 | `urn:problem-type:validation-error` | `@Valid` fail (`@NotBlank`, `@NotNull`, `@Size`) | Cao nhất (specific) |
+| 2 | `HttpMessageNotReadableException` | 400 | `urn:problem-type:malformed-json` | JSON malformed, enum value không hợp lệ, `ignoreUnknown=false` reject | Cao |
+| 3 | `AccessDeniedException` | 403 | `urn:problem-type:forbidden` | `@PreAuthorize` fail (role không đủ) | Cao |
+| 4 | `ResourceNotFoundException` | 404 | `urn:problem-type:not-found` | Service throw khi `findById` trả empty | Cao |
+| 5 | `IllegalStateException` | 422 | `urn:problem-type:invalid-state-transition` | Entity throw từ `advanceStatus()` khi vi phạm state machine | Cao |
+| 6 | `Exception` | 500 | `urn:problem-type:internal-error` | Fallback — bắt mọi exception không xử lý | Thấp nhất (catch-all) |
 
 > [!IMPORTANT]
-> **Thứ tự ưu tiên handler:** Spring `@ExceptionHandler` chọn handler cụ thể nhất trước (most specific first). `AccessDeniedException` sẽ luôn được bắt bởi handler #3, KHÔNG bởi `ResponseStatusException` handler #4, vì `AccessDeniedException` không phải subclass của `ResponseStatusException`.
+> **Thứ tự ưu tiên handler:** Spring `@ExceptionHandler` chọn handler cụ thể nhất trước (most specific first). `AccessDeniedException` sẽ luôn được bắt bởi handler #3, `ResourceNotFoundException` bởi handler #4, `IllegalStateException` bởi handler #5, và handler #6 (`Exception.class`) chỉ đóng vai trò fallback cuối cùng cho các lỗi không lường trước.
 
 ## Handler Code
 
@@ -40,6 +42,7 @@ DRAFT ONLY — scoring target, never wired into app.
 // AI Provenance: generated from docs/api-rules.md §2, docs/security-rules.md §4
 package com.gpc.oms.exception;
 
+import com.gpc.oms.exception.ResourceNotFoundException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpStatus;
@@ -49,7 +52,6 @@ import org.springframework.security.access.AccessDeniedException;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
-import org.springframework.web.server.ResponseStatusException;
 
 import java.net.URI;
 import java.util.List;
@@ -66,7 +68,7 @@ public class GlobalExceptionHandler {
     public ProblemDetail handleValidationErrors(MethodArgumentNotValidException ex) {
         log.warn("Validation failed: {}", ex.getMessage());
         ProblemDetail problem = ProblemDetail.forStatusAndDetail(HttpStatus.BAD_REQUEST, "Validation Failed");
-        problem.setType(URI.create("https://api.oms.gpc.com/errors/validation"));
+        problem.setType(URI.create("urn:problem-type:validation-error"));
         
         List<Map<String, String>> invalidParams = ex.getBindingResult().getFieldErrors().stream()
             .map(error -> Map.of(
@@ -85,7 +87,7 @@ public class GlobalExceptionHandler {
     public ProblemDetail handleMalformedJson(HttpMessageNotReadableException ex) {
         log.warn("Malformed request body");
         ProblemDetail problem = ProblemDetail.forStatusAndDetail(HttpStatus.BAD_REQUEST, "Malformed Request Body");
-        problem.setType(URI.create("https://api.oms.gpc.com/errors/validation"));
+        problem.setType(URI.create("urn:problem-type:malformed-json"));
         problem.setProperty("invalidParams",
             List.of(Map.of("name", "body", "reason", "Request body is malformed or contains an invalid enum value")));
         return problem;
@@ -98,24 +100,27 @@ public class GlobalExceptionHandler {
     public ProblemDetail handleAccessDenied(AccessDeniedException ex) {
         log.warn("Access denied");
         ProblemDetail problem = ProblemDetail.forStatusAndDetail(HttpStatus.FORBIDDEN, "Access Denied");
-        problem.setType(URI.create("https://api.oms.gpc.com/errors/forbidden"));
+        problem.setType(URI.create("urn:problem-type:forbidden"));
         return problem;
     }
 
-    // Handler #4: 404/422/etc — Xử lý các lỗi nghiệp vụ
-    // Trigger: Service throw ResponseStatusException(NOT_FOUND) hoặc ResponseStatusException(UNPROCESSABLE_ENTITY)
-    // Response: type URI based on status code
-    @ExceptionHandler(ResponseStatusException.class)
-    public ProblemDetail handleResponseStatusException(ResponseStatusException ex) {
-        log.warn("Response status exception: {} - {}", ex.getStatusCode(), ex.getReason());
-        ProblemDetail problem = ProblemDetail.forStatusAndDetail(ex.getStatusCode(), ex.getReason());
-        
-        if (ex.getStatusCode() == HttpStatus.NOT_FOUND) {
-            problem.setType(URI.create("https://api.oms.gpc.com/errors/not-found"));
-        } else if (ex.getStatusCode() == HttpStatus.UNPROCESSABLE_ENTITY) {
-            problem.setType(URI.create("https://api.oms.gpc.com/errors/invalid-state-transition"));
-        }
-        
+    // Handler #4: 404 — Resource không tìm thấy
+    // Trigger: Service throw ResourceNotFoundException khi findById trả empty
+    @ExceptionHandler(ResourceNotFoundException.class)
+    public ProblemDetail handleResourceNotFound(ResourceNotFoundException ex) {
+        log.warn("Resource not found: {}", ex.getMessage());
+        ProblemDetail problem = ProblemDetail.forStatusAndDetail(HttpStatus.NOT_FOUND, ex.getMessage());
+        problem.setType(URI.create("urn:problem-type:not-found"));
+        return problem;
+    }
+
+    // Handler #5: 422 — Vi phạm state machine (invalid state transition)
+    // Trigger: Entity throw IllegalStateException qua advanceStatus(), Service re-throw
+    @ExceptionHandler(IllegalStateException.class)
+    public ProblemDetail handleIllegalStateTransition(IllegalStateException ex) {
+        log.warn("Illegal state transition: {}", ex.getMessage());
+        ProblemDetail problem = ProblemDetail.forStatusAndDetail(HttpStatus.UNPROCESSABLE_ENTITY, ex.getMessage());
+        problem.setType(URI.create("urn:problem-type:invalid-state-transition"));
         return problem;
     }
 
@@ -127,7 +132,7 @@ public class GlobalExceptionHandler {
         log.error("Unexpected error", ex); // full stacktrace CHỈ ở server log, KHÔNG trả về client
         ProblemDetail problem = ProblemDetail.forStatusAndDetail(
             HttpStatus.INTERNAL_SERVER_ERROR, "An unexpected error occurred");
-        problem.setType(URI.create("https://api.oms.gpc.com/errors/internal"));
+        problem.setType(URI.create("urn:problem-type:internal-error"));
         return problem;
     }
 }
@@ -137,7 +142,7 @@ public class GlobalExceptionHandler {
 
 - [ ] `@RestControllerAdvice` trên class
 - [ ] Import `org.springframework.security.access.AccessDeniedException` (KHÔNG `java.nio.file.AccessDeniedException`)
-- [ ] 5 handlers đầy đủ: Validation(400), MalformedJSON(400), AccessDenied(403), ResponseStatus(4xx), Fallback(500)
+- [ ] 6 handlers đầy đủ: Validation(400), MalformedJSON(400), AccessDenied(403), ResourceNotFound(404), IllegalState(422), Fallback(500)
 - [ ] `ProblemDetail` (Spring Boot 3) — KHÔNG dùng custom error class
 - [ ] Không trả stack trace, SQL message, class name ra client
 - [ ] Log: `log.warn` cho 4xx, `log.error` cho 5xx
