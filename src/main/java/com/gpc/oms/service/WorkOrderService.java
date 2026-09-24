@@ -26,28 +26,28 @@ public class WorkOrderService {
         this.repo = repo;
     }
 
-    public WorkOrderResponse createWorkOrder(WorkOrderRequest req) {
-        WorkOrder entity = new WorkOrder(req.equipmentId(), req.description(), req.priority());
-        WorkOrder saved = repo.save(entity);
+    public WorkOrderResponse createWorkOrder(final WorkOrderRequest req) {
+        final WorkOrder entity = new WorkOrder(req.equipmentId(), req.description(), req.priority());
+        final WorkOrder saved = repo.save(entity);
         log.info("created workorder id={}", saved.getId());
         return WorkOrderResponse.from(saved);
     }
 
-    public PagedResponse<WorkOrderResponse> getWorkOrders(Pageable pageable, WorkOrderStatus status) {
-        Page<WorkOrder> page = (status != null)
+    public PagedResponse<WorkOrderResponse> getWorkOrders(final Pageable pageable, final WorkOrderStatus status) {
+        final Page<WorkOrder> page = (status != null)
                 ? repo.findByStatus(status, pageable)
                 : repo.findAll(pageable);
         return PagedResponse.from(page.map(WorkOrderResponse::from));
     }
 
-    public WorkOrderResponse getWorkOrderById(UUID id) {
-        WorkOrder entity = repo.findById(id)
+    public WorkOrderResponse getWorkOrderById(final UUID id) {
+        final WorkOrder entity = repo.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("WorkOrder not found with id: " + id));
         return WorkOrderResponse.from(entity);
     }
 
-    public WorkOrderResponse updateStatus(UUID id, WorkOrderStatusRequest req) {
-        WorkOrder entity = repo.findById(id)
+    public WorkOrderResponse updateStatus(final UUID id, final WorkOrderStatusRequest req) {
+        final WorkOrder entity = repo.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("WorkOrder not found with id: " + id));
 
         try {
@@ -56,7 +56,7 @@ public class WorkOrderService {
             throw ex; // Re-throw — GlobalExceptionHandler sẽ map thành 422
         }
 
-        WorkOrder saved = repo.save(entity);
+        final WorkOrder saved = repo.save(entity);
         log.info("updated workorder id={} status={}", saved.getId(), saved.getStatus());
         return WorkOrderResponse.from(saved);
     }

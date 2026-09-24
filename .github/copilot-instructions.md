@@ -13,14 +13,21 @@ Outage Work Order API — microservice quản lý sự kiện mất điện (OMS
 5. Disclose AI provenance in PRs.
 
 ## Stack notes (Java 17 + Spring Boot 3.3 + JPA/H2 dev, PostgreSQL prod)
-- Constructor injection only, no field `@Autowired`.
-- SLF4J logger, no PII in logs.
-- REST plural resources under `/api/v1`, `@Valid` on inputs, RFC 7807 `problem+json`.
-- JPA/parameterized queries only, no string-concat native SQL. RBAC via `@PreAuthorize`.
+- **Oracle Senior Java Guidelines:** Pure Java 17, Effective Java (Joshua Bloch), Clean Architecture.
+- **Design Patterns:**
+  * *Static Factory Method Pattern:* DTOs (`WorkOrderResponse.from()`, `PagedResponse.from()`) with defensive `Objects.requireNonNull()`.
+  * *State Pattern / State Machine:* Enforce valid transitions (`canTransitionTo()`) in Enum; Domain Entities (`WorkOrder.advanceStatus()`) protect domain invariants with `IllegalStateException`.
+  * *Pure Records & Immutability:* 100% Request/Response DTOs are Java 17 `record`. Local variables marked `final` for JIT escape analysis.
+  * *Pre-sizing Collections:* Always supply `initialCapacity` when collection size is known.
+- **Dependency Injection:** Constructor injection only with `private final` fields. CẤM TUYỆT ĐỐI `@Autowired` trên field.
+- **Zero-Lombok & Zero-Reflection:** CẤM TUYỆT ĐỐI Lombok annotations và Reflection mappers (`ModelMapper`). Ánh xạ tường minh bằng Static Factory hoặc MapStruct.
+- **SLF4J Logging:** Parametric logging only (`log.info("...", var)`). Cấm string concatenation `+` trong log. Cấm log PII hoặc raw payload.
+- **REST & Security:** Plural resources under `/api/v1`, `@Valid` on inputs, RFC 7807 `problem+json`, RBAC via `@PreAuthorize`.
 
 ## Testing
 - JUnit 5 + Spring Boot Test. `@WebMvcTest` for controller tests, `@DataJpaTest` for repository tests.
 - Every endpoint must have tests for: success case, validation failure (400), unauthorized (401), forbidden (403), not found (404), invalid state transition (422).
+- Quality Gate: 100% Line & Branch JaCoCo coverage required across domain, service, controller, dto, exception packages.
 - Run `mvn test` — all tests must pass before any PR.
 
 ## References

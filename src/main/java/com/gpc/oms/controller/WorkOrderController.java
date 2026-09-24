@@ -32,38 +32,38 @@ public class WorkOrderController {
 
     @PostMapping
     @PreAuthorize("hasAnyRole('DISPATCHER', 'TECHNICIAN', 'ADMIN')")
-    public ResponseEntity<WorkOrderResponse> createWorkOrder(@Valid @RequestBody WorkOrderRequest request) {
+    public ResponseEntity<WorkOrderResponse> createWorkOrder(@Valid @RequestBody final WorkOrderRequest request) {
         log.info("create workorder equipmentId={}", request.equipmentId().hashCode());
-        WorkOrderResponse response = workOrderService.createWorkOrder(request);
-        URI location = URI.create("/api/v1/workorders/" + response.id());
+        final WorkOrderResponse response = workOrderService.createWorkOrder(request);
+        final URI location = URI.create("/api/v1/workorders/" + response.id());
         return ResponseEntity.created(location).body(response);
     }
 
     @GetMapping
     @PreAuthorize("hasAnyRole('DISPATCHER', 'TECHNICIAN', 'ADMIN')")
     public ResponseEntity<PagedResponse<WorkOrderResponse>> getWorkOrders(
-            @PageableDefault(size = 20, sort = "createdAt", direction = Sort.Direction.DESC) Pageable pageable,
-            @RequestParam(required = false) WorkOrderStatus status) {
+            @PageableDefault(size = 20, sort = "createdAt", direction = Sort.Direction.DESC) final Pageable pageable,
+            @RequestParam(required = false) final WorkOrderStatus status) {
         log.info("get workorders page={} size={} status={}", pageable.getPageNumber(), pageable.getPageSize(), status);
-        PagedResponse<WorkOrderResponse> response = workOrderService.getWorkOrders(pageable, status);
+        final PagedResponse<WorkOrderResponse> response = workOrderService.getWorkOrders(pageable, status);
         return ResponseEntity.ok(response);
     }
 
     @GetMapping("/{id}")
     @PreAuthorize("hasAnyRole('DISPATCHER', 'TECHNICIAN', 'ADMIN')")
-    public ResponseEntity<WorkOrderResponse> getWorkOrderById(@PathVariable UUID id) {
+    public ResponseEntity<WorkOrderResponse> getWorkOrderById(@PathVariable final UUID id) {
         log.info("get workorder by id={}", id);
-        WorkOrderResponse response = workOrderService.getWorkOrderById(id);
+        final WorkOrderResponse response = workOrderService.getWorkOrderById(id);
         return ResponseEntity.ok(response);
     }
 
     @PatchMapping("/{id}/status")
     @PreAuthorize("hasAnyRole('TECHNICIAN', 'ADMIN')")
     public ResponseEntity<WorkOrderResponse> updateStatus(
-            @PathVariable UUID id,
-            @Valid @RequestBody WorkOrderStatusRequest request) {
+            @PathVariable final UUID id,
+            @Valid @RequestBody final WorkOrderStatusRequest request) {
         log.info("update status workorderId={}", id);
-        WorkOrderResponse response = workOrderService.updateStatus(id, request);
+        final WorkOrderResponse response = workOrderService.updateStatus(id, request);
         return ResponseEntity.ok(response);
     }
 }

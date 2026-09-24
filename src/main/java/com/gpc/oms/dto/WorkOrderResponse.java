@@ -23,6 +23,7 @@ public record WorkOrderResponse(
      * Được gọi bởi WorkOrderService sau mỗi thao tác CRUD.
      */
     public static WorkOrderResponse from(WorkOrder entity) {
+        java.util.Objects.requireNonNull(entity, "workOrder must not be null");
         return new WorkOrderResponse(
             entity.getId(),
             entity.getEquipmentId(),

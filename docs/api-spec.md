@@ -107,7 +107,7 @@ Tài liệu này xác định các giao ước RESTful API chính thức của p
 | Điều kiện Vi phạm | HTTP Status | RFC 7807 `type` | RFC 7807 `detail` |
 |---|---|---|---|
 | Không tìm thấy ID trong CSDL | `404 Not Found` | `urn:problem-type:not-found` | `"WorkOrder not found with id: {id}"` |
-| Định dạng ID không phải UUID | `400 Bad Request` | `urn:problem-type:type-mismatch` | `"Parameter 'id' must be a valid UUID"` |
+| Định dạng ID không phải UUID | `400 Bad Request` | `urn:problem-type:validation-error` | `"Validation Failed"` (kèm `invalidParams: [{"name": "id", "reason": "Invalid value for parameter 'id'"}]`) |
 
 ---
 
@@ -138,20 +138,20 @@ Tài liệu này xác định các giao ước RESTful API chính thức của p
 |---|---|---|---|
 | Vi phạm thứ tự máy trạng thái (vd: `DONE` -> `OPEN`) | `422 Unprocessable Entity` | `urn:problem-type:invalid-state-transition` | `"Invalid state transition from {current} to {target}"` |
 | Không tìm thấy ID trong CSDL | `404 Not Found` | `urn:problem-type:not-found` | `"WorkOrder not found with id: {id}"` |
-| Role `DISPATCHER` gọi API này | `403 Forbidden` | `urn:problem-type:forbidden` | `"Access Denied: Only TECHNICIAN can update status"` |
+| Role `DISPATCHER` gọi API này | `403 Forbidden` | `urn:problem-type:forbidden` | `"Access Denied"` |
 
 ---
 
 ## 5. Cấu trúc Lỗi Chuẩn RFC 7807 Problem Details
 
-Mọi lỗi trả về client bắt buộc tuân thủ schema JSON sau:
+Mọi lỗi trả về client bắt buộc tuân thủ schema JSON sau (`application/problem+json`):
 
 ```json
 {
   "type": "urn:problem-type:validation-error",
   "title": "Validation Failed",
   "status": 400,
-  "detail": "Validation failed for field: equipmentId",
+  "detail": "Validation Failed",
   "instance": "/api/v1/workorders",
   "invalidParams": [
     {
@@ -161,3 +161,16 @@ Mọi lỗi trả về client bắt buộc tuân thủ schema JSON sau:
   ]
 }
 ```
+
+### Danh Mục URN Lỗi Hệ Thống (RFC 7807 Error Catalog)
+
+| HTTP Status | Problem Type URN | Title Mặc định | Handler Phụ trách | Kịch bản Kích hoạt |
+|---|---|---|---|---|
+| `400 Bad Request` | `urn:problem-type:validation-error` | `Validation Failed` | `handleValidationErrors` | Vi phạm `@Valid` (@NotBlank, @NotNull, @Size) trên Request Body |
+| `400 Bad Request` | `urn:problem-type:malformed-json` | `Malformed Request Body` | `handleMalformedJson` | JSON sai cú pháp, enum không hợp lệ, hoặc parse error |
+| `400 Bad Request` | `urn:problem-type:validation-error` | `Validation Failed` | `handleQueryParamTypeMismatch` | Query param hoặc Path variable sai kiểu dữ liệu |
+| `401 Unauthorized` | `urn:problem-type:unauthorized` | `Unauthorized` | `CustomAuthenticationEntryPoint` | Thiếu hoặc sai thông tin xác thực HTTP Basic |
+| `403 Forbidden` | `urn:problem-type:forbidden` | `Access Denied` | `handleAccessDenied` | Vi phạm phân quyền RBAC (`@PreAuthorize`) |
+| `404 Not Found` | `urn:problem-type:not-found` | *Message chi tiết* | `handleResourceNotFound` | Không tìm thấy bản ghi theo UUID chỉ định |
+| `422 Unprocessable Entity` | `urn:problem-type:invalid-state-transition` | *Message chi tiết* | `handleIllegalStateTransition` | Vi phạm quy tắc chuyển trạng thái của State Machine |
+| `500 Internal Server Error` | `urn:problem-type:internal-error` | `An unexpected error occurred` | `handleUnexpected` | Lỗi ngoại lệ không lường trước (che giấu stack trace) |

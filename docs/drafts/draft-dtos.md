@@ -208,6 +208,7 @@ public record WorkOrderResponse(
      * 3. Return new WorkOrderResponse record
      */
     public static WorkOrderResponse from(WorkOrder entity) {
+        java.util.Objects.requireNonNull(entity, "workOrder must not be null");
         return new WorkOrderResponse(
             entity.getId(),
             entity.getEquipmentId(),
@@ -268,6 +269,7 @@ public record PagedResponse<T>(
     boolean isLast
 ) {
     public static <T> PagedResponse<T> from(Page<T> page) {
+        java.util.Objects.requireNonNull(page, "page must not be null");
         return new PagedResponse<>(
             page.getContent(),
             page.getNumber(),

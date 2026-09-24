@@ -49,6 +49,7 @@ Hệ thống yêu cầu chuyển đổi dữ liệu tường minh (Explicit Mapp
        Instant resolvedAt
    ) {
        public static WorkOrderResponse from(WorkOrder entity) {
+           java.util.Objects.requireNonNull(entity, "workOrder must not be null");
            return new WorkOrderResponse(
                entity.getId(),
                entity.getEquipmentId(),
