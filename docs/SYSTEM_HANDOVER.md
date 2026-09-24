@@ -91,25 +91,23 @@ sequenceDiagram
 c:\ai-native-oms-api\src\main\java\com\gpc\oms
 ├── OmsApiApplication.java                   [Entry Point] Khởi động Spring Boot Application
 ├── config/
-│   ├── CorrelationIdFilter.java             [Filter] Quản lý X-Correlation-Id header & MDC log context
-│   └── SecurityConfig.java                  [Security] Cấu hình HTTP Basic, Stateless, In-Memory Users & RFC 7807 401
+│   ├── SecurityConfig.java                  [Security] Dual SecurityFilterChain (h2ConsoleChain !prod & filterChain), RFC 7807 401
+│   └── StringToWorkOrderStatusConverter.java [Converter] Web conversion chuỗi query param sang WorkOrderStatus Enum
 ├── controller/
 │   └── WorkOrderController.java             [REST API] Tiếp nhận HTTP request, phân quyền @PreAuthorize
 ├── domain/
 │   ├── WorkOrder.java                       [Entity] Aggregate Root, bảo vệ bất biến & quản lý chuyển đổi trạng thái
-│   ├── WorkOrderPriority.java               [Enum] 4 mức độ ưu tiên (LOW, MEDIUM, HIGH, CRITICAL)
+│   ├── Priority.java                        [Enum] 4 mức độ ưu tiên (LOW, MEDIUM, HIGH, CRITICAL)
 │   ├── WorkOrderStatus.java                [Enum] 3 trạng thái (OPEN, IN_PROGRESS, DONE) & hàm canTransitionTo
-│   └── WorkOrderRepository.java             [Repository] Spring Data JPA interface tương tác với H2
+│   └── WorkOrderRepository.java             [Repository] Spring Data JPA interface tương tác với H2/PostgreSQL
 ├── dto/
-│   ├── CreateWorkOrderRequest.java          [DTO] DTO record tạo phiếu (đạt chuẩn RFC 7807 validation)
-│   ├── WorkOrderRequest.java                [DTO] DTO record tương thích chuẩn API spec
-│   ├── WorkOrderStatusRequest.java          [DTO] DTO record cập nhật trạng thái phiếu công tác
+│   ├── WorkOrderRequest.java                [DTO] Record tiếp nhận payload tạo phiếu (đạt chuẩn RFC 7807 validation)
+│   ├── WorkOrderStatusRequest.java          [DTO] Record cập nhật trạng thái phiếu công tác
 │   ├── WorkOrderResponse.java               [DTO] Immutable record trả về cho client với static factory mapper
 │   └── PagedResponse.java                   [DTO] Generic record bọc dữ liệu phân trang
 ├── exception/
-│   ├── GlobalExceptionHandler.java          [Advice] Bắt toàn bộ lỗi và chuyển hóa về RFC 7807 ProblemDetail
-│   ├── InvalidStateTransitionException.java [Exception] Ném ra khi vi phạm luồng trạng thái
-│   └── WorkOrderNotFoundException.java      [Exception] Ném ra khi không tìm thấy UUID phiếu
+│   ├── GlobalExceptionHandler.java          [Advice] Bắt toàn bộ 7 nhóm ngoại lệ và chuyển hóa về RFC 7807 ProblemDetail
+│   └── ResourceNotFoundException.java       [Exception] Ngoại lệ ném ra khi không tìm thấy UUID phiếu
 └── service/
     └── WorkOrderService.java                [Service] Transactional orchestration & logic miền ứng dụng
 ```
@@ -205,16 +203,18 @@ Khi có lỗi xảy ra, hệ thống trả về HTTP Body dạng JSON theo chu�
 }
 ```
 
-#### Ma Trận Mã Lỗi Hệ Thống
+#### Ma Trận Mã Lỗi Hệ Thống (RFC 7807 Error Catalog)
 
-| HTTP Status | Problem Type URN | Mô Tả Khi Xảy Ra Lỗi |
-|---|---|---|
-| `400 Bad Request` | `urn:problem-type:validation-error` | Request body thiếu trường bắt buộc hoặc vi phạm độ dài |
-| `401 Unauthorized` | `urn:problem-type:unauthorized` | Thiếu hoặc sai thông tin xác thực HTTP Basic |
-| `403 Forbidden` | `urn:problem-type:forbidden` | Tài khoản không có vai trò phù hợp trong ma trận RBAC |
-| `404 Not Found` | `urn:problem-type:not-found` | Phiếu công tác không tồn tại với ID chỉ định |
-| `422 Unprocessable Entity` | `urn:problem-type:invalid-state-transition` | Vi phạm quy tắc chuyển đổi trạng thái của State Machine |
-| `500 Internal Server Error` | `urn:problem-type:internal-server-error` | Lỗi ngoại lệ hệ thống không lường trước |
+| HTTP Status | Problem Type URN | Title / Mô Tả Khi Xảy Ra Lỗi | Handler Phụ Trách |
+|---|---|---|---|
+| `400 Bad Request` | `urn:problem-type:validation-error` | Validation Failed (thiếu trường bắt buộc hoặc vi phạm độ dài `@Valid`) | `handleValidationErrors` |
+| `400 Bad Request` | `urn:problem-type:malformed-json` | Malformed Request Body (JSON sai cú pháp, giá trị enum không hợp lệ) | `handleMalformedJson` |
+| `400 Bad Request` | `urn:problem-type:validation-error` | Validation Failed (Query param hoặc path param sai kiểu dữ liệu) | `handleQueryParamTypeMismatch` |
+| `401 Unauthorized` | `urn:problem-type:unauthorized` | Unauthorized (Thiếu hoặc sai thông tin xác thực) | `CustomAuthenticationEntryPoint` |
+| `403 Forbidden` | `urn:problem-type:forbidden` | Access Denied (Tài khoản không có quyền hạn phù hợp trong RBAC) | `handleAccessDenied` |
+| `404 Not Found` | `urn:problem-type:not-found` | Resource Not Found (Phiếu công tác không tồn tại với ID chỉ định) | `handleResourceNotFound` |
+| `422 Unprocessable Entity` | `urn:problem-type:invalid-state-transition` | Illegal State Transition (Vi phạm quy tắc máy trạng thái một chiều) | `handleIllegalStateTransition` |
+| `500 Internal Server Error` | `urn:problem-type:internal-error` | An unexpected error occurred (Lỗi hệ thống bất khả kháng, che giấu stacktrace) | `handleUnexpected` |
 
 ---
 
@@ -286,17 +286,17 @@ Toàn bộ 03 phát hiện mức Major/P0 đã được đội ngũ kỹ sư x�
 # 1. Làm sạch và biên dịch mã nguồn
 mvn clean compile
 
-# 2. Chạy toàn bộ 71 automated tests
+# 2. Chạy toàn bộ 78 automated tests
 mvn test
 
-# 3. Chạy kiểm tra toàn diện, build package và thẩm định JaCoCo Quality Gate
+# 3. Chạy kiểm tra toàn diện, build package và thẩm định JaCoCo Quality Gate (100% Coverage)
 mvn clean verify
 
 # 4. Khởi động ứng dụng Spring Boot cục bộ
 mvn spring-boot:run
 
 # 5. Hoặc chạy file JAR đóng gói độc lập
-java -jar target/oms-api-0.0.1-SNAPSHOT.jar
+java -jar target/oms-api-demo-0.0.1-SNAPSHOT.jar
 ```
 
 ### 6.3 Bảng Điều Khiển Kiểm Thử Tương Tác Trực Quan (Interactive Test Console)
@@ -349,30 +349,37 @@ curl -X PATCH http://localhost:8080/api/v1/workorders/{WORK_ORDER_ID}/status \
 ## 7. HỒ SƠ CHẤT LƯỢNG & BÁO CÁO KIỂM THỬ TỰ ĐỘNG
 
 ### 7.1 Kim Tự Tháp Kiểm Thử (Testing Pyramid)
-Toàn bộ mã nguồn được bảo vệ bởi 71 bài kiểm thử tự động, phân chia theo các tầng chuyên biệt:
+Toàn bộ mã nguồn được bảo vệ bởi **78 bài kiểm thử tự động**, phân chia theo các tầng chuyên biệt của Testing Pyramid, đạt tỷ lệ thành công 100% (78/78 Green):
 
 ```
                           ▲
                          / \
-                        /E2E\     WorkOrderIntegrationTest (8 tests)
+                        /E2E\     WorkOrderIntegrationTest (7 tests)
                        /-----\    Full SpringBootTest Slice
-                      / Slice \   WorkOrderControllerTest (12 tests)
-                     /  Tests  \  WorkOrderRepositoryTest (8 tests)
-                    /-----------\
-                   / Unit Tests  \ WorkOrderTest (22 tests), WorkOrderStatusTest (7 tests)
-                  /_______________\ WorkOrderServiceTest (12 tests), CorrelationIdFilterTest (2 tests)
+                      / Slice \   WorkOrderControllerTest (15 tests)
+                     /  Tests  \  WorkOrderRepositoryTest (4 tests)
+                    /-----------\ H2Console Security Tests (2 tests)
+                   / Unit Tests  \ WorkOrderTest (8), WorkOrderStatusTest (11), PriorityTest (2)
+                  /_______________\ DtoMappingTest (10), WorkOrderServiceTest (8), Exception Tests (7), Config (4)
 ```
 
 | Tên Lớp Kiểm Thử | Tầng Kiểm Thử | Số Ca Test | Trạng Thái |
 |---|---|---|---|
-| `WorkOrderTest` | Domain Unit Test | 22 | PASS (100%) |
-| `WorkOrderStatusTest` | State Machine Unit Test | 7 | PASS (100%) |
-| `WorkOrderServiceTest` | Service Unit Test (Mockito) | 12 | PASS (100%) |
-| `WorkOrderControllerTest` | Web Slice Test (`@WebMvcTest`) | 12 | PASS (100%) |
-| `WorkOrderRepositoryTest` | Persistence Slice Test (`@DataJpaTest`) | 8 | PASS (100%) |
-| `WorkOrderIntegrationTest` | End-to-End Integration Test (`@SpringBootTest`) | 8 | PASS (100%) |
-| `CorrelationIdFilterTest` | HTTP Filter Unit Test | 2 | PASS (100%) |
-| **TỔNG CỘNG** | **Toàn bộ hệ thống** | **71** | **71/71 PASS (0 Errors, 0 Skipped)** |
+| `WorkOrderTest` | Domain Unit Test | 8 | PASS (100%) |
+| `WorkOrderStatusTest` | State Machine Unit Test (3x3 transition matrix) | 11 | PASS (100%) |
+| `PriorityTest` | Domain Enum Unit Test | 2 | PASS (100%) |
+| `DtoMappingTest` | DTO Record & Factory Mapper Test | 10 | PASS (100%) |
+| `ResourceNotFoundExceptionTest` | Exception Class Unit Test | 1 | PASS (100%) |
+| `StringToWorkOrderStatusConverterTest` | Web Config Converter Test | 3 | PASS (100%) |
+| `WorkOrderServiceTest` | Service Unit Test (Mockito) | 8 | PASS (100%) |
+| `GlobalExceptionHandlerUnitTest` | Exception Advice Direct Unit Test | 6 | PASS (100%) |
+| `WorkOrderControllerTest` | Web Slice Test (`@WebMvcTest`) | 15 | PASS (100%) |
+| `WorkOrderRepositoryTest` | Persistence Slice Test (`@DataJpaTest`) | 4 | PASS (100%) |
+| `H2ConsoleDevAccessTest` | Security Slice Test (`!prod` public access) | 1 | PASS (100%) |
+| `H2ConsoleProdAccessTest` | Security Slice Test (`prod` admin authorization) | 1 | PASS (100%) |
+| `OmsApiApplicationTests` | Spring Context Bootstrap Test | 1 | PASS (100%) |
+| `WorkOrderIntegrationTest` | End-to-End Integration Test (`@SpringBootTest`) | 7 | PASS (100%) |
+| **TỔNG CỘNG** | **Toàn bộ kim tự tháp kiểm thử** | **78** | **78/78 PASS (0 Failures, 0 Errors, 0 Skipped)** |
 
 ### 7.2 Báo Cáo Đo Lường Độ Bao Phủ JaCoCo (JaCoCo Coverage Metrics)
 Dự án tích hợp cấu hình chốt chặn chất lượng (Quality Gate) nghiêm ngặt trong `pom.xml`. Mỗi khi thực hiện `mvn verify`, mã nguồn phải đạt:
@@ -380,6 +387,17 @@ Dự án tích hợp cấu hình chốt chặn chất lượng (Quality Gate) ng
 - **Branch Coverage:** `1.00` (100.0%)
 
 Vị trí báo cáo chi tiết: `target/site/jacoco/index.html`.
+
+#### Chi Tiết Đo Lường Từng Package Nghiệp Vụ Cốt Lõi (11 Classes)
+
+| Package | Số Lớp | Methods | Lines | Branches | Instructions | Độ Bao Phủ |
+|---|---|---|---|---|---|---|
+| `com.gpc.oms.domain` | 3 | 15 | 38/38 | 11/11 | 149/149 | **100.0%** |
+| `com.gpc.oms.service` | 1 | 8 | 24/24 | 2/2 | 109/109 | **100.0%** |
+| `com.gpc.oms.controller` | 1 | 6 | 17/17 | n/a | 87/87 | **100.0%** |
+| `com.gpc.oms.dto` | 4 | 6 | 20/20 | n/a | 102/102 | **100.0%** |
+| `com.gpc.oms.exception` | 2 | 11 | 42/42 | 2/2 | 159/159 | **100.0%** |
+| **TỔNG HỢP TOÀN DỰ ÁN** | **11** | **46** | **141/141 (100%)** | **15/15 (100%)** | **606/606 (100%)** | **100.0% (PERFECT)** |
 
 ---
 
@@ -446,7 +464,7 @@ Khi cần mở rộng thêm thực thể hoặc endpoint mới:
 | Tiêu Chí Nghiệm Thu | Kết Quả Đánh Giá | Tình Trạng |
 |---|---|---|
 | Mã nguồn biên dịch thành công không cảnh báo | `BUILD SUCCESS` | [x] ĐẠT |
-| Toàn bộ 71 automated test cases thực thi thành công | 71 Passed, 0 Failed, 0 Skipped | [x] ĐẠT |
+| Toàn bộ 78 automated test cases thực thi thành công | 78 Passed, 0 Failed, 0 Skipped | [x] ĐẠT |
 | JaCoCo Line và Branch Coverage đạt ngưỡng quy định | 100% Line, 100% Branch | [x] ĐẠT |
 | Cấu trúc bảng và chỉ mục DB đồng bộ qua Flyway | Schema V1 khởi tạo chính xác | [x] ĐẠT |
 | Giao diện Test Console hoạt động mượt mà trên browser | Đã kiểm chứng tại `http://localhost:8080/` | [x] ĐẠT |

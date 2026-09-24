@@ -19,10 +19,15 @@ Tài liệu là kim chỉ nam để GitHub Copilot tự động sinh các lớp 
 
 ## 1. Tổng quan Kiến trúc Bảo mật (Security Architecture)
 
-- **Framework:** Spring Security 6.x tích hợp trên nền tảng Spring Boot 3.3+.
+- **Framework:** Spring Security 6.3.3 tích hợp trên nền tảng Spring Boot 3.3.4.
 - **Mô hình xác thực:** Không trạng thái (Stateless Session - `SessionCreationPolicy.STATELESS`).
-- **Giao thức xác thực:** JSON Web Token (JWT) thông qua HTTP Header `Authorization: Bearer <token>`.
+- **Chiến lược xác thực theo giai đoạn:**
+  - **Hiện tại (Dev / Test / Staging):** HTTP Basic Authentication với phân định profile `@Profile("!prod")` cho danh sách tài khoản demo trong bộ nhớ (`InMemoryUserDetailsManager`).
+  - **Mục tiêu Production (Enterprise Roadmap - Issue #33):** OAuth2 Resource Server xác thực JWT qua HTTP Header `Authorization: Bearer <token>`.
 - **Cơ chế phân quyền:** Phân quyền theo vai trò (Role-Based Access Control - RBAC) sử dụng Method Security `@EnableMethodSecurity(prePostEnabled = true)`.
+- **Kiến trúc Dual SecurityFilterChain (SEC-01 Hardening):**
+  - **`h2ConsoleChain` (`@Order(1)`, `@Profile("!prod")`):** Chỉ kích hoạt ở môi trường non-prod, cho phép truy cập `/h2-console/**` công khai phục vụ kiểm thử và debug cục bộ.
+  - **`filterChain` (`@Order(2)`):** Áp dụng cho toàn bộ endpoints nghiệp vụ. Cho phép truy cập công khai trang chủ (`/`, `/index.html`, `/favicon.ico`). Trên profile `prod`, đường dẫn `/h2-console/**` yêu cầu bắt buộc quyền `ROLE_ADMIN`. Toàn bộ request còn lại yêu cầu xác thực.
 - **Định dạng lỗi:** Toàn bộ vi phạm an ninh (401, 403, 429) bắt buộc trả về định dạng **RFC 7807 Problem Details** (`application/problem+json`).
 
 ---
@@ -116,34 +121,34 @@ Nhằm ngăn ngừa tấn công Brute-force và quá tải hệ thống điều 
 ---
 
 ## 6. Xử lý Lỗi Tầng Bảo mật theo Chuẩn RFC 7807
-
-Các ngoại lệ bảo mật phát sinh tại tầng Filter (trước khi vào Controller) phải được bắt bởi các Handler chuyên dụng và chuyển đổi sang JSON chuẩn:
-
-### 1. Chưa xác thực (HTTP 401 Unauthorized)
-- **Lớp cài đặt:** `AuthenticationEntryPoint`
-- **RFC 7807 Payload:**
-  ```json
-  {
-    "type": "urn:problem-type:unauthorized",
-    "title": "Unauthorized",
-    "status": 401,
-    "detail": "Token xác thực không hợp lệ, đã hết hạn hoặc không được cung cấp.",
-    "instance": "/api/v1/workorders"
-  }
-  ```
-
-### 2. Không có quyền truy cập (HTTP 403 Forbidden)
-- **Lớp cài đặt:** `AccessDeniedHandler`
-- **RFC 7807 Payload:**
-  ```json
-  {
-    "type": "urn:problem-type:forbidden",
-    "title": "Forbidden",
-    "status": 403,
-    "detail": "Tài khoản của bạn không có quyền thực hiện thao tác này.",
-    "instance": "/api/v1/workorders"
-  }
-  ```
+ 
+ Các ngoại lệ bảo mật phát sinh tại tầng Filter hoặc Security Interceptor phải được chuyển đổi sang định dạng JSON chuẩn `application/problem+json`:
+ 
+ ### 1. Chưa xác thực (HTTP 401 Unauthorized)
+ - **Lớp cài đặt:** `CustomAuthenticationEntryPoint` (tại `SecurityConfig.filterChain`)
+ - **RFC 7807 Payload:**
+   ```json
+   {
+     "type": "urn:problem-type:unauthorized",
+     "title": "Unauthorized",
+     "status": 401,
+     "detail": "Authentication token is missing or expired",
+     "instance": "/api/v1/workorders"
+   }
+   ```
+ 
+ ### 2. Không có quyền truy cập (HTTP 403 Forbidden)
+ - **Lớp cài đặt:** `GlobalExceptionHandler.handleAccessDenied` (bắt `org.springframework.security.access.AccessDeniedException`)
+ - **RFC 7807 Payload:**
+   ```json
+   {
+     "type": "urn:problem-type:forbidden",
+     "title": "Access Denied",
+     "status": 403,
+     "detail": "Access Denied",
+     "instance": "/api/v1/workorders"
+   }
+   ```
 
 ---
 

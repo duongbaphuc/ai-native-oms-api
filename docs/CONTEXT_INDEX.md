@@ -65,7 +65,7 @@ Khi phát triển từng phần, lập trình viên/Copilot chỉ cần nạp c�
 ## 5. Trung Tâm Quản Trị Prompt AI (AI Prompt Repository)
 
 Thư mục [`docs/prompt/`](prompt/README.md) quản lý toàn bộ các câu lệnh Prompt được chuẩn hóa của dự án:
-- [`docs/prompt/01-sdlc-playbook/`](prompt/01-sdlc-playbook/00-MASTER-AI-NATIVE-SDLC-PLAYBOOK.md): Chuỗi 8 prompt quy trình AI-Native SDLC toàn diện (Role - Task - Constraints - Done When).
+- [`docs/prompt/01-sdlc-playbook/`](prompt/01-sdlc-playbook/00-MASTER-AI-NATIVE-SDLC-PLAYBOOK.md): Chuỗi 13 prompt quy trình AI-Native SDLC toàn diện từ Khởi tạo đến Vận hành & Cập nhật đặc tả (Pha 00 - 12).
 - [`docs/prompt/02-copilot-slash-commands/`](prompt/02-copilot-slash-commands/README.md): Lệnh Slash Commands tích hợp trong IDE Copilot (`.github/prompts/`).
 - [`docs/prompt/03-module-task-prompts/`](prompt/03-module-task-prompts/README.md): Bản thảo kỹ thuật theo từng module (`docs/drafts/`).
 - [`docs/prompt/04-dev-contributions/`](prompt/04-dev-contributions/): Prompt đóng góp từ các developer khác (`tudtbis92`, `templates`).
@@ -74,5 +74,28 @@ Thư mục [`docs/prompt/`](prompt/README.md) quản lý toàn bộ các câu l�
 
 ## 6. Chính Sách Lưu Trữ (Archive Policy)
 
-* Thư mục [`docs/archive/`](archive/) chứa các báo cáo kiểm toán cũ và các bản review lịch sử (bao gồm `review-code-vs-spec-WO-REVIEW-01.md`).
+* Thư mục [`docs/archive/`](archive/) chứa các báo cáo kiểm toán cũ và các bản review lịch sử (bao gồm `review-code-vs-spec-WO-REVIEW-01.md`, `code-vs-spec-audit-report-*.md`).
 * **CẢNH BÁO CHO AI:** Tuyệt đối **KHÔNG** đọc hoặc nạp các tệp trong `docs/archive/` làm căn cứ sinh code, nhằm tránh xung đột nhận thức với các quy chuẩn kỹ thuật mới nhất.
+
+---
+
+## 7. Bảng Kiểm Kê Tệp Sống & Ngân Sách Ngữ Cảnh AI (File Inventory & Token Budget)
+
+Bảng này cung cấp ước tính dung lượng và token của các tệp tài liệu sống trong `docs/` để AI Agent kiểm soát ngân sách context window:
+
+| Tên Tệp Markdown | Kích Thước (Bytes) | Ước Tính Tokens | Mục Đích Chính |
+|---|---|---|---|
+| [`docs/br-analysis-wo.md`](br-analysis-wo.md) | ~5,050 | ~1,250 | Phân tích bài toán nghiệp vụ sự cố lưới điện |
+| [`docs/domain-model.md`](domain-model.md) | ~4,870 | ~1,200 | Thực thể WorkOrder, Invariants, State Machine |
+| [`docs/api-spec.md`](api-spec.md) | ~10,670 | ~2,600 | Hợp đồng REST API, RFC 7807 Error Catalog |
+| [`docs/database-migration-spec.md`](database-migration-spec.md) | ~8,730 | ~2,100 | Flyway DDL `V1__...`, Indexing, Schema constraints |
+| [`docs/security-auth-spec.md`](security-auth-spec.md) | ~9,150 | ~2,250 | Dual SecurityFilterChain, RBAC matrix, Security headers |
+| [`docs/coding-rules.md`](coding-rules.md) | ~2,240 | ~550 | Chuẩn Java 17 records, Constructor Injection |
+| [`docs/api-rules.md`](api-rules.md) | ~3,930 | ~950 | Chuẩn RESTful, JSON schema, RFC 7807 |
+| [`docs/internal-coding-standards.md`](internal-coding-standards.md) | ~8,900 | ~2,200 | Chuẩn UTC Instant, PagedResponse, mapping thủ công |
+| [`docs/security-rules.md`](security-rules.md) | ~2,830 | ~700 | OWASP API Top 10, Defense-in-depth guardrails |
+| [`docs/observability-and-logging.md`](observability-and-logging.md) | ~8,730 | ~2,150 | Tracing, MDC logging context, Metrics |
+| [`docs/ADR-001-use-h2-database.md`](ADR-001-use-h2-database.md) | ~2,050 | ~500 | Quyết định kiến trúc cơ sở dữ liệu H2 |
+| [`docs/SYSTEM_HANDOVER.md`](SYSTEM_HANDOVER.md) | ~32,000 | ~7,800 | Hồ sơ bàn giao kỹ thuật toàn diện, 78 tests, Runbook |
+| [`docs/SECURITY_HANDOVER_REPORT.md`](SECURITY_HANDOVER_REPORT.md) | ~29,000 | ~7,200 | Hồ sơ bàn giao an ninh, thẩm định OWASP, SEC-01..04 |
+
