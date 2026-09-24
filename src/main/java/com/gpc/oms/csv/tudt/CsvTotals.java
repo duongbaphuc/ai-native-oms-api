@@ -73,7 +73,7 @@ public final class CsvTotals {
             if (line == null) {
                 throw new IllegalArgumentException("Empty CSV input");
             }
-            if (!line.isEmpty() && line.charAt(0) == '﻿') {
+            if (!line.isEmpty() && line.charAt(0) == '\uFEFF') {
                 line = line.substring(1);
             }
             List<String> header = trimAll(parseLine(line));
@@ -142,7 +142,7 @@ public final class CsvTotals {
         boolean firstPhysical = true;
         while ((line = br.readLine()) != null) {
             lineNo++;
-            if (firstPhysical && !line.isEmpty() && line.charAt(0) == '﻿') {
+            if (firstPhysical && !line.isEmpty() && line.charAt(0) == '\uFEFF') {
                 line = line.substring(1);
             }
             firstPhysical = false;
@@ -156,7 +156,7 @@ public final class CsvTotals {
             throw new IllegalArgumentException("Empty CSV input");
         }
         List<String> header = trimAll(parseLine(headerLine));
-        if (!header.isEmpty() && !header.get(0).isEmpty() && header.get(0).charAt(0) == '﻿') {
+        if (!header.isEmpty() && !header.get(0).isEmpty() && header.get(0).charAt(0) == '\uFEFF') {
             header.set(0, header.get(0).substring(1));
         }
         Map<String, Integer> indexByHeader = new HashMap<>();
@@ -420,7 +420,7 @@ public final class CsvTotals {
     }
 
     private static String stripBom(String s) {
-        if (!s.isEmpty() && s.charAt(0) == '﻿') {
+        if (!s.isEmpty() && s.charAt(0) == '\uFEFF') {
             return s.substring(1);
         }
         return s;
