@@ -174,3 +174,17 @@ Mọi lỗi trả về client bắt buộc tuân thủ schema JSON sau (`applica
 | `404 Not Found` | `urn:problem-type:not-found` | *Message chi tiết* | `handleResourceNotFound` | Không tìm thấy bản ghi theo UUID chỉ định |
 | `422 Unprocessable Entity` | `urn:problem-type:invalid-state-transition` | *Message chi tiết* | `handleIllegalStateTransition` | Vi phạm quy tắc chuyển trạng thái của State Machine |
 | `500 Internal Server Error` | `urn:problem-type:internal-error` | `An unexpected error occurred` | `handleUnexpected` | Lỗi ngoại lệ không lường trước (che giấu stack trace) |
+
+---
+
+## 6. Giám Sát & Thăm Dò Sức Khỏe Ứng Dụng (Spring Boot Actuator Probes)
+
+Hệ thống cung cấp các endpoint thăm dò trạng thái phục vụ giám sát container, Kubernetes liveness/readiness probes và bộ điều phối CI/CD:
+
+| Endpoint | Giao thức | Phân Quyền | Mục Đích Sử Dụng | Phản Hồi Thành Công |
+|---|---|---|---|---|
+| `/actuator/health` | `GET` | Public (`permitAll`) | Kiểm tra sức khỏe tổng thể và Kubernetes Liveness/Readiness probes | `200 OK` `{"status":"UP"}` |
+| `/actuator/info` | `GET` | Public (`permitAll`) | Cung cấp thông tin phiên bản và build metadata của ứng dụng | `200 OK` `{}` |
+
+> [!NOTE]
+> Thuộc tính `management.endpoint.health.show-details: when-authorized` đảm bảo chi tiết thành phần nội bộ (DB, disk) chỉ hiển thị khi có chứng thực hợp lệ, ngăn chặn rò rỉ cấu trúc hạ tầng ra bên ngoài.
