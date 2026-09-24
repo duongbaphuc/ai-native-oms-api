@@ -1,6 +1,6 @@
 <!--
 Role: Senior Engineer. Task: Xây dựng 2 API GET /api/v1/workorders và GET /api/v1/workorders/{id}.
-Context files: docs/api-spec.md, docs/security-rules.md, docs/coding-rules.md
+Context files: docs/02-api-spec.md, docs/00-security-rules.md, docs/00-coding-rules.md
 Constraints: 
 - Lấy danh sách (GET /): Phân quyền DISPATCHER, TECHNICIAN, ADMIN, hỗ trợ phân trang (Pageable) và lọc status, trả về PagedResponse<WorkOrderResponse>.
 - Lấy chi tiết (GET /{id}): Phân quyền DISPATCHER, TECHNICIAN, ADMIN, trả về WorkOrderResponse, nếu không tìm thấy trả lỗi 404 RFC 7807.
@@ -30,7 +30,7 @@ DRAFT ONLY — scoring target, never wired into app.
 5. Return `ResponseEntity.ok(response)`
 
 **Service (`getWorkOrders`):**  
-→ Xem chi tiết tại [`draft-workorder-service.md`](draft-workorder-service.md) §Method 2. Tuân thủ chuẩn `PagedResponse<T>` tại [`internal-coding-standards.md`](../internal-coding-standards.md) §3.
+→ Xem chi tiết tại [`draft-workorder-service.md`](draft-workorder-service.md) §Method 2. Tuân thủ chuẩn `PagedResponse<T>` tại [`00-internal-coding-standards.md`](../00-internal-coding-standards.md) §3.
 
 ### Error Mapping
 

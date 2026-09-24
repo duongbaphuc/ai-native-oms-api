@@ -10,15 +10,15 @@
 ## 1. Tóm Tắt Điều Hành (Executive Summary)
 
 Cuộc kiểm toán được thực hiện nhằm đánh giá tính toàn vẹn, sự tuân thủ nghiêm ngặt và mức độ sẵn sàng bàn giao (Production-Readiness) của mã nguồn dự án `ai-native-oms-api` đối chiếu trực tiếp với 9 tài liệu đặc tả kỹ thuật nền tảng:
-- `docs/domain-model.md`
-- `docs/api-spec.md`
-- `docs/security-auth-spec.md`
-- `docs/api-rules.md`
-- `docs/coding-rules.md`
-- `docs/database-migration-spec.md`
-- `docs/observability-and-logging.md`
-- `docs/internal-coding-standards.md`
-- `docs/devops-pipeline-spec.md`
+- `docs/01-domain-model.md`
+- `docs/02-api-spec.md`
+- `docs/02-security-auth-spec.md`
+- `docs/00-api-rules.md`
+- `docs/00-coding-rules.md`
+- `docs/02-database-migration-spec.md`
+- `docs/02-observability-and-logging.md`
+- `docs/00-internal-coding-standards.md`
+- `docs/10-devops-pipeline-spec.md`
 
 ### Kết quả Đánh Giá Tổng Thể:
 - **Điểm số tuân thủ tổng thể (Overall Compliance Score):** **`99.5 / 100` (HẠNG XUẤT SẮC - GRADE A+)**
@@ -32,23 +32,23 @@ Cuộc kiểm toán được thực hiện nhằm đánh giá tính toàn vẹn,
 
 | STT | Tài Liệu Đặc Tả (Spec & Section) | Thành Phần Mã Nguồn (Code File) | Trạng Thái Tuân Thủ | Ghi Chú Đánh Giá Chi Tiết |
 |:---:|---|---|:---:|---|
-| **1** | `docs/domain-model.md` §Entities | `src/main/java/com/gpc/oms/domain/WorkOrder.java` | **COMPLIANT** | Khởi tạo UUID v4, các cột `equipmentId(50)`, `description(500)`, `priority`, `status`, `createdAt(updatable=false)`, `resolvedAt(nullable)`. Manual getters, không dùng Lombok. |
-| **2** | `docs/domain-model.md` §Invariants | `src/main/java/com/gpc/oms/domain/WorkOrderStatus.java` | **COMPLIANT** | Enum `OPEN`, `IN_PROGRESS`, `DONE`. Hàm `canTransitionTo()` kiểm soát chuyển trạng thái 1 chiều $3 \times 3$, ném `IllegalStateException` khi vi phạm. |
-| **3** | `docs/domain-model.md` §Entities | `src/main/java/com/gpc/oms/domain/Priority.java` | **COMPLIANT** | Enum 4 mức: `LOW`, `MEDIUM`, `HIGH`, `CRITICAL`. |
-| **4** | `docs/domain-model.md` §Repository | `src/main/java/com/gpc/oms/domain/WorkOrderRepository.java` | **COMPLIANT** | Kế thừa `JpaRepository<WorkOrder, UUID>`, khai báo `findByStatus(WorkOrderStatus, Pageable)`. |
-| **5** | `docs/api-spec.md` §1 Request | `src/main/java/com/gpc/oms/dto/WorkOrderRequest.java` | **COMPLIANT** | Java Record. Validation: `@NotBlank`, `@Size(max=50)`, `@NotBlank`, `@Size(min=10, max=500)`, `@NotNull`. `@JsonIgnoreProperties(ignoreUnknown=false)`. |
-| **6** | `docs/api-spec.md` §4 Request | `src/main/java/com/gpc/oms/dto/WorkOrderStatusRequest.java` | **COMPLIANT** | Java Record. Validation: `@NotNull(message = "status must not be null; valid values: Open, InProgress, Done")`. |
-| **7** | `docs/api-spec.md` §1 Response | `src/main/java/com/gpc/oms/dto/WorkOrderResponse.java` | **COMPLIANT** | Java Record. Khớp 100% 7 trường dữ liệu. Cung cấp static factory method `from(WorkOrder entity)`. |
-| **8** | `docs/internal-coding-standards.md` §3 | `src/main/java/com/gpc/oms/dto/PagedResponse.java` | **COMPLIANT** | Java Record chuẩn hóa phân trang: `content`, `pageNumber`, `pageSize`, `totalElements`, `totalPages`, `isFirst`, `isLast`. Static factory `from(Page<T>)`. |
-| **9** | `docs/api-spec.md` §3 Exception | `src/main/java/com/gpc/oms/exception/ResourceNotFoundException.java` | **COMPLIANT** | Domain exception kế thừa `RuntimeException`. |
-| **10** | `docs/api-rules.md` §2, `security-rules.md` | `src/main/java/com/gpc/oms/exception/GlobalExceptionHandler.java` | **COMPLIANT** | `@RestControllerAdvice`. Ánh xạ chuẩn xác 6 nhóm lỗi RFC 7807 URN: `validation-error`, `malformed-json`, `forbidden`, `not-found`, `invalid-state-transition`, `internal-error`. |
-| **11** | `docs/coding-rules.md` 3-Tier Service | `src/main/java/com/gpc/oms/service/WorkOrderService.java` | **COMPLIANT** | Constructor injection, tách biệt logic nghiệp vụ, xử lý rẽ nhánh `status != null` vs `status == null`, re-throw `IllegalStateException` sang 422. |
-| **12** | `docs/api-spec.md` §1–§4 | `src/main/java/com/gpc/oms/controller/WorkOrderController.java` | **COMPLIANT** | Tiền tố `/api/v1/workorders`, `@Valid` kích hoạt validation, Location header cho 201 Created. |
-| **13** | `docs/security-auth-spec.md` §3 RBAC | `src/main/java/com/gpc/oms/controller/WorkOrderController.java` | **COMPLIANT** | `@PreAuthorize` kiểm soát chặt chẽ: `POST` (DISPATCHER/TECHNICIAN/ADMIN), `GET` (DISPATCHER/TECHNICIAN/ADMIN), `PATCH` (CHỈ TECHNICIAN/ADMIN; DISPATCHER bị chặn 403). |
-| **14** | `docs/security-auth-spec.md` §1, 6 | `src/main/java/com/gpc/oms/config/SecurityConfig.java` | **COMPLIANT** | Stateless, CSRF disabled cho token-based, Custom `AuthenticationEntryPoint` trả về RFC 7807 `urn:problem-type:unauthorized` khi thiếu token. |
-| **15** | `docs/database-migration-spec.md` | `src/main/resources/db/migration/V1__init_work_orders_schema.sql` | **COMPLIANT** | DDL H2/PostgreSQL tương thích: UUID PK, check constraints `chk_work_orders_priority`, `chk_work_orders_status`, 2 indexes tra cứu. |
-| **16** | `docs/ADR-001-use-h2-database.md` | `src/main/resources/application.yml` | **COMPLIANT** | Cấu hình H2 in-memory DB, `fail-on-unknown-properties: true`, bật H2 web console. |
-| **17** | `docs/devops-pipeline-spec.md` | `pom.xml` (JaCoCo Quality Gate) | **COMPLIANT** | Cấu hình `jacoco-maven-plugin` thực thi kiểm soát chất lượng ở pha `verify`: chặn build nếu `LINE` hoặc `BRANCH` coverage trên 5 package nghiệp vụ < 100%. |
+| **1** | `docs/01-domain-model.md` §Entities | `src/main/java/com/gpc/oms/domain/WorkOrder.java` | **COMPLIANT** | Khởi tạo UUID v4, các cột `equipmentId(50)`, `description(500)`, `priority`, `status`, `createdAt(updatable=false)`, `resolvedAt(nullable)`. Manual getters, không dùng Lombok. |
+| **2** | `docs/01-domain-model.md` §Invariants | `src/main/java/com/gpc/oms/domain/WorkOrderStatus.java` | **COMPLIANT** | Enum `OPEN`, `IN_PROGRESS`, `DONE`. Hàm `canTransitionTo()` kiểm soát chuyển trạng thái 1 chiều $3 \times 3$, ném `IllegalStateException` khi vi phạm. |
+| **3** | `docs/01-domain-model.md` §Entities | `src/main/java/com/gpc/oms/domain/Priority.java` | **COMPLIANT** | Enum 4 mức: `LOW`, `MEDIUM`, `HIGH`, `CRITICAL`. |
+| **4** | `docs/01-domain-model.md` §Repository | `src/main/java/com/gpc/oms/domain/WorkOrderRepository.java` | **COMPLIANT** | Kế thừa `JpaRepository<WorkOrder, UUID>`, khai báo `findByStatus(WorkOrderStatus, Pageable)`. |
+| **5** | `docs/02-api-spec.md` §1 Request | `src/main/java/com/gpc/oms/dto/WorkOrderRequest.java` | **COMPLIANT** | Java Record. Validation: `@NotBlank`, `@Size(max=50)`, `@NotBlank`, `@Size(min=10, max=500)`, `@NotNull`. `@JsonIgnoreProperties(ignoreUnknown=false)`. |
+| **6** | `docs/02-api-spec.md` §4 Request | `src/main/java/com/gpc/oms/dto/WorkOrderStatusRequest.java` | **COMPLIANT** | Java Record. Validation: `@NotNull(message = "status must not be null; valid values: Open, InProgress, Done")`. |
+| **7** | `docs/02-api-spec.md` §1 Response | `src/main/java/com/gpc/oms/dto/WorkOrderResponse.java` | **COMPLIANT** | Java Record. Khớp 100% 7 trường dữ liệu. Cung cấp static factory method `from(WorkOrder entity)`. |
+| **8** | `docs/00-internal-coding-standards.md` §3 | `src/main/java/com/gpc/oms/dto/PagedResponse.java` | **COMPLIANT** | Java Record chuẩn hóa phân trang: `content`, `pageNumber`, `pageSize`, `totalElements`, `totalPages`, `isFirst`, `isLast`. Static factory `from(Page<T>)`. |
+| **9** | `docs/02-api-spec.md` §3 Exception | `src/main/java/com/gpc/oms/exception/ResourceNotFoundException.java` | **COMPLIANT** | Domain exception kế thừa `RuntimeException`. |
+| **10** | `docs/00-api-rules.md` §2, `00-security-rules.md` | `src/main/java/com/gpc/oms/exception/GlobalExceptionHandler.java` | **COMPLIANT** | `@RestControllerAdvice`. Ánh xạ chuẩn xác 6 nhóm lỗi RFC 7807 URN: `validation-error`, `malformed-json`, `forbidden`, `not-found`, `invalid-state-transition`, `internal-error`. |
+| **11** | `docs/00-coding-rules.md` 3-Tier Service | `src/main/java/com/gpc/oms/service/WorkOrderService.java` | **COMPLIANT** | Constructor injection, tách biệt logic nghiệp vụ, xử lý rẽ nhánh `status != null` vs `status == null`, re-throw `IllegalStateException` sang 422. |
+| **12** | `docs/02-api-spec.md` §1–§4 | `src/main/java/com/gpc/oms/controller/WorkOrderController.java` | **COMPLIANT** | Tiền tố `/api/v1/workorders`, `@Valid` kích hoạt validation, Location header cho 201 Created. |
+| **13** | `docs/02-security-auth-spec.md` §3 RBAC | `src/main/java/com/gpc/oms/controller/WorkOrderController.java` | **COMPLIANT** | `@PreAuthorize` kiểm soát chặt chẽ: `POST` (DISPATCHER/TECHNICIAN/ADMIN), `GET` (DISPATCHER/TECHNICIAN/ADMIN), `PATCH` (CHỈ TECHNICIAN/ADMIN; DISPATCHER bị chặn 403). |
+| **14** | `docs/02-security-auth-spec.md` §1, 6 | `src/main/java/com/gpc/oms/config/SecurityConfig.java` | **COMPLIANT** | Stateless, CSRF disabled cho token-based, Custom `AuthenticationEntryPoint` trả về RFC 7807 `urn:problem-type:unauthorized` khi thiếu token. |
+| **15** | `docs/02-database-migration-spec.md` | `src/main/resources/db/migration/V1__init_work_orders_schema.sql` | **COMPLIANT** | DDL H2/PostgreSQL tương thích: UUID PK, check constraints `chk_work_orders_priority`, `chk_work_orders_status`, 2 indexes tra cứu. |
+| **16** | `docs/02-ADR-001-use-h2-database.md` | `src/main/resources/application.yml` | **COMPLIANT** | Cấu hình H2 in-memory DB, `fail-on-unknown-properties: true`, bật H2 web console. |
+| **17** | `docs/10-devops-pipeline-spec.md` | `pom.xml` (JaCoCo Quality Gate) | **COMPLIANT** | Cấu hình `jacoco-maven-plugin` thực thi kiểm soát chất lượng ở pha `verify`: chặn build nếu `LINE` hoặc `BRANCH` coverage trên 5 package nghiệp vụ < 100%. |
 
 ---
 
@@ -87,7 +87,7 @@ Cuộc kiểm toán được thực hiện nhằm đánh giá tính toàn vẹn,
 
 ### Trụ Cột 5: Quy Chuẩn Mã Sạch & Vệ Sinh Mã Nguồn (Clean Code & Hygiene)
 - **Đánh giá: 9.8/10**
-- Mã nguồn tuân thủ triệt để [docs/coding-rules.md](file:///c:/ai-native-oms-api/docs/coding-rules.md):
+- Mã nguồn tuân thủ triệt để [docs/00-coding-rules.md](file:///c:/ai-native-oms-api/docs/00-coding-rules.md):
   * **No-Lombok Rule:** Tuyệt đối không sử dụng Lombok; toàn bộ DTOs sử dụng Java Record bất biến, Entity sử dụng getter thủ công.
   * **Java 17 Language Features:** Khai thác Switch Expressions (pattern matching trong enum), Text Blocks, Java Records.
   * **Fail-Fast Deserialization:** Bật cấu hình `fail-on-unknown-properties: true` kết hợp `@JsonIgnoreProperties(ignoreUnknown = false)` nhằm ngăn chặn tấn công injection hoặc sai lệch payload.
@@ -118,8 +118,8 @@ Cuộc kiểm toán được thực hiện nhằm đánh giá tính toàn vẹn,
 
 | Mã Phát Hiện | Mức Độ | Vị Trí File & Dòng | Hiện Trạng Phân Tích | Khuyến Nghị Cải Tiến Tiếp Theo |
 |:---:|:---:|---|---|---|
-| **F-01** | `Info` | [SecurityConfig.java](file:///c:/ai-native-oms-api/src/main/java/com/gpc/oms/config/SecurityConfig.java) L39-L53 | `UserDetailsService` InMemory (`admin`, `dispatcher`, `technician`) đang cấu hình trực tiếp để phục vụ kiểm thử local và demo trên browser. | Trong môi trường Production thực tế, chuyển đổi sang OAuth2 Resource Server / JWT Decoder xác thực qua SSO Keycloak/Auth0 như đặc tả tại `docs/security-auth-spec.md`. |
-| **F-02** | `Info` | [application.yml](file:///c:/ai-native-oms-api/src/main/resources/application.yml) L5 | Đang sử dụng H2 in-memory Database (`jdbc:h2:mem:workorderdb`) cho môi trường demo theo `docs/ADR-001-use-h2-database.md`. | Khi triển khai hạ tầng Production, kích hoạt profile `prod` trỏ về PostgreSQL 15+ cluster kèm Flyway enabled. |
+| **F-01** | `Info` | [SecurityConfig.java](file:///c:/ai-native-oms-api/src/main/java/com/gpc/oms/config/SecurityConfig.java) L39-L53 | `UserDetailsService` InMemory (`admin`, `dispatcher`, `technician`) đang cấu hình trực tiếp để phục vụ kiểm thử local và demo trên browser. | Trong môi trường Production thực tế, chuyển đổi sang OAuth2 Resource Server / JWT Decoder xác thực qua SSO Keycloak/Auth0 như đặc tả tại `docs/02-security-auth-spec.md`. |
+| **F-02** | `Info` | [application.yml](file:///c:/ai-native-oms-api/src/main/resources/application.yml) L5 | Đang sử dụng H2 in-memory Database (`jdbc:h2:mem:workorderdb`) cho môi trường demo theo `docs/02-ADR-001-use-h2-database.md`. | Khi triển khai hạ tầng Production, kích hoạt profile `prod` trỏ về PostgreSQL 15+ cluster kèm Flyway enabled. |
 | **F-03** | `Minor` | [GlobalExceptionHandler.java](file:///c:/ai-native-oms-api/src/main/java/com/gpc/oms/exception/GlobalExceptionHandler.java) L90 | Hàm `handleUnexpected` bắt chung `Exception.class` và ghi log full stack trace. | Đã triển khai hoàn hảo việc che giấu chi tiết nội bộ với client (trả về message tĩnh `An unexpected error occurred`). Nên gắn thêm thuộc tính `traceId` / `correlationId` vào ProblemDetail để hỗ trợ truy vết log trên Grafana Loki. |
 
 ---

@@ -1,4 +1,4 @@
-// AI Provenance: generated from docs/api-spec.md, docs/security-rules.md, docs/drafts/draft-workorder-tests.md
+// AI Provenance: generated from docs/02-api-spec.md, docs/00-security-rules.md, docs/drafts/draft-workorder-tests.md
 package com.gpc.oms.controller;
 
 import com.fasterxml.jackson.databind.ObjectMapper;

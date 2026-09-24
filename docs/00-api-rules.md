@@ -1,7 +1,7 @@
 <!--
 Role: Principal API Architect
 Task: API Design Rules, RFC 7807 Standard, and Jackson Strict Schema Configuration
-Context files: docs/coding-rules.md, docs/security-rules.md, docs/api-spec.md
+Context files: docs/00-coding-rules.md, docs/00-security-rules.md, docs/02-api-spec.md
 Constraints: REST plural resources, RFC 7807 problem+json, Strict schema (fail on unknown properties)
 Target Files:
 - src/main/java/com/gpc/oms/controller/WorkOrderController.java
@@ -18,7 +18,7 @@ Tài liệu này xác định các quy tắc thiết kế giao diện lập trì
 
 1. **Danh từ Số nhiều:** Toàn bộ REST endpoints phải sử dụng danh từ số nhiều ở dạng chữ thường (vd: `/api/v1/workorders`).
 2. **Phiên bản Hóa:** Bắt buộc đặt phiên bản tiền tố `/api/v1/` trong đường dẫn.
-3. **Cấm Phát minh Trường:** AI Copilot không được phép tự thêm các trường JSON ngoài phạm vi đã được quy định trong `docs/api-spec.md`.
+3. **Cấm Phát minh Trường:** AI Copilot không được phép tự thêm các trường JSON ngoài phạm vi đã được quy định trong `docs/02-api-spec.md`.
 
 ---
 

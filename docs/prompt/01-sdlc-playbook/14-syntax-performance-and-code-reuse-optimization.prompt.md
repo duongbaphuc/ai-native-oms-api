@@ -31,7 +31,7 @@ Thực hiện quy trình tối ưu hóa và đồng bộ hóa toàn diện theo 
    - Rà soát code snippet mẫu trong:
      * `.github/copilot-instructions.md`
      * `docs/drafts/*.md` (`draft-dtos.md`, `draft-workorder-service.md`, `draft-workorder-domain.md`, `draft-global-exception-handler.md`, `draft-workorder-tests.md`)
-     * `docs/internal-coding-standards.md`, `docs/api-spec.md`
+     * `docs/00-internal-coding-standards.md`, `docs/02-api-spec.md`
    - Phát hiện các đoạn code blueprint còn dùng cú pháp Java cũ, magic strings, hoặc chưa áp dụng các kỹ thuật tối ưu hóa hiệu năng & tái sử dụng.
 3. **Lập bảng Ma Trận Tối Ưu Hóa (Optimization Matrix):**
    - Liệt kê: `Tệp/Thành phần` | `Khía cạnh (Cú pháp / Hiệu năng / Tái sử dụng)` | `Hiện trạng` | `Hành động Tối ưu hóa`.
@@ -63,7 +63,7 @@ Thực hiện các tinh chỉnh vi mô (Micro-refactoring) đảm bảo giữ ng
 ### Bước 4: Đồng Bộ & Nâng Cấp Toàn Bộ Các File Markdown Đã Sinh (`docs/` & `.github/`)
 1. **Cập nhật `.github/copilot-instructions.md`:**
    - Bổ sung quy chuẩn: Ưu tiên cú pháp Java 17 hiện đại, Pre-sizing Collections, sử dụng hằng số tập trung cho URN RFC 7807, và bắt buộc dùng Test Fixture Pattern cho test code.
-2. **Cập nhật `docs/internal-coding-standards.md`:**
+2. **Cập nhật `docs/00-internal-coding-standards.md`:**
    - Bổ sung mục "Modern Java 17 Idioms, JVM Performance & Code Reusability Guide" hướng dẫn chi tiết cách viết code tối ưu CPU/RAM và tái sử dụng components.
 3. **Cập nhật toàn bộ các file trong `docs/drafts/`:**
    - Đồng bộ hóa các khối code mẫu trong `docs/drafts/draft-dtos.md`, `draft-workorder-service.md`, `draft-workorder-domain.md`, `draft-global-exception-handler.md`, `draft-workorder-tests.md` khớp 100% với các tối ưu hóa thực tế.
@@ -93,7 +93,7 @@ Thực hiện các tinh chỉnh vi mô (Micro-refactoring) đảm bảo giữ ng
 # DONE WHEN:
 1. Bảng Ma Trận Tối Ưu Hóa (Optimization Matrix) được lập hoàn chỉnh, ghi nhận 100% các tệp Java và Markdown đều ở trạng thái **OPTIMIZED & COMPLIANT**.
 2. Toàn bộ mã nguồn Java trong `src/main/` và `src/test/` áp dụng cú pháp Java 17 hiện đại, tối ưu bộ nhớ/JIT, và sử dụng Test Fixture Pattern.
-3. Toàn bộ các tệp Markdown (`docs/drafts/*.md`, `docs/internal-coding-standards.md`, `.github/copilot-instructions.md`) được cập nhật đồng bộ các đoạn code mẫu đạt chuẩn.
+3. Toàn bộ các tệp Markdown (`docs/drafts/*.md`, `docs/00-internal-coding-standards.md`, `.github/copilot-instructions.md`) được cập nhật đồng bộ các đoạn code mẫu đạt chuẩn.
 4. Lệnh `mvn clean verify` chạy thành công với 100% bài test PASS và JaCoCo đạt 100% Line & Branch Coverage.
 5. Atomic Pull Request được mở thành công trên GitHub với base branch là `main` sẵn sàng cho Human Reviewer phê duyệt.
 ```

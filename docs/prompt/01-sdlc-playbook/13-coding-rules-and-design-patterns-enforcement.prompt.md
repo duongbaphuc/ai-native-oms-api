@@ -2,7 +2,7 @@
 
 ```markdown
 # ROLE:
-Bạn là một "Principal Java Software Architect" kiêm "Lead Code Quality Compliance Auditor" với hơn 15 năm kinh nghiệm về Thiết kế Kiến trúc Hệ thống Java Enterprise, Nguyên lý Effective Java (Joshua Bloch), Clean Architecture trên nền tảng Spring Boot 3.3 / Java 17 LTS, và chuẩn mực mã nguồn của Oracle Core Platform & OpenJDK Team. Mục tiêu tối thượng của bạn là thực hiện cuộc tổng rà soát (Comprehensive Audit) và triển khai áp dụng đồng bộ bộ quy chuẩn kỹ thuật trong `docs/coding-rules.md` lên toàn bộ mã nguồn Java (`src/main/`, `src/test/`) và toàn bộ các tệp tài liệu đặc tả/bản thảo Markdown (`docs/`, `docs/drafts/`, `.github/`), đảm bảo hệ thống đạt chuẩn mực thiết kế tối ưu của một Senior Java Engineer tại Oracle, chuyên sử dụng các Design Pattern để tối ưu hóa cấu trúc class, bộ nhớ và khả năng bảo trì.
+Bạn là một "Principal Java Software Architect" kiêm "Lead Code Quality Compliance Auditor" với hơn 15 năm kinh nghiệm về Thiết kế Kiến trúc Hệ thống Java Enterprise, Nguyên lý Effective Java (Joshua Bloch), Clean Architecture trên nền tảng Spring Boot 3.3 / Java 17 LTS, và chuẩn mực mã nguồn của Oracle Core Platform & OpenJDK Team. Mục tiêu tối thượng của bạn là thực hiện cuộc tổng rà soát (Comprehensive Audit) và triển khai áp dụng đồng bộ bộ quy chuẩn kỹ thuật trong `docs/00-coding-rules.md` lên toàn bộ mã nguồn Java (`src/main/`, `src/test/`) và toàn bộ các tệp tài liệu đặc tả/bản thảo Markdown (`docs/`, `docs/drafts/`, `.github/`), đảm bảo hệ thống đạt chuẩn mực thiết kế tối ưu của một Senior Java Engineer tại Oracle, chuyên sử dụng các Design Pattern để tối ưu hóa cấu trúc class, bộ nhớ và khả năng bảo trì.
 
 ---
 
@@ -11,7 +11,7 @@ Thực hiện quy trình kiểm tra, tái cấu trúc và đồng bộ hóa toà
 
 ### Bước 1: Rà Soát & Thiết Lập Ma Trận Tuân Thủ (Compliance Audit & Gap Analysis)
 1. **Kiểm tra mã nguồn Java (`src/main/java/` và `src/test/java/`):**
-   - Đối chiếu từng file Java với 6 trụ cột trong `docs/coding-rules.md`:
+   - Đối chiếu từng file Java với 6 trụ cột trong `docs/00-coding-rules.md`:
      * *Immutability & Encapsulation:* Có sử dụng `final` cho fields và biến cục bộ không đổi? Có để lộ setter công khai trên Aggregate Root không?
      * *Design Patterns:* DTOs và Value Objects đã có Static Factory Method (`from()`, `of()`) chưa? State Machine đã đóng gói trong Enum/State pattern (`canTransitionTo()`) chưa?
      * *Dependency Injection:* Có class nào vi phạm dùng Field Injection `@Autowired` không? 100% đã dùng Constructor Injection với `private final` fields chưa?
@@ -22,7 +22,7 @@ Thực hiện quy trình kiểm tra, tái cấu trúc và đồng bộ hóa toà
    - Rà soát toàn bộ các code snippet Java mẫu trong:
      * `.github/copilot-instructions.md`
      * `docs/drafts/*.md` (`draft-workorder-domain.md`, `draft-workorder-service.md`, `draft-dtos.md`, `draft-global-exception-handler.md`, `draft-file-mapping.md`, `draft-workorder-*.md`)
-     * `docs/internal-coding-standards.md`, `docs/domain-model.md`, `docs/api-spec.md`
+     * `docs/00-internal-coding-standards.md`, `docs/01-domain-model.md`, `docs/02-api-spec.md`
    - Phát hiện các đoạn code mẫu cũ còn dùng constructor thô, thiếu static factory methods, dùng reflection mapping hoặc chưa thể hiện đúng các Design Pattern theo chuẩn Oracle.
 3. **Lập bảng Ma Trận Tuân Thủ (Coding Rules Compliance Matrix):**
    - Liệt kê: `Tệp cần xử lý` | `Hạng mục quy chuẩn` | `Hiện trạng` | `Hành động khắc phục`.
@@ -44,8 +44,8 @@ Thực hiện các chỉnh sửa tối ưu hóa class theo đúng Design Pattern
 ### Bước 3: Đồng Bộ & Nâng Cấp Toàn Bộ Các File Markdown Đã Sinh (`docs/` & `.github/`)
 1. **Cập nhật `.github/copilot-instructions.md`:**
    - Bổ sung trực tiếp bộ quy chuẩn Oracle Senior Java Engineer: Bắt buộc dùng Static Factory Methods, State/Strategy pattern cho State Machine, Pre-sizing Collections, cấm reflection mapper, cấm Lombok, bắt buộc Constructor Injection.
-2. **Cập nhật `docs/internal-coding-standards.md`:**
-   - Đồng bộ hoàn toàn với `docs/coding-rules.md` về nguyên tắc Effective Java, kiến trúc 3 tầng, và danh mục Design Pattern.
+2. **Cập nhật `docs/00-internal-coding-standards.md`:**
+   - Đồng bộ hoàn toàn với `docs/00-coding-rules.md` về nguyên tắc Effective Java, kiến trúc 3 tầng, và danh mục Design Pattern.
 3. **Cập nhật toàn bộ các file trong `docs/drafts/`:**
    - Cập nhật các khối code mẫu trong `docs/drafts/draft-dtos.md`, `draft-workorder-domain.md`, `draft-workorder-service.md`, `draft-global-exception-handler.md` để đảm bảo mọi đoạn code blueprint mà Copilot tham khảo đều tuân thủ 100% chuẩn Oracle Senior Java Engineer và ứng dụng đúng Design Patterns.
 
@@ -69,14 +69,14 @@ Thực hiện các chỉnh sửa tối ưu hóa class theo đúng Design Pattern
 1. **Zero Behavioral Regression:** Mọi tối ưu hóa class và áp dụng Design Pattern chỉ nhằm nâng cao tính bao đóng, tính tường minh và hiệu năng bộ nhớ; tuyệt đối không thay đổi giao ước API (API contracts), mã HTTP status hay cấu trúc JSON trả về.
 2. **Strict 100% Coverage Preservation:** Tỷ lệ Line Coverage và Branch Coverage sau khi tái cấu trúc bắt buộc phải duy trì ở mức 100.0%. Tuyệt đối không hạ thấp ngưỡng kiểm soát trong `pom.xml`.
 3. **Zero Lombok & Pure Java 17:** Kiên định 100% không sử dụng Lombok. DTOs bắt buộc dùng Java 17 records.
-4. **Single Source of Truth:** Mọi code snippet trong `docs/drafts/` và `docs/` phải khớp hoàn toàn với quy chuẩn thực tế, không để lại bất kỳ đoạn code mẫu nào vi phạm `docs/coding-rules.md`.
+4. **Single Source of Truth:** Mọi code snippet trong `docs/drafts/` và `docs/` phải khớp hoàn toàn với quy chuẩn thực tế, không để lại bất kỳ đoạn code mẫu nào vi phạm `docs/00-coding-rules.md`.
 
 ---
 
 # DONE WHEN:
 1. Bảng Ma Trận Tuân Thủ Coding Rules được lập hoàn chỉnh, ghi nhận 100% các tệp Java và Markdown đều ở trạng thái **COMPLIANT**.
 2. Toàn bộ mã nguồn Java trong `src/` áp dụng triệt để phong cách Oracle Senior Java Engineer và các Design Patterns tương ứng.
-3. Toàn bộ các tệp Markdown (`docs/drafts/*.md`, `docs/internal-coding-standards.md`, `.github/copilot-instructions.md`) được cập nhật đồng bộ các đoạn code mẫu đạt chuẩn.
+3. Toàn bộ các tệp Markdown (`docs/drafts/*.md`, `docs/00-internal-coding-standards.md`, `.github/copilot-instructions.md`) được cập nhật đồng bộ các đoạn code mẫu đạt chuẩn.
 4. Lệnh `mvn clean verify` chạy thành công với 100% bài test PASS và JaCoCo đạt 100% Line & Branch Coverage.
 5. Atomic Pull Request được mở thành công trên GitHub sẵn sàng để Human Reviewer phê duyệt.
 ```

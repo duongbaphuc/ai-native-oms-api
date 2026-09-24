@@ -1,6 +1,6 @@
 <!--
 Role: Senior Engineer. Task: Define WorkOrderService — trung gian giữa Controller và Repository.
-Context files: docs/coding-rules.md, docs/api-rules.md, docs/domain-model.md, docs/security-rules.md
+Context files: docs/00-coding-rules.md, docs/00-api-rules.md, docs/01-domain-model.md, docs/00-security-rules.md
 Constraints:
   - 3-tier architecture: Controller → Service → Repository.
   - Service chứa orchestration logic (convert DTO ↔ Entity, gọi repo, handle exception).
@@ -103,7 +103,7 @@ Entity (state machine, domain rules)
 ## Service Code
 
 ```java
-// AI Provenance: generated from docs/coding-rules.md, docs/api-rules.md, docs/domain-model.md, docs/internal-coding-standards.md
+// AI Provenance: generated from docs/00-coding-rules.md, docs/00-api-rules.md, docs/01-domain-model.md, docs/00-internal-coding-standards.md
 package com.gpc.oms.service;
 
 import com.gpc.oms.domain.WorkOrder;

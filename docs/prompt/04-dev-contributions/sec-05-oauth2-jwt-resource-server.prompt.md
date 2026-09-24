@@ -2,7 +2,7 @@
 > **Phân loại:** Enterprise Security Feature Task Prompt  
 > **Issue:** [#33](https://github.com/duongbaphuc/ai-native-oms-api/issues/33)  
 > **Lỗ hổng:** SEC-05 (CWE-798 Hardcoded / Local Credentials in Production Gap — CVSS HIGH)  
-> **Tài liệu đối chiếu:** `docs/security-auth-spec.md §2-3`, `docs/security-rules.md §1, §3`, `docs/SECURITY_HANDOVER_REPORT.md §3`  
+> **Tài liệu đối chiếu:** `docs/02-security-auth-spec.md §2-3`, `docs/00-security-rules.md §1, §3`, `docs/09-SECURITY_HANDOVER_REPORT.md §3`  
 > **Mục tiêu:** Tích hợp `spring-boot-starter-oauth2-resource-server`, hiện thực hóa cơ chế xác thực JWT không trạng thái (Stateless) tập trung với Identity Provider (Keycloak / Azure AD), bảo đảm an ninh cho môi trường Production.
 
 ```markdown
@@ -12,7 +12,7 @@ Bạn là một "Senior Enterprise Security Architect" kiêm "Spring Security 6.
 ---
 
 # TASK:
-Hiện thực hóa tính năng xác thực JWT tập trung SEC-05 theo yêu cầu trong Issue #33 (`docs/security-auth-spec.md §2-3`):
+Hiện thực hóa tính năng xác thực JWT tập trung SEC-05 theo yêu cầu trong Issue #33 (`docs/02-security-auth-spec.md §2-3`):
 
 1. **Bổ sung OAuth2 Resource Server Starter vào `pom.xml`:**
    - Trong `pom.xml`, bổ sung dependency chính thức:

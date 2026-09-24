@@ -1,4 +1,4 @@
-// AI Provenance: generated from docs/api-spec.md, docs/security-auth-spec.md, docs/internal-coding-standards.md
+// AI Provenance: generated from docs/02-api-spec.md, docs/02-security-auth-spec.md, docs/00-internal-coding-standards.md
 package com.gpc.oms;
 
 import com.fasterxml.jackson.databind.JsonNode;

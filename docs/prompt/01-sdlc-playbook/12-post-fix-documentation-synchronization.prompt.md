@@ -24,31 +24,31 @@ Lập bảng ma trận đối chiếu chi tiết chỉ ra sự bất đối xứ
 
 | Thành Phần Code Thay Đổi | File Code Nguồn Thực Tế | File Markdown Đang Mô Tả | Trạng Thái Lệch Chuẩn (Drift Details) | Hành Động Cần Cập Nhật |
 |---|---|---|---|---|
-| *Ví dụ: RFC 7807 Type* | `GlobalExceptionHandler.java` | `docs/api-spec.md` | Code trả về `type: "urn:problem:validation-error"` nhưng spec ghi `urn:problem:bad-request` | Cập nhật mục §3 trong `docs/api-spec.md` khớp với code |
-| *Ví dụ: Test Metrics* | `*Test.java` (79 tests) | `docs/SYSTEM_HANDOVER.md` | Spec ghi nhận 78 tests, JaCoCo 98% | Cập nhật 79 tests, JaCoCo 100% Line & Branch |
-| *Ví dụ: Security Filter* | `SecurityConfig.java` | `docs/security-auth-spec.md` | Đã bổ sung `@Order(1)` H2 Console Chain profile `!prod` | Bổ sung Dual FilterChain vào tài liệu kiến trúc bảo mật |
+| *Ví dụ: RFC 7807 Type* | `GlobalExceptionHandler.java` | `docs/02-api-spec.md` | Code trả về `type: "urn:problem:validation-error"` nhưng spec ghi `urn:problem:bad-request` | Cập nhật mục §3 trong `docs/02-api-spec.md` khớp với code |
+| *Ví dụ: Test Metrics* | `*Test.java` (79 tests) | `docs/08-SYSTEM_HANDOVER.md` | Spec ghi nhận 78 tests, JaCoCo 98% | Cập nhật 79 tests, JaCoCo 100% Line & Branch |
+| *Ví dụ: Security Filter* | `SecurityConfig.java` | `docs/02-security-auth-spec.md` | Đã bổ sung `@Order(1)` H2 Console Chain profile `!prod` | Bổ sung Dual FilterChain vào tài liệu kiến trúc bảo mật |
 
 ### Bước 3: Cập Nhật Chuẩn Xác Toàn Bộ Tệp Tài Liệu Markdown Sống (Living Docs)
 Thực hiện chỉnh sửa trực tiếp các tệp Markdown cốt lõi theo đúng chuẩn kỹ thuật của dự án:
-1. **`docs/domain-model.md`:**
+1. **`docs/01-domain-model.md`:**
    - Cập nhật định nghĩa Entity, Enums, bảng thuộc tính 4 cột `[Tên thuộc tính, Kiểu dữ liệu, Bắt buộc, Mô tả nghiệp vụ]`.
    - Cập nhật ma trận trạng thái (State Machine Matrix), bảo đảm mọi quy tắc chuyển đổi (Transitions) và ngoại lệ `IllegalStateException` khớp hoàn toàn với phương thức trong Domain Model.
-2. **`docs/api-spec.md`:**
+2. **`docs/02-api-spec.md`:**
    - Cập nhật bảng Request/Response schema (Pure Java 17 record fields, không Lombok).
    - Kiểm tra và đồng bộ chính xác các Query Parameters (ví dụ: `page`, `size`, `sort`, `status`, `assignedTo`).
    - Chuẩn hóa toàn bộ ma trận lỗi RFC 7807: `type`, `title`, `status`, `detail`, `instance`, `invalidParams`. Tuyệt đối không để lệch dù chỉ 1 ký tự trong URI định danh `urn:problem:*`.
-3. **`docs/security-auth-spec.md` & `docs/SECURITY_HANDOVER_REPORT.md`:**
+3. **`docs/02-security-auth-spec.md` & `docs/09-SECURITY_HANDOVER_REPORT.md`:**
    - Cập nhật cấu hình bảo mật nhiều lớp (Defense-in-depth): H2 Console isolation (`!prod`), HTTP Basic Auth, Rate Limiting, Distributed Tracing (`X-Correlation-ID`), MDC context.
    - Cập nhật bảng đối chiếu OWASP API Security Top 10 và trạng thái khắc phục các lỗ hổng (P0, P1, P2).
    - Cập nhật Điểm Số An Ninh Thực Tế (Security Posture Score) và danh mục bằng chứng kiểm thử an toàn đã chạy xanh.
-4. **`docs/database-migration-spec.md`:**
+4. **`docs/02-database-migration-spec.md`:**
    - Cập nhật danh sách các migration script Flyway mới nhất (`V1__...`, `V2__...`).
    - Cập nhật chiến lược quản lý schema (`spring.jpa.hibernate.ddl-auto: validate`).
-5. **`docs/SYSTEM_HANDOVER.md`:**
+5. **`docs/08-SYSTEM_HANDOVER.md`:**
    - Cập nhật Bảng Thống Kê Kiểm Thử (Kim tự tháp kiểm thử: Unit, Slice, Integration, E2E).
    - Cập nhật chỉ số chất lượng JaCoCo (tỷ lệ Line Coverage % và Branch Coverage % thực tế đạt được từ báo cáo JaCoCo mới nhất).
    - Cập nhật Checklist Bàn Giao Vận Hành (Operational Handover Checklist) và hướng dẫn triển khai/khởi chạy.
-6. **`docs/CONTEXT_INDEX.md` & `README.md`:**
+6. **`docs/03-CONTEXT_INDEX.md` & `README.md`:**
    - Cập nhật bảng kiểm kê tệp (Inventory Table) với số dòng (Line Count), kích thước (Size), và ước lượng Token Count để AI Agent luôn có ngữ cảnh chính xác nhất.
    - Cập nhật trạng thái build, coverage badge, và hướng dẫn kiểm thử nhanh trong `README.md`.
 
@@ -71,13 +71,13 @@ Thực hiện chỉnh sửa trực tiếp các tệp Markdown cốt lõi theo đ
 1. **Zero Spec Drift (Không Độ Lệch Đặc Tả):** Tài liệu và mã nguồn phải là tấm gương phản chiếu 1:1. Không chấp nhận bất kỳ sự sai khác nào về kiểu dữ liệu, tên trường (camelCase / snake_case), mã HTTP status hay chuỗi URN lỗi RFC 7807.
 2. **Absolute Grounding (Căn Cứ Tuyệt Đối Trên Code & Test Thực Tế):** Mọi số liệu đưa vào tài liệu (số lượng test case, số dòng code, tỷ lệ coverage, thời gian phản hồi) bắt buộc phải được trích xuất trực tiếp từ kết quả lệnh kiểm thử thực tế (`mvn clean verify` hoặc JaCoCo report). Nghiêm cấm hoàn toàn việc ước lượng hoặc suy diễn chủ quan.
 3. **Pure Java 17 & Clean Architecture Alignment:** Mọi đoạn mã minh họa trong tài liệu đặc tả phải tuân thủ nghiêm ngặt tiêu chuẩn dự án: Pure Java 17 records, Constructor Injection, hoàn toàn không chứa annotations của Lombok (`@Data`, `@Getter`, `@Setter`, `@Builder`, `@AllArgsConstructor`), và tuân thủ ranh giới giữa Domain, Service, Controller, DTO.
-4. **Preserve Document Hierarchy:** Giữ vững cấu trúc phân cấp tài liệu hiện có trong `docs/`. Không tự ý đổi tên thư mục hoặc di dời vị trí các tệp sống cốt lõi đã được định nghĩa trong `docs/CONTEXT_INDEX.md`.
+4. **Preserve Document Hierarchy:** Giữ vững cấu trúc phân cấp tài liệu hiện có trong `docs/`. Không tự ý đổi tên thư mục hoặc di dời vị trí các tệp sống cốt lõi đã được định nghĩa trong `docs/03-CONTEXT_INDEX.md`.
 
 ---
 
 # DONE WHEN:
 1. Bảng **Ma Trận Xử Lý Độ Lệch Đặc Tả (Spec Drift Resolution Matrix)** được lập hoàn chỉnh, liệt kê rõ từng file code đã fix và file tài liệu tương ứng đã được đồng bộ.
-2. Tất cả các tệp tài liệu sống (`docs/domain-model.md`, `docs/api-spec.md`, `docs/security-auth-spec.md`, `docs/database-migration-spec.md`, `docs/SYSTEM_HANDOVER.md`, `docs/SECURITY_HANDOVER_REPORT.md`, `docs/CONTEXT_INDEX.md`, `README.md`) đã được cập nhật chính xác 100% với hiện trạng mã nguồn.
+2. Tất cả các tệp tài liệu sống (`docs/01-domain-model.md`, `docs/02-api-spec.md`, `docs/02-security-auth-spec.md`, `docs/02-database-migration-spec.md`, `docs/08-SYSTEM_HANDOVER.md`, `docs/09-SECURITY_HANDOVER_REPORT.md`, `docs/03-CONTEXT_INDEX.md`, `README.md`) đã được cập nhật chính xác 100% với hiện trạng mã nguồn.
 3. Số lượng bài test và tỷ lệ JaCoCo Line & Branch Coverage trong hồ sơ bàn giao khớp chính xác từng con số với kết quả chạy `mvn clean verify` mới nhất.
 4. Toàn bộ các đường link markdown nội bộ, bảng biểu GFM, alert callouts và khối mã nguồn đều hợp lệ, không có dead links hay lỗi cú pháp markdown.
 5. Hồ sơ tài liệu sẵn sàng 100% để phục vụ các đợt kiểm toán tiếp theo và cấp quyền cho AI Agent mới tham gia dự án mà không gặp bất kỳ ảo giác nào (Zero Context Hallucination).

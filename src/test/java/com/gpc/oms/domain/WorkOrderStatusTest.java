@@ -1,4 +1,4 @@
-// AI Provenance: generated from docs/domain-model.md §Invariants, docs/api-spec.md §4
+// AI Provenance: generated from docs/01-domain-model.md §Invariants, docs/02-api-spec.md §4
 package com.gpc.oms.domain;
 
 import org.junit.jupiter.api.DisplayName;

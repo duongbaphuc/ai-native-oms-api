@@ -1,7 +1,7 @@
 # HỒ SƠ ĐÁNH GIÁ AN NINH & BÀN GIAO BẢO MẬT HỆ THỐNG
 ## Outage Management System - Work Order API Service (`oms-api-demo`)
 
-> **Tài liệu tham chiếu chuẩn (Single Source of Truth):** `docs/SECURITY_HANDOVER_REPORT.md`  
+> **Tài liệu tham chiếu chuẩn (Single Source of Truth):** `docs/09-SECURITY_HANDOVER_REPORT.md`  
 > **Phiên bản thẩm định:** `2.0.0-RELEASE (Post-Hardening & Remediation Dossier)`  
 > **Thời điểm kiểm định:** 24/09/2026  
 > **Chủ trì kiểm định:** Principal Application Security Architect & Lead DevSecOps Specialist  
@@ -255,7 +255,7 @@ gantt
     section Phase 2: P1 Observability
     Hiện thực hóa CorrelationIdFilter (SEC-03)  :active, p1_1, 2026-09-25, 2d
     Tích hợp Actuator & Prometheus (OPS-01)     :p1_2, 2026-09-26, 1d
-    Chuẩn hóa RFC 7807 api-spec.md (SPEC-01)    :p1_3, 2026-09-25, 1d
+    Chuẩn hóa RFC 7807 02-api-spec.md (SPEC-01)    :p1_3, 2026-09-25, 1d
     section Phase 3: P2 Enterprise Scale
     Tích hợp OAuth2 JWT Resource Server (SEC-05):p2_1, 2026-09-28, 3d
     Triển khai Bucket4j Rate Limiting (SEC-06)  :p2_2, 2026-10-01, 2d
@@ -270,7 +270,7 @@ gantt
 | | **SEC-04** | Tích hợp starter `flyway-core` và thiết lập `ddl-auto: validate` | `P0` | **ĐÃ HOÀN TẤT** (PR #35) | Database Architect |
 | **Phase 2: P1 Observability** | **SEC-03** | Hiện thực hóa `CorrelationIdFilter.java` kế thừa `OncePerRequestFilter` | `P1` | **Sẵn sàng code** ([Issue #31](https://github.com/duongbaphuc/ai-native-oms-api/issues/31)) | SRE / Backend Dev |
 | | **OPS-01** | Bổ sung `spring-boot-starter-actuator` và Prometheus registry | `P1` | **Sẵn sàng code** ([Issue #44](https://github.com/duongbaphuc/ai-native-oms-api/issues/44)) | SRE Engineer |
-| | **SPEC-01** | Đồng bộ URN mã lỗi trong `docs/api-spec.md` khớp `docs/api-rules.md` | `P1` | **Sẵn sàng cập nhật** ([Issue #45](https://github.com/duongbaphuc/ai-native-oms-api/issues/45)) | Tech Lead |
+| | **SPEC-01** | Đồng bộ URN mã lỗi trong `docs/02-api-spec.md` khớp `docs/00-api-rules.md` | `P1` | **Sẵn sàng cập nhật** ([Issue #45](https://github.com/duongbaphuc/ai-native-oms-api/issues/45)) | Tech Lead |
 | **Phase 3: P2 Enterprise Scale** | **SEC-05** | Tích hợp OAuth2 Resource Server xác thực JWT qua Keycloak/Azure AD | `P2` | **Sẵn sàng code** ([Issue #33](https://github.com/duongbaphuc/ai-native-oms-api/issues/33)) | Security Architect |
 | | **SEC-06** | Triển khai bộ lọc giới hạn tần suất gọi API với Bucket4j (100 req/min) | `P2` | **Sẵn sàng code** ([Issue #34](https://github.com/duongbaphuc/ai-native-oms-api/issues/34)) | Security Engineer |
 

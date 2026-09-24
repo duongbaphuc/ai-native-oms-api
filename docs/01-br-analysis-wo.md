@@ -1,11 +1,11 @@
 <!--
 Role: Principal Business Analyst & Solution Architect
 Task: Business Requirement Analysis & Decomposition for Outage Work Order
-Context files: docs/domain-model.md, docs/api-spec.md, docs/database-migration-spec.md, docs/security-auth-spec.md
+Context files: docs/01-domain-model.md, docs/02-api-spec.md, docs/02-database-migration-spec.md, docs/02-security-auth-spec.md
 Constraints: Aligned with WorkOrder entity, work_orders table, DISPATCHER & TECHNICIAN access, RFC 7807 problem details
 Target Files:
-- docs/domain-model.md
-- docs/api-spec.md
+- docs/01-domain-model.md
+- docs/02-api-spec.md
 - src/main/java/com/gpc/oms/domain/WorkOrder.java
 -->
 # Phân tích Yêu cầu Nghiệp vụ (BR Analysis) - Outage Work Order

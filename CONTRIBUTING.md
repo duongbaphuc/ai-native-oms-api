@@ -17,6 +17,6 @@
 - **Bảo mật Prompt:** Tuyệt đối không đưa credentials, khóa bí mật, hoặc dữ liệu nhạy cảm của khách hàng vào prompt của Copilot.
 
 ## 3. Liên kết Tài liệu (References)
-- [Quy tắc Lập trình (Coding Rules)](docs/coding-rules.md)
-- [Quy tắc API (API Rules)](docs/api-rules.md)
-- [Quy tắc Bảo mật (Security Rules)](docs/security-rules.md)
+- [Quy tắc Lập trình (Coding Rules)](docs/00-coding-rules.md)
+- [Quy tắc API (API Rules)](docs/00-api-rules.md)
+- [Quy tắc Bảo mật (Security Rules)](docs/00-security-rules.md)

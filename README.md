@@ -2,8 +2,8 @@
 
 [![Build Status](https://img.shields.io/badge/build-passing-brightgreen)](#)
 [![Java Version](https://img.shields.io/badge/Java-17%20LTS-blue)](#)
-[![Spring Boot](https://img.shields.io/badge/Spring%20Boot-3.3.4-success)](#)
-[![Automated Tests](https://img.shields.io/badge/Tests-78%20Passed-brightgreen)](#)
+[![Spring Boot](https://img.shields.io/badge/Spring%20Boot-3.3.5-success)](#)
+[![Automated Tests](https://img.shields.io/badge/Tests-89%20Passed-brightgreen)](#)
 [![JaCoCo Coverage](https://img.shields.io/badge/JaCoCo-100%25%20Line%20%26%20Branch-success)](#)
 [![RFC 7807](https://img.shields.io/badge/RFC%207807-Problem%20Details-blueviolet)](#)
 [![Security Posture](https://img.shields.io/badge/Security-Grade%20A%2B%20(98%2F100)-darkgreen)](#)
@@ -22,7 +22,7 @@ Dự án áp dụng phương pháp luận **AI-Native SDLC**, phát triển theo
 - **Bảo mật:** Dual `SecurityFilterChain` (cô lập H2 Console ở `!prod`, HTTP Basic Auth với phân quyền RBAC `@PreAuthorize`).
 
 > [!IMPORTANT]
-> **Chính sách Phát triển (Spec-Driven & Zero Drift):** Dự án tuân thủ nguyên tắc "Spec-First": Mọi thay đổi mã nguồn bắt buộc phải đồng bộ 100% với hệ thống tài liệu đặc tả tại [`docs/`](docs/CONTEXT_INDEX.md).
+> **Chính sách Phát triển (Spec-Driven & Zero Drift):** Dự án tuân thủ nguyên tắc "Spec-First": Mọi thay đổi mã nguồn bắt buộc phải đồng bộ 100% với hệ thống tài liệu đặc tả tại [`docs/`](docs/03-CONTEXT_INDEX.md).
 
 ---
 
@@ -69,10 +69,18 @@ Khi ứng dụng chạy, truy cập trình duyệt tại:
 
 ---
 
-## Tài Liệu Tham Khảo (Documentation)
+## Hệ Thống Tài Liệu Kỹ Thuật (AI-Native SDLC Documentation)
 
-- **Bản đồ Ngữ cảnh AI:** [`docs/CONTEXT_INDEX.md`](docs/CONTEXT_INDEX.md)
-- **Hồ Sơ Bàn Giao Kỹ Thuật:** [`docs/SYSTEM_HANDOVER.md`](docs/SYSTEM_HANDOVER.md)
-- **Hồ Sơ Đánh Giá An Ninh Toàn Diện:** [`docs/SECURITY_HANDOVER_REPORT.md`](docs/SECURITY_HANDOVER_REPORT.md)
-- **Hợp Đồng REST API:** [`docs/api-spec.md`](docs/api-spec.md)
-- **Quy Trình AI-Native SDLC Playbook:** [`docs/prompt/01-sdlc-playbook/00-MASTER-AI-NATIVE-SDLC-PLAYBOOK.md`](docs/prompt/01-sdlc-playbook/00-MASTER-AI-NATIVE-SDLC-PLAYBOOK.md)
+Toàn bộ tài liệu trong thư mục [`docs/`](docs/03-CONTEXT_INDEX.md) được sắp xếp chặt chẽ theo thứ tự các giai đoạn của quy trình AI-Native SDLC:
+
+| Giai Đoạn SDLC | Tài Liệu Kỹ Thuật | Vai Trò / Trọng Tâm |
+|---|---|---|
+| **Pha 00: Governance & Rules** | [`docs/00-coding-rules.md`](docs/00-coding-rules.md)<br>[`docs/00-internal-coding-standards.md`](docs/00-internal-coding-standards.md)<br>[`docs/00-api-rules.md`](docs/00-api-rules.md)<br>[`docs/00-security-rules.md`](docs/00-security-rules.md) | Quy chuẩn viết mã Oracle Core, tiêu chuẩn thiết kế API RESTful, an ninh OWASP API và Instant UTC |
+| **Pha 01: Business & Domain** | [`docs/01-br-analysis-wo.md`](docs/01-br-analysis-wo.md)<br>[`docs/01-domain-model.md`](docs/01-domain-model.md) | Phân tích bài toán mất điện lưới, mô hình Aggregate Root, Value Objects và State Machine |
+| **Pha 02: Architecture & Specs** | [`docs/02-api-spec.md`](docs/02-api-spec.md)<br>[`docs/02-database-migration-spec.md`](docs/02-database-migration-spec.md)<br>[`docs/02-security-auth-spec.md`](docs/02-security-auth-spec.md)<br>[`docs/02-observability-and-logging.md`](docs/02-observability-and-logging.md)<br>[`docs/02-ADR-001-use-h2-database.md`](docs/02-ADR-001-use-h2-database.md) | Hợp đồng REST API RFC 7807, Flyway DDL migration, Dual SecurityFilterChain, ECS Logging & ADR |
+| **Pha 03: AI Context Index** | [`docs/03-CONTEXT_INDEX.md`](docs/03-CONTEXT_INDEX.md) | Bản đồ điều hướng ngữ cảnh AI và công thức nạp Modular Context |
+| **Pha 04: Implementation Drafts** | [`docs/drafts/`](docs/drafts/) | 9 bản thảo chi tiết (Blueprints) dùng cho Copilot sinh mã nguồn |
+| **Pha 08: System Handover** | [`docs/08-SYSTEM_HANDOVER.md`](docs/08-SYSTEM_HANDOVER.md)<br>[`docs/08-ORACLE_JAVA_DOCUMENTATION.md`](docs/08-ORACLE_JAVA_DOCUMENTATION.md) | Hồ sơ bàn giao kỹ thuật toàn diện (89 tests, Runbook) và Cẩm nang kiến trúc Java Enterprise |
+| **Pha 09: Security Audit** | [`docs/09-SECURITY_HANDOVER_REPORT.md`](docs/09-SECURITY_HANDOVER_REPORT.md) | Báo cáo thẩm định an ninh bàn giao, kiểm toán OWASP API Top 10 & CWE |
+| **Pha 10: DevOps & CI/CD** | [`docs/10-devops-pipeline-spec.md`](docs/10-devops-pipeline-spec.md) | Đặc tả Multi-stage Dockerfile non-root, Docker Compose & GitHub Actions CI |
+| **Playbook Trọn Gói** | [`docs/prompt/01-sdlc-playbook/00-MASTER-AI-NATIVE-SDLC-PLAYBOOK.md`](docs/prompt/01-sdlc-playbook/00-MASTER-AI-NATIVE-SDLC-PLAYBOOK.md) | Chuỗi 15 prompt chuẩn mực từ Pha 00 đến Pha 14 |

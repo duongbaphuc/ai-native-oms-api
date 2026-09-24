@@ -2,7 +2,7 @@
 > **Phân loại:** Performance & Security Feature Task Prompt  
 > **Issue:** [#34](https://github.com/duongbaphuc/ai-native-oms-api/issues/34)  
 > **Lỗ hổng:** SEC-06 (CWE-770 Allocation of Resources Without Limits or Throttling — CVSS MEDIUM)  
-> **Tài liệu đối chiếu:** `docs/security-auth-spec.md §5`, `docs/security-rules.md`, `docs/SECURITY_HANDOVER_REPORT.md §3`  
+> **Tài liệu đối chiếu:** `docs/02-security-auth-spec.md §5`, `docs/00-security-rules.md`, `docs/09-SECURITY_HANDOVER_REPORT.md §3`  
 > **Mục tiêu:** Tích hợp `bucket4j-core`, xây dựng `RateLimitingFilter` kiểm soát tần suất gọi API (60 req/phút cho GET, 20 req/phút cho POST/PATCH), trả về HTTP 429 kèm RFC 7807 và header `Retry-After`.
 
 ```markdown
@@ -12,7 +12,7 @@ Bạn là một "Senior DevSecOps Engineer" kiêm "Spring Web Performance Specia
 ---
 
 # TASK:
-Hiện thực hóa tính năng giới hạn tần suất gọi API SEC-06 theo yêu cầu trong Issue #34 (`docs/security-auth-spec.md §5`):
+Hiện thực hóa tính năng giới hạn tần suất gọi API SEC-06 theo yêu cầu trong Issue #34 (`docs/02-security-auth-spec.md §5`):
 
 1. **Bổ sung Bucket4j Dependency vào `pom.xml`:**
    - Trong `pom.xml`, thêm thư viện chính thức của Bucket4j:

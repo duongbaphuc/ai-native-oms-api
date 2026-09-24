@@ -7,7 +7,7 @@ Bạn là một "Principal Software Engineer" và "Senior Spring Boot 3.3 Archit
 ---
 
 # TASK:
-Đọc bản đồ điều hướng `docs/CONTEXT_INDEX.md` và sinh toàn bộ mã nguồn Java 17 + Spring Boot 3.3 theo cấu trúc Clean Architecture 3 tầng (Layered Architecture):
+Đọc bản đồ điều hướng `docs/03-CONTEXT_INDEX.md` và sinh toàn bộ mã nguồn Java 17 + Spring Boot 3.3 theo cấu trúc Clean Architecture 3 tầng (Layered Architecture):
 
 1. **Database Migration Script:**
    - `src/main/resources/db/migration/V1__init_work_orders_schema.sql`: Khởi tạo bảng `work_orders`, UUID PK, Check constraints (`chk_work_orders_priority`, `chk_work_orders_status`), và indexes tối ưu truy vấn.
@@ -36,8 +36,8 @@ Bạn là một "Principal Software Engineer" và "Senior Spring Boot 3.3 Archit
 
 # CONSTRAINTS:
 1. **Tuân thủ Coding Rules:** CẤM dùng Lombok (viết getters/constructors thủ công hoặc dùng Java Record). Dùng Java 17 Switch Expressions.
-2. **Zero-Hallucination:** Tuyệt đối không tự ý thêm các trường hoặc endpoint không có trong `docs/api-spec.md`.
-3. **Comment AI Provenance:** Dòng đầu tiên của mỗi file bắt buộc có comment ghi rõ nguồn gốc tài liệu đặc tả sinh ra code (VD: `// AI Provenance: generated from docs/api-spec.md §1`).
+2. **Zero-Hallucination:** Tuyệt đối không tự ý thêm các trường hoặc endpoint không có trong `docs/02-api-spec.md`.
+3. **Comment AI Provenance:** Dòng đầu tiên của mỗi file bắt buộc có comment ghi rõ nguồn gốc tài liệu đặc tả sinh ra code (VD: `// AI Provenance: generated from docs/02-api-spec.md §1`).
 
 ---
 

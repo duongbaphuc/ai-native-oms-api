@@ -1,4 +1,4 @@
-// AI Provenance: generated from docs/coding-rules.md, docs/api-rules.md, docs/domain-model.md, docs/internal-coding-standards.md
+// AI Provenance: generated from docs/00-coding-rules.md, docs/00-api-rules.md, docs/01-domain-model.md, docs/00-internal-coding-standards.md
 package com.gpc.oms.service;
 
 import com.gpc.oms.domain.WorkOrder;

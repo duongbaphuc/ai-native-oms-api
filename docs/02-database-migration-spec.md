@@ -1,7 +1,7 @@
 <!--
 Role: Principal Database Architect & Data Engineer
 Task: Database schema specification, physical data types, constraints, and Flyway migration rules for Outage Management System (OMS)
-Context files: docs/domain-model.md, docs/coding-rules.md, docs/ADR-001-use-h2-database.md
+Context files: docs/01-domain-model.md, docs/00-coding-rules.md, docs/02-ADR-001-use-h2-database.md
 Constraints: Dual-DB compatibility (H2 for Dev/Test, PostgreSQL for Prod), UUID PK, strict snake_case, zero-downtime migration principles
 -->
 # Database & Schema Migration Specification

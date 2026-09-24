@@ -1,4 +1,4 @@
-// AI Provenance: generated from docs/internal-coding-standards.md §3, docs/api-spec.md §2
+// AI Provenance: generated from docs/00-internal-coding-standards.md §3, docs/02-api-spec.md §2
 package com.gpc.oms.dto;
 
 import org.springframework.data.domain.Page;

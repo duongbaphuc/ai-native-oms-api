@@ -8,10 +8,10 @@ Bạn là một "Senior AI Context Auditor" và "AI-Native SDLC Quality Assuranc
 
 # TASK:
 Rà soát, đối chiếu và kiểm toán chéo (cross-audit) toàn bộ các tài liệu đặc tả và bản thảo trong thư mục `docs/`:
-1. Phát hiện tất cả các điểm mâu thuẫn hệ thống (logic contradictions) và khoảng trống ngữ cảnh (context gaps) giữa `docs/api-spec.md`, `docs/domain-model.md`, `docs/security-auth-spec.md`, và các file `docs/drafts/*.md`.
+1. Phát hiện tất cả các điểm mâu thuẫn hệ thống (logic contradictions) và khoảng trống ngữ cảnh (context gaps) giữa `docs/02-api-spec.md`, `docs/01-domain-model.md`, `docs/02-security-auth-spec.md`, và các file `docs/drafts/*.md`.
 2. Lập báo cáo kiểm toán chi tiết lưu tại `docs/archive/audit-logs/ai-context-audit-report-2026-09-24.md`.
 3. Sửa chữa trực tiếp tất cả các lỗi logic phát hiện được trên toàn bộ tài liệu đặc tả.
-4. Tạo bản đồ điều hướng ngữ cảnh trung tâm `docs/CONTEXT_INDEX.md` làm chỉ mục duy nhất cho AI Code Generator.
+4. Tạo bản đồ điều hướng ngữ cảnh trung tâm `docs/03-CONTEXT_INDEX.md` làm chỉ mục duy nhất cho AI Code Generator.
 
 ---
 
@@ -29,5 +29,5 @@ Rà soát, đối chiếu và kiểm toán chéo (cross-audit) toàn bộ các t
 # DONE WHEN:
 1. Xuất file báo cáo kiểm toán với bảng phân loại lỗi, mức độ nghiêm trọng (Cao, Trung bình, Nhấp nháy), nguyên nhân gốc rễ và hành động khắc phục.
 2. 100% các file đặc tả trong `docs/` được cập nhật đồng bộ, không còn bất kỳ điểm mâu thuẫn nào về validation (`min=10, max=500`), cấu trúc phân trang, hay URN mã lỗi.
-3. File `docs/CONTEXT_INDEX.md` được tạo đầy đủ với cây phân cấp tài liệu và bản đồ vai trò trách nhiệm rõ ràng.
+3. File `docs/03-CONTEXT_INDEX.md` được tạo đầy đủ với cây phân cấp tài liệu và bản đồ vai trò trách nhiệm rõ ràng.
 ```
