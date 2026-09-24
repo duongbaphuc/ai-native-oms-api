@@ -13,6 +13,7 @@ import org.springframework.security.access.AccessDeniedException;
 import org.springframework.validation.BeanPropertyBindingResult;
 import org.springframework.validation.FieldError;
 import org.springframework.web.bind.MethodArgumentNotValidException;
+import org.springframework.web.method.annotation.MethodArgumentTypeMismatchException;
 
 import java.net.URI;
 import java.util.List;
@@ -81,7 +82,26 @@ class GlobalExceptionHandlerUnitTest {
     }
 
     @Test
-    @DisplayName("Handler #3: AccessDeniedException maps 403 forbidden")
+    @DisplayName("Handler #3: MethodArgumentTypeMismatchException maps 400 validation-error for invalid query param")
+    void handleQueryParamTypeMismatch_returnsProblemDetail() {
+        MethodArgumentTypeMismatchException ex = mock(MethodArgumentTypeMismatchException.class);
+        when(ex.getName()).thenReturn("status");
+
+        ProblemDetail problem = handler.handleQueryParamTypeMismatch(ex);
+
+        assertThat(problem.getStatus()).isEqualTo(HttpStatus.BAD_REQUEST.value());
+        assertThat(problem.getDetail()).isEqualTo("Validation Failed");
+        assertThat(problem.getType()).isEqualTo(URI.create("urn:problem-type:validation-error"));
+
+        @SuppressWarnings("unchecked")
+        List<Map<String, String>> invalidParams = (List<Map<String, String>>) problem.getProperties().get("invalidParams");
+        assertThat(invalidParams).hasSize(1);
+        assertThat(invalidParams.get(0)).containsEntry("name", "status")
+                                        .containsEntry("reason", "Invalid value for parameter 'status'");
+    }
+
+    @Test
+    @DisplayName("Handler #4: AccessDeniedException maps 403 forbidden")
     void handleAccessDenied_returnsProblemDetail() {
         AccessDeniedException ex = new AccessDeniedException("Access is denied");
 
@@ -93,7 +113,7 @@ class GlobalExceptionHandlerUnitTest {
     }
 
     @Test
-    @DisplayName("Handler #4: ResourceNotFoundException maps 404 not-found")
+    @DisplayName("Handler #5: ResourceNotFoundException maps 404 not-found")
     void handleResourceNotFound_returnsProblemDetail() {
         ResourceNotFoundException ex = new ResourceNotFoundException("WorkOrder not found with id: a1b2c3d4");
 
@@ -105,7 +125,7 @@ class GlobalExceptionHandlerUnitTest {
     }
 
     @Test
-    @DisplayName("Handler #5: IllegalStateException maps 422 invalid-state-transition")
+    @DisplayName("Handler #6: IllegalStateException maps 422 invalid-state-transition")
     void handleIllegalStateTransition_returnsProblemDetail() {
         IllegalStateException ex = new IllegalStateException("Invalid state transition from OPEN to DONE");
 
@@ -117,7 +137,7 @@ class GlobalExceptionHandlerUnitTest {
     }
 
     @Test
-    @DisplayName("Handler #6: Exception fallback maps 500 internal-error without leaking internal details")
+    @DisplayName("Handler #7: Exception fallback maps 500 internal-error without leaking internal details")
     void handleUnexpected_returnsProblemDetail() {
         Exception ex = new RuntimeException("Sensitive database connection failure details");
 
