@@ -42,7 +42,7 @@ Dịch vụ Outage Work Order là một microservice cốt lõi thuộc phân h�
 ### 1. Phân Quyền Truy Cập
 - **Điều độ viên (`ROLE_DISPATCHER`):** Tiếp nhận thông tin sự cố, tạo mới phiếu (`POST /api/v1/workorders`), tra cứu toàn bộ danh sách (`GET /api/v1/workorders`).
 - **Kỹ thuật viên Hiện trường (`ROLE_TECHNICIAN`):** Báo cáo sự cố tại chỗ (`POST /api/v1/workorders`), xem danh sách và chi tiết phiếu, tiếp nhận và cập nhật tiến độ khắc phục (`PATCH /api/v1/workorders/{id}/status`).
-- **Quản trị viên (`ROLE_ADMIN`):** Toàn quyền quản trị và giám sát hệ thống.
+- **Quản trị viên (`ROLE_ADMIN`):** Toàn quyền quản trị và giám sát hệ thống (bao gồm tạo, xem, và cập nhật trạng thái phiếu sự cố).
 
 ### 2. Máy Trạng Thái Đơn Hướng (One-way State Machine)
 - Tuyến tính nghiêm ngặt: `OPEN` $\rightarrow$ `IN_PROGRESS` $\rightarrow$ `DONE`.
@@ -55,5 +55,5 @@ Dịch vụ Outage Work Order là một microservice cốt lõi thuộc phân h�
 | Tầng (Layer) | Thành phần & Trách nhiệm Bóc tách |
 |---|---|
 | **UI Layer** | - **Dispatcher Web Portal:** Màn hình tạo phiếu sự cố và theo dõi danh sách theo thời gian thực.<br>- **Technician Mobile App:** Ứng dụng hiện trường tạo báo cáo sự cố và chuyển trạng thái sang `IN_PROGRESS` hoặc `DONE`. |
-| **API Layer** | - `POST /api/v1/workorders`: Tiếp nhận báo cáo sự cố (Dành cho `DISPATCHER`, `TECHNICIAN`).<br>- `GET /api/v1/workorders`: Lấy danh sách phiếu sự cố có phân trang và lọc.<br>- `GET /api/v1/workorders/{id}`: Xem chi tiết phiếu.<br>- `PATCH /api/v1/workorders/{id}/status`: Cập nhật trạng thái (Dành cho `TECHNICIAN`, `DISPATCHER`).<br>- Chuẩn lỗi bắt buộc: RFC 7807 `application/problem+json`. |
+| **API Layer** | - `POST /api/v1/workorders`: Tiếp nhận báo cáo sự cố (Dành cho `DISPATCHER`, `TECHNICIAN`, `ADMIN`).<br>- `GET /api/v1/workorders`: Lấy danh sách phiếu sự cố có phân trang và lọc (Dành cho `DISPATCHER`, `TECHNICIAN`, `ADMIN`).<br>- `GET /api/v1/workorders/{id}`: Xem chi tiết phiếu (Dành cho `DISPATCHER`, `TECHNICIAN`, `ADMIN`).<br>- `PATCH /api/v1/workorders/{id}/status`: Cập nhật trạng thái (Dành cho `TECHNICIAN`, `ADMIN`).<br>- Chuẩn lỗi bắt buộc: RFC 7807 `application/problem+json`. |
 | **Data Layer** | - Cơ sở dữ liệu: PostgreSQL (Production) / H2 (Dev/Test), bảng `work_orders`.<br>- Tích hợp CDC: Debezium CDC lắng nghe bảng `work_orders` để phát sự kiện sang Apache Kafka phục vụ tính toán SAIDI/SAIFI. |

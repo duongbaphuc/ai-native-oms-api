@@ -3,7 +3,7 @@ name: Review OMS Code
 description: Audit code against the project's 12 Scorecard quality and security criteria.
 ---
 
-Audit the selected code or PR changes against the project standards in `#file:docs/coding-rules.md`, `#file:docs/api-rules.md`, and `#file:docs/security-rules.md`.
+Audit the selected code or PR changes against the project standards in `#file:docs/br-analysis-wo.md`, `#file:docs/coding-rules.md`, `#file:docs/api-rules.md`, `#file:docs/security-rules.md`, and `#file:docs/internal-coding-standards.md`.
 
 Verify each of the following 12 criteria:
 
@@ -14,10 +14,10 @@ Verify each of the following 12 criteria:
 5. **Strict Schema:** Unknown fields must be rejected (`ignoreUnknown = false` or `fail-on-unknown-properties: true`).
 6. **RFC 7807 Errors:** `application/problem+json` returned for all error statuses, with `invalidParams` details. No stack traces leaked.
 7. **Boundary Validation:** `@Valid` on controller request bodies.
-8. **RBAC:** Explicit `@PreAuthorize("hasRole(...)")` on every endpoint.
+8. **RBAC:** Explicit `@PreAuthorize("hasAnyRole(...)")` on every endpoint.
 9. **JPA Parameterized:** No string concatenation in native SQL queries.
 10. **No Hallucinated Deps:** Only libraries already declared in `#file:pom.xml`.
-11. **State Machine Invariant:** Enforce linear one-way transitions (`Open` -> `InProgress` -> `Done`) at the domain level.
+11. **State Machine Invariant:** Enforce linear one-way transitions (`OPEN` -> `IN_PROGRESS` -> `DONE`) at the domain level.
 12. **AI Provenance:** Document tools, models, and prompts used.
 
 **Output Format:**
