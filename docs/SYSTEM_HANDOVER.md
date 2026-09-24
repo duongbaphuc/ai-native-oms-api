@@ -220,6 +220,9 @@ Khi có lỗi xảy ra, hệ thống trả về HTTP Body dạng JSON theo chu�
 
 ## 5. MÔ HÌNH BẢO MẬT & PHÂN QUYỀN (RBAC)
 
+> [!IMPORTANT]
+> **Hồ Sơ Đánh Giá An Ninh Toàn Diện:** Xem chi tiết ma trận OWASP API Security Top 10 (2023), danh mục lỗ hổng & bug issue (SEC-01..07) cùng lộ trình gia cố an ninh (Hardening Roadmap P0-P2) tại [`docs/SECURITY_HANDOVER_REPORT.md`](SECURITY_HANDOVER_REPORT.md).
+
 ### 5.1 Kiến Trúc Bảo Mật
 - Triển khai thông qua `SecurityFilterChain` của Spring Security 6.
 - Sử dụng cơ chế **Stateless Session** (`SessionCreationPolicy.STATELESS`), phù hợp tối ưu cho kiến trúc RESTful Microservices.

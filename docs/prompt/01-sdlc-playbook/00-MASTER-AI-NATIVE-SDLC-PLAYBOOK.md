@@ -4,7 +4,7 @@ Tài liệu này tổng hợp toàn bộ chuỗi Prompt chuẩn mực theo cấu
 
 ---
 
-## 1. Sơ Đồ Quy Trình 8 Giai Đoạn Tuyến Tính
+## 1. Sơ Đồ Quy Trình 9 Giai Đoạn Tuyến Tính
 
 ```mermaid
 graph TD
@@ -15,6 +15,7 @@ graph TD
     P5 --> P6["Giai đoạn 6: Nghiệm thu Trực quan & Test Console (06-interactive-verification-and-console.prompt.md)"]
     P6 --> P7["Giai đoạn 7: Kiểm toán Toàn diện Mã nguồn vs Đặc tả (07-comprehensive-code-review-audit.prompt.md)"]
     P7 --> P8["Giai đoạn 8: Lập Hồ Sơ Bàn Giao Kỹ Thuật & Vận Hành (08-system-handover-documentation.prompt.md)"]
+    P8 --> P9["Giai đoạn 9: Kiểm Định Bảo Mật & Lập Hồ Sơ An Ninh Bàn Giao (09-security-audit-and-vulnerability-assessment.prompt.md)"]
 ```
 
 ---
@@ -31,6 +32,7 @@ graph TD
 | **06** | [`06-interactive-verification-and-console.prompt.md`](06-interactive-verification-and-console.prompt.md) | Senior Full-Stack QA Engineer & UI Specialist | Xây dựng Web Test Console trực quan để nghiệm thu trên trình duyệt | UI Dark Slate/Glassmorphic, Role Switcher, API Inspector thời gian thực |
 | **07** | [`07-comprehensive-code-review-audit.prompt.md`](07-comprehensive-code-review-audit.prompt.md) | Lead Software Quality Auditor & Principal Code Review Architect | Kiểm toán đối chiếu 100% dòng code với toàn bộ 9 tài liệu đặc tả markdown | Báo cáo kiểm toán, ma trận truy vết 1-1, điểm số tuân thủ, Production Verdict |
 | **08** | [`08-system-handover-documentation.prompt.md`](08-system-handover-documentation.prompt.md) | Principal Technical Delivery Lead & SRE Architect | Tổng hợp mã nguồn, kiểm thử, cấu hình để lập Hồ Sơ Bàn Giao Kỹ Thuật Toàn Diện | File `SYSTEM_HANDOVER.md` 9 phần tiêu chuẩn, sẵn sàng vận hành & ký nghiệm thu |
+| **09** | [`09-security-audit-and-vulnerability-assessment.prompt.md`](09-security-audit-and-vulnerability-assessment.prompt.md) | Principal Application Security Architect & DevSecOps Lead | Thẩm định OWASP API Top 10, CWE, dò quét bug issue và lập Hồ Sơ An Ninh Bàn Giao | File `SECURITY_HANDOVER_REPORT.md` 8 phần tiêu chuẩn, Hardening Roadmap P0-P2 |
 
 ---
 
