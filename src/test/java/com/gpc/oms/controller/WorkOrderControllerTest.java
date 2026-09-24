@@ -222,5 +222,18 @@ class WorkOrderControllerTest {
             .andExpect(status().isBadRequest())
             .andExpect(jsonPath("$.type").value("urn:problem-type:validation-error"))
             .andExpect(jsonPath("$.invalidParams[0].name").value("status"));
+    // Row 15: Unexpected Exception fallback → 500
+    @Test
+    @WithMockUser(roles = "TECHNICIAN")
+    void getById_unexpectedException_returns500() throws Exception {
+        UUID id = UUID.randomUUID();
+        when(workOrderService.getWorkOrderById(id))
+            .thenThrow(new RuntimeException("Database connection timeout"));
+
+        mockMvc.perform(get("/api/v1/workorders/{id}", id))
+            .andExpect(status().isInternalServerError())
+            .andExpect(jsonPath("$.type").value("urn:problem-type:internal-error"))
+            .andExpect(jsonPath("$.status").value(500))
+            .andExpect(jsonPath("$.detail").value("An unexpected error occurred"));
     }
 }
