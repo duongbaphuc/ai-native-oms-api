@@ -5,10 +5,14 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.math.BigDecimal;
+import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.util.List;
 import java.util.Map;
 
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.io.TempDir;
 
 class CsvTotalsTest {
 
@@ -156,5 +160,88 @@ class CsvTotalsTest {
         assertEquals(2, t.goods().scale(), "summary scale 2");
         assertEquals(2, t.vat().scale(), "vat scale 2");
         assertEquals(2, t.payable().scale(), "payable scale 2");
+    }
+
+    @Test
+    void outputCsv(@TempDir Path tmp) throws Exception {
+        String csv = "product,quantity,unit_price,vat_rate,note\n"
+                + "Apple,2,10.00,0.10,fresh\n"
+                + "Banana,1,5.00,10,sweet\n";
+        Path out = tmp.resolve("out.csv");
+        CsvTotals.Totals t = CsvTotals.calculate(csv, null, out);
+
+        List<String> lines = Files.readAllLines(out, StandardCharsets.UTF_8);
+        assertEquals(4, lines.size(), "header + 2 rows + TOTAL");
+        assertEquals("product,quantity,unit_price,vat_rate,note,line_total,vat_amount,payable",
+                lines.get(0), "header gains three trailing names");
+        assertTrue(lines.get(1).contains("fresh"), "extra column passthrough row1: " + lines.get(1));
+        assertTrue(lines.get(1).contains("20.00") && lines.get(1).contains("2.00")
+                && lines.get(1).contains("22.00"), "row1 formatted scale 2 plain: " + lines.get(1));
+        assertTrue(lines.get(2).contains("sweet"), "extra column passthrough row2: " + lines.get(2));
+        assertTrue(lines.get(2).contains("5.00") && lines.get(2).contains("0.50")
+                && lines.get(2).contains("5.50"), "row2 formatted scale 2 plain: " + lines.get(2));
+
+        String total = lines.get(3);
+        assertTrue(total.startsWith("TOTAL,"), "TOTAL literal in product column: " + total);
+        assertTrue(total.contains(t.goods().toPlainString())
+                && total.contains(t.vat().toPlainString())
+                && total.contains(t.payable().toPlainString()),
+                "TOTAL row carries summary values: " + total);
+        List<String> totalCells = CsvTotals.scanHeaders(total + "\nX");
+        // TOTAL shape: 5 original cols (literal + 4 empty filler incl. note) + 3 totals
+        assertEquals(8, totalCells.size(), "TOTAL field count: " + total);
+
+        byte[] raw = Files.readAllBytes(out);
+        assertTrue(raw.length > 0 && raw[raw.length - 1] == '\n', "trailing newline");
+
+        // Quoted-comma product round-trips with stable field counts.
+        String quoted = "product,quantity,unit_price,vat_rate\n\"A,B\",2,10.00,0.10\n";
+        Path qout = tmp.resolve("quoted.csv");
+        CsvTotals.calculate(quoted, null, qout);
+        List<String> qlines = Files.readAllLines(qout, StandardCharsets.UTF_8);
+        assertTrue(qlines.get(1).startsWith("\"A,B\","), "quoted field escaped: " + qlines.get(1));
+        List<String> qheader = CsvTotals.scanHeaders(Files.readString(qout, StandardCharsets.UTF_8));
+        assertEquals(7, qheader.size(), "re-parse field-count stability");
+    }
+
+    @Test
+    void pathParity(@TempDir Path tmp) throws Exception {
+        String csv = "product,quantity,unit_price,vat_rate\n"
+                + "Apple,2,10.00,0.10\n"
+                + "Banana,1,5.00,10\n";
+        Path in = tmp.resolve("in.csv");
+        Files.writeString(in, csv, StandardCharsets.UTF_8);
+
+        assertEquals(CsvTotals.scanHeaders(csv), CsvTotals.scanHeaders(in), "scanHeaders parity");
+
+        CsvTotals.Totals fromString = CsvTotals.calculate(csv, null);
+        CsvTotals.Totals fromPath = CsvTotals.calculate(in, null);
+        assertCompare("parity goods", fromString.goods(), fromPath.goods());
+        assertCompare("parity vat", fromString.vat(), fromPath.vat());
+        assertCompare("parity payable", fromString.payable(), fromPath.payable());
+
+        // null csvOut writes no file.
+        Path noFile = tmp.resolve("never-created.csv");
+        CsvTotals.calculate(csv, null, null);
+        assertTrue(Files.notExists(noFile), "null csvOut creates no file");
+
+        // csvOut creates parent dirs and overwrites existing target.
+        Path nested = tmp.resolve("a/b/result.csv");
+        CsvTotals.calculate(in, null, nested);
+        assertTrue(Files.exists(nested), "parent dirs created");
+        Files.writeString(nested, "junk", StandardCharsets.UTF_8);
+        CsvTotals.Totals viaPath = CsvTotals.calculate(in, null, nested);
+        List<String> lines = Files.readAllLines(nested, StandardCharsets.UTF_8);
+        assertTrue(lines.get(0).endsWith("line_total,vat_amount,payable"), "overwrite: " + lines.get(0));
+        assertCompare("csvOut totals match", fromString.goods(), viaPath.goods());
+
+        // Parentless relative path does not NPE.
+        Path parentless = Path.of("parentless0103_" + System.nanoTime() + ".csv");
+        try {
+            CsvTotals.calculate(csv, null, parentless);
+            assertTrue(Files.exists(parentless), "parentless target created");
+        } finally {
+            Files.deleteIfExists(parentless);
+        }
     }
 }
