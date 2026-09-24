@@ -4,7 +4,7 @@ Tài liệu này tổng hợp toàn bộ chuỗi Prompt chuẩn mực theo cấu
 
 ---
 
-## 1. Sơ Đồ Quy Trình 13 Giai Đoạn Tuyến Tính (End-to-End AI-Native SDLC)
+## 1. Sơ Đồ Quy Trình 14 Giai Đoạn Tuyến Tính (End-to-End AI-Native SDLC)
 
 ```mermaid
 graph TD
@@ -30,10 +30,11 @@ graph TD
         P8 --> P9["Pha 9: Kiểm Định Bảo Mật & Lập Hồ Sơ An Ninh Bàn Giao (09-security-audit-and-vulnerability-assessment.prompt.md)"]
     end
 
-    subgraph "Giai đoạn 10-12: Đóng gói Container, CI/CD & Vận hành Bền vững"
+    subgraph "Giai đoạn 10-13: Đóng gói Container, CI/CD & Vận hành Bền vững"
         P9 --> P10["Pha 10: Đóng Gói Container & CI/CD Pipeline (10-docker-and-cicd-pipeline.prompt.md)"]
         P10 --> P11["Pha 11: Vòng Lặp Sửa Lỗi & Tiến Hóa Tính Năng (11-feature-evolution-and-bugfix.prompt.md)"]
         P11 --> P12["Pha 12: Đồng Bộ & Cập Nhật Tài Liệu Sau Khi Fix Code (12-post-fix-documentation-synchronization.prompt.md)"]
+        P12 --> P13["Pha 13: Kiểm Tra & Triển Khai Coding Rules & Design Patterns (13-coding-rules-and-design-patterns-enforcement.prompt.md)"]
     end
 ```
 
@@ -56,6 +57,7 @@ graph TD
 | **10** | [`10-docker-and-cicd-pipeline.prompt.md`](10-docker-and-cicd-pipeline.prompt.md) | Lead DevSecOps Architect & Cloud-Native Engineer | Đóng gói Multi-Stage Dockerfile (non-root), Docker Compose và GitHub Actions CI/CD | `docker build` thành công, `.github/workflows/ci.yml` kiểm định tự động |
 | **11** | [`11-feature-evolution-and-bugfix.prompt.md`](11-feature-evolution-and-bugfix.prompt.md) | Principal SRE & Spec-Driven Evolution Specialist | Quy trình tiếp nhận Issue, Spec-First Bugfix, Red-Green test, mở Atomic PR | Zero Regression, Spec đồng bộ 100% với Code, JaCoCo Coverage bảo toàn |
 | **12** | [`12-post-fix-documentation-synchronization.prompt.md`](12-post-fix-documentation-synchronization.prompt.md) | Principal Technical Documentation Architect & Quality Compliance Auditor | Rà soát Git diff sau khi fix code, dò quét độ lệch và cập nhật đồng bộ toàn bộ tài liệu Markdown | Ma trận Spec Drift 100% resolved, docs/ và code đồng bộ tuyệt đối |
+| **13** | [`13-coding-rules-and-design-patterns-enforcement.prompt.md`](13-coding-rules-and-design-patterns-enforcement.prompt.md) | Principal Java Software Architect & Code Quality Auditor | Kiểm tra và triển khai áp dụng bộ quy chuẩn Oracle Coding Rules & Design Patterns lên toàn bộ code và markdown | 100% code & docs tuân thủ chuẩn Oracle, JaCoCo 100% Green, Zero Regression |
 
 ---
 
