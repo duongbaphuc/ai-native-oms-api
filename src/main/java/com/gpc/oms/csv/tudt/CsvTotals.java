@@ -47,7 +47,14 @@ public final class CsvTotals {
             if (line == null) {
                 throw new IllegalArgumentException("Empty CSV input");
             }
-            return trimAll(parseLine(line));
+            List<String> header = trimAll(parseLine(line));
+            for (int i = 0; i < header.size(); i++) {
+                if (header.indexOf(header.get(i)) != i) {
+                    throw new IllegalArgumentException(
+                            "Duplicate header '" + header.get(i) + "' at line 1");
+                }
+            }
+            return header;
         } catch (IOException e) {
             throw new IllegalArgumentException("Cannot read CSV input", e);
         }
@@ -68,7 +75,14 @@ public final class CsvTotals {
             if (!line.isEmpty() && line.charAt(0) == '﻿') {
                 line = line.substring(1);
             }
-            return trimAll(parseLine(line));
+            List<String> header = trimAll(parseLine(line));
+            for (int i = 0; i < header.size(); i++) {
+                if (header.indexOf(header.get(i)) != i) {
+                    throw new IllegalArgumentException(
+                            "Duplicate header '" + header.get(i) + "' at line 1");
+                }
+            }
+            return header;
         } catch (IOException e) {
             throw new IllegalArgumentException("Cannot read CSV file: " + csv, e);
         }
@@ -134,6 +148,9 @@ public final class CsvTotals {
         if (header == null) {
             throw new IllegalArgumentException("Empty CSV input");
         }
+        if (!header.isEmpty() && !header.get(0).isEmpty() && header.get(0).charAt(0) == '﻿') {
+            header.set(0, header.get(0).substring(1));
+        }
         Map<String, Integer> indexByHeader = new HashMap<>();
         for (int i = 0; i < header.size(); i++) {
             if (indexByHeader.putIfAbsent(header.get(i), i) != null) {
@@ -142,6 +159,14 @@ public final class CsvTotals {
             }
         }
         Map<String, String> effective = defaultIfEmpty(mapping);
+        if (mapping != null && !mapping.isEmpty()) {
+            for (String logical : new String[]{"product", "quantity", "unit_price", "vat_rate"}) {
+                if (!mapping.containsKey(logical)) {
+                    throw new IllegalArgumentException(
+                            "Missing mapping for logical field '" + logical + "'");
+                }
+            }
+        }
         int productIdx = resolveIndex(effective, "product", indexByHeader);
         int qtyIdx = resolveIndex(effective, "quantity", indexByHeader);
         int priceIdx = resolveIndex(effective, "unit_price", indexByHeader);
@@ -170,17 +195,9 @@ public final class CsvTotals {
                 throw new IllegalArgumentException(
                         "Row " + rowN + ": column '" + col + "' value '' blank numeric cell");
             }
-            BigDecimal qty;
-            BigDecimal price;
-            BigDecimal rate;
-            try {
-                qty = new BigDecimal(qtyStr);
-                price = new BigDecimal(priceStr);
-                rate = new BigDecimal(vatStr);
-            } catch (NumberFormatException e) {
-                throw new IllegalArgumentException(
-                        "Row " + rowN + ": invalid numeric value", e);
-            }
+            BigDecimal qty = parseNumeric(qtyStr, rowN, "quantity");
+            BigDecimal price = parseNumeric(priceStr, rowN, "unit_price");
+            BigDecimal rate = parseNumeric(vatStr, rowN, "vat_rate");
             try {
                 qty.toBigIntegerExact();
             } catch (ArithmeticException e) {
@@ -213,6 +230,15 @@ public final class CsvTotals {
             writeResultCsv(csvOut, header, rows, computed, totals, productIdx);
         }
         return totals;
+    }
+
+    private static BigDecimal parseNumeric(String raw, int rowN, String logical) {
+        try {
+            return new BigDecimal(raw);
+        } catch (NumberFormatException e) {
+            throw new IllegalArgumentException(
+                    "Row " + rowN + ": column '" + logical + "' value '" + raw + "' not a number", e);
+        }
     }
 
     // D-12 costly reinterpretation isolated here so Phase 2 can revisit.
