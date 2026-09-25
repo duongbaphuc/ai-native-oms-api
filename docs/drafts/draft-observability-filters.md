@@ -103,25 +103,26 @@ public class CorrelationIdFilter extends OncePerRequestFilter {
     }
 
     @Override
-    protected void doFilterInternal(
-            final HttpServletRequest request,
-            final HttpServletResponse response,
-            final FilterChain filterChain) throws ServletException, IOException {
+    protected void doFilterInternal(HttpServletRequest request,
+                                    HttpServletResponse response,
+                                    FilterChain filterChain) throws ServletException, IOException {
 
-        final String existingId = request.getHeader(CORRELATION_ID_HEADER);
-        final String correlationId = (existingId != null && !existingId.isBlank())
-                ? existingId.trim()
-                : UUID.randomUUID().toString();
-
-        MDC.put(TRACE_ID_MDC_KEY, correlationId);
-        MDC.put(CORRELATION_ID_MDC_KEY, correlationId);
-
-        response.setHeader(CORRELATION_ID_HEADER, correlationId);
+        String correlationId = request.getHeader(CORRELATION_ID_HEADER);
+        if (correlationId == null || correlationId.isBlank()) {
+            correlationId = UUID.randomUUID().toString();
+        } else {
+            correlationId = correlationId.trim();
+        }
 
         try {
+            MDC.put(TRACE_ID_MDC_KEY, correlationId);
+            MDC.put(CORRELATION_ID_MDC_KEY, correlationId);
+            response.setHeader(CORRELATION_ID_HEADER, correlationId);
+
             filterChain.doFilter(request, response);
         } finally {
-            MDC.clear();
+            MDC.remove(TRACE_ID_MDC_KEY);
+            MDC.remove(CORRELATION_ID_MDC_KEY);
         }
     }
 }
@@ -189,45 +190,48 @@ public class RateLimitingFilter extends OncePerRequestFilter {
             final FilterChain filterChain) throws ServletException, IOException {
 
         final String clientIp = resolveClientIp(request);
-        final String method = request.getMethod();
-        final String bucketKey = clientIp + ":" + (HttpMethod.GET.matches(method) ? "READ" : "WRITE");
+        final boolean isRead = HttpMethod.GET.matches(request.getMethod());
+        final String cacheKey = clientIp + ":" + (isRead ? "READ" : "WRITE");
 
-        if (buckets.size() >= MAX_CACHE_ENTRIES) {
-            log.warn("RateLimitingFilter cache limit reached ({} entries). Purging cache to prevent resource exhaustion.", MAX_CACHE_ENTRIES);
+        if (buckets.size() > MAX_CACHE_ENTRIES) {
+            log.warn("RateLimitingFilter cache exceeded capacity limit [size={}]. Evicting entries to prevent OOM.", buckets.size());
             buckets.clear();
         }
 
-        final Bucket bucket = buckets.computeIfAbsent(bucketKey, key -> createBucket(method));
+        final Bucket bucket = buckets.computeIfAbsent(cacheKey, key -> createNewBucket(isRead));
         final ConsumptionProbe probe = bucket.tryConsumeAndReturnRemaining(1);
 
         if (probe.isConsumed()) {
             filterChain.doFilter(request, response);
-        } else {
-            final long waitForRefillNanos = probe.getNanosToWaitForRefill();
-            final long waitForRefillSeconds = Math.max(1, TimeUnit.NANOSECONDS.toSeconds(waitForRefillNanos));
-
-            log.warn("Rate limit exceeded for client IP [{}] on [{}] {}. Tokens exhausted. Retry after {}s",
-                    clientIp, method, request.getRequestURI(), waitForRefillSeconds);
-
-            response.setStatus(429);
-            response.setContentType(PROBLEM_JSON_CONTENT_TYPE);
-            response.setHeader(RETRY_AFTER_HEADER, String.valueOf(waitForRefillSeconds));
-
-            final String problemJson = """
-                    {"type":"urn:problem-type:rate-limit-exceeded","title":"Too Many Requests","status":429,"detail":"Rate limit exceeded. Try again in %d seconds.","instance":"%s"}"""
-                    .formatted(waitForRefillSeconds, request.getRequestURI());
-
-            response.getWriter().write(problemJson);
+            return;
         }
+
+        final long waitForRefillNanos = probe.getNanosToWaitForRefill();
+        final long retryAfterSeconds = Math.max(1L, TimeUnit.NANOSECONDS.toSeconds(waitForRefillNanos));
+
+        log.warn("Rate limit exceeded for client [ip={}, method={}, uri={}, retryAfterSeconds={}]",
+                clientIp, request.getMethod(), request.getRequestURI(), retryAfterSeconds);
+
+        response.setStatus(429);
+        response.setHeader(RETRY_AFTER_HEADER, String.valueOf(retryAfterSeconds));
+        response.setContentType(PROBLEM_JSON_CONTENT_TYPE);
+
+        final String problemJson = """
+            {"type":"urn:problem-type:rate-limit-exceeded","title":"Too Many Requests","status":429,"detail":"Bạn đã vượt quá giới hạn tần suất gọi API. Vui lòng thử lại sau %d giây.","instance":"%s"}"""
+            .formatted(retryAfterSeconds, request.getRequestURI());
+
+        response.getWriter().write(problemJson);
     }
 
-    private Bucket createBucket(final String httpMethod) {
-        final long capacity = HttpMethod.GET.matches(httpMethod) ? READ_CAPACITY : WRITE_CAPACITY;
-        final Bandwidth limit = Bandwidth.builder()
+    private Bucket createNewBucket(final boolean isRead) {
+        final long capacity = isRead ? READ_CAPACITY : WRITE_CAPACITY;
+        final Bandwidth bandwidth = Bandwidth.builder()
                 .capacity(capacity)
                 .refillGreedy(capacity, REFILL_DURATION)
                 .build();
-        return Bucket.builder().addLimit(limit).build();
+        return Bucket.builder()
+                .addLimit(bandwidth)
+                .build();
     }
 
     private String resolveClientIp(final HttpServletRequest request) {
@@ -237,7 +241,7 @@ public class RateLimitingFilter extends OncePerRequestFilter {
             return ips[0].trim();
         }
         final String remoteAddr = request.getRemoteAddr();
-        return (remoteAddr != null && !remoteAddr.isBlank()) ? remoteAddr : "UNKNOWN";
+        return (remoteAddr != null && !remoteAddr.isBlank()) ? remoteAddr.trim() : "unknown-client";
     }
 }
 ```

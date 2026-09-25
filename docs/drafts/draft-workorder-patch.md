@@ -64,11 +64,10 @@ RFC 7807 ProblemDetail JSON
     @PatchMapping("/{id}/status")
     @PreAuthorize("hasAnyRole('TECHNICIAN', 'ADMIN')")
     public ResponseEntity<WorkOrderResponse> updateStatus(
-            @PathVariable UUID id, 
-            @Valid @RequestBody WorkOrderStatusRequest req) {
-        
+            @PathVariable final UUID id,
+            @Valid @RequestBody final WorkOrderStatusRequest request) {
         log.info("update status workorderId={}", id);
-        WorkOrderResponse response = workOrderService.updateStatus(id, req);
+        final WorkOrderResponse response = workOrderService.updateStatus(id, request);
         return ResponseEntity.ok(response);
     }
 ```
