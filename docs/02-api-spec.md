@@ -173,7 +173,7 @@ Mọi lỗi trả về client bắt buộc tuân thủ schema JSON sau (`applica
 | `403 Forbidden` | `urn:problem-type:forbidden` | `Access Denied` | `handleAccessDenied` | Vi phạm phân quyền RBAC (`@PreAuthorize`) |
 | `404 Not Found` | `urn:problem-type:not-found` | *Message chi tiết* | `handleResourceNotFound` | Không tìm thấy bản ghi theo UUID chỉ định |
 | `422 Unprocessable Entity` | `urn:problem-type:invalid-state-transition` | *Message chi tiết* | `handleIllegalStateTransition` | Vi phạm quy tắc chuyển trạng thái của State Machine |
-| `429 Too Many Requests` | `urn:problem-type:rate-limit-exceeded` | `Too Many Requests` | `RateLimitingFilter` | Vượt ngưỡng tần suất gọi (10 write / 60 read req/min per IP) |
+| `429 Too Many Requests` | `urn:problem-type:rate-limit-exceeded` | `Too Many Requests` | `RateLimitingFilter` | Vượt ngưỡng tần suất gọi (20 write / 60 read req/min per IP) |
 | `500 Internal Server Error` | `urn:problem-type:internal-error` | `An unexpected error occurred` | `handleUnexpected` | Lỗi ngoại lệ không lường trước (che giấu stack trace) |
 
 ---
