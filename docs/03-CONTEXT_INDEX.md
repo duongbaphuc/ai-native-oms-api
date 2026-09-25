@@ -32,17 +32,20 @@
 
 ## 3. Bản Thảo Cài Đặt Chi Tiết (Implementation Drafts - Copilot Blueprints)
 
-Các tệp trong `docs/drafts/` chứa mã giả (pseudo-code), chữ ký phương thức, bảng mapping và mã nguồn mẫu để Copilot sinh code:
+Các tệp trong `docs/drafts/` chứa mã giả (pseudo-code), chữ ký phương thức, bảng mapping và mã nguồn mẫu để Copilot sinh code với tỷ lệ Zero-Draft-Drift 100%:
 
-- [`docs/drafts/draft-file-mapping.md`](drafts/draft-file-mapping.md): Danh mục 14 file Java bắt buộc và thứ tự triển khai (Enums $\rightarrow$ Entity $\rightarrow$ Repo $\rightarrow$ DTOs $\rightarrow$ Service $\rightarrow$ Controller $\rightarrow$ Handlers $\rightarrow$ Tests).
+- [`docs/drafts/draft-file-mapping.md`](drafts/draft-file-mapping.md): Danh mục toàn bộ 39 file Java bắt buộc (19 production + 20 test files) và thứ tự triển khai chuẩn hóa (Dependencies First).
 - [`docs/drafts/draft-workorder-domain.md`](drafts/draft-workorder-domain.md): Entity `WorkOrder`, Enums `Priority`, `WorkOrderStatus` (với `canTransitionTo()`), `WorkOrderRepository`.
 - [`docs/drafts/draft-dtos.md`](drafts/draft-dtos.md): `WorkOrderRequest`, `WorkOrderStatusRequest`, `WorkOrderResponse`, `PagedResponse`.
 - [`docs/drafts/draft-workorder-service.md`](drafts/draft-workorder-service.md): `WorkOrderService` (4 methods, delegation, re-throw exception).
 - [`docs/drafts/draft-workorder-create.md`](drafts/draft-workorder-create.md): `POST /api/v1/workorders` (201 Created + Location).
 - [`docs/drafts/draft-workorder-get.md`](drafts/draft-workorder-get.md): `GET /api/v1/workorders` (Paged) và `GET /api/v1/workorders/{id}`.
 - [`docs/drafts/draft-workorder-patch.md`](drafts/draft-workorder-patch.md): `PATCH /api/v1/workorders/{id}/status` (422 invalid transition).
-- [`docs/drafts/draft-global-exception-handler.md`](drafts/draft-global-exception-handler.md): `GlobalExceptionHandler` (6 RFC 7807 handlers).
-- [`docs/drafts/draft-workorder-tests.md`](drafts/draft-workorder-tests.md): Ma trận 16 test cases nghiệm thu và WebMvcTest code mẫu.
+- [`docs/drafts/draft-global-exception-handler.md`](drafts/draft-global-exception-handler.md): `GlobalExceptionHandler` (7 RFC 7807 handlers).
+- [`docs/drafts/draft-security-config.md`](drafts/draft-security-config.md): `SecurityConfig`, `JwtRoleConverter`, Dual SecurityFilterChain và kiểm thử bảo mật.
+- [`docs/drafts/draft-observability-filters.md`](drafts/draft-observability-filters.md): `CorrelationIdFilter`, `RateLimitingFilter` (Bucket4j Token Bucket).
+- [`docs/drafts/draft-shared-components.md`](drafts/draft-shared-components.md): `ProblemTypes`, `StringToWorkOrderStatusConverter`, `WorkOrderTestFixtures` (Object Mother).
+- [`docs/drafts/draft-workorder-tests.md`](drafts/draft-workorder-tests.md): Kim tự tháp kiểm thử 20 test classes (117 test cases) và ma trận chấp nhận đầy đủ.
 
 ---
 
@@ -57,15 +60,16 @@ Khi phát triển từng phần, lập trình viên/Copilot chỉ cần nạp c�
 | **Tạo DTOs & Validation** | `docs/02-api-spec.md` + `docs/drafts/draft-dtos.md` + `docs/00-internal-coding-standards.md` |
 | **Viết Service Layer** | `docs/drafts/draft-workorder-service.md` + `docs/drafts/draft-workorder-domain.md` + `docs/drafts/draft-dtos.md` |
 | **Viết Controller Endpoints** | `docs/02-api-spec.md` + `docs/drafts/draft-workorder-*.md` + `docs/02-security-auth-spec.md` |
-| **Viết Exception Handler** | `docs/00-api-rules.md` + `docs/drafts/draft-global-exception-handler.md` |
-| **Viết Unit & Controller Tests** | `docs/drafts/draft-workorder-tests.md` + `docs/02-api-spec.md` + `docs/02-security-auth-spec.md` |
+| **Cấu hình Security & Filters** | `docs/02-security-auth-spec.md` + `docs/02-observability-and-logging.md` + `docs/drafts/draft-security-config.md` + `docs/drafts/draft-observability-filters.md` |
+| **Viết Exception Handler** | `docs/00-api-rules.md` + `docs/drafts/draft-global-exception-handler.md` + `docs/drafts/draft-shared-components.md` |
+| **Viết Unit & Controller Tests** | `docs/drafts/draft-workorder-tests.md` + `docs/drafts/draft-shared-components.md` + `docs/02-api-spec.md` + `docs/02-security-auth-spec.md` |
 
 ---
 
 ## 5. Trung Tâm Quản Trị Prompt AI (AI Prompt Repository)
 
 Thư mục [`docs/prompt/`](prompt/README.md) quản lý toàn bộ các câu lệnh Prompt được chuẩn hóa của dự án:
-- [`docs/prompt/01-sdlc-playbook/`](prompt/01-sdlc-playbook/00-MASTER-AI-NATIVE-SDLC-PLAYBOOK.md): Chuỗi 15 prompt quy trình AI-Native SDLC toàn diện từ Khởi tạo đến Tối ưu hóa Cú pháp & Hiệu năng (Pha 00 - 14).
+- [`docs/prompt/01-sdlc-playbook/`](prompt/01-sdlc-playbook/00-MASTER-AI-NATIVE-SDLC-PLAYBOOK.md): Chuỗi 17 prompt quy trình AI-Native SDLC toàn diện từ Khởi tạo (Pha 00), Bản thảo kỹ thuật (Pha 04B) đến Tự động Thẩm định (Pha 15).
 - [`docs/prompt/02-copilot-slash-commands/`](prompt/02-copilot-slash-commands/README.md): Lệnh Slash Commands tích hợp trong IDE Copilot (`.github/prompts/`).
 - [`docs/prompt/03-module-task-prompts/`](prompt/03-module-task-prompts/README.md): Bản thảo kỹ thuật theo từng module (`docs/drafts/`).
 - [`docs/prompt/04-dev-contributions/`](prompt/04-dev-contributions/): Prompt đóng góp từ các developer khác (`tudtbis92`, `templates`).
