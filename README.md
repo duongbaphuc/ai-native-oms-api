@@ -1,17 +1,19 @@
 # Outage Work Order API ⚡
 
 [![Build Status](https://img.shields.io/badge/build-passing-brightgreen)](#)
-[![Release](https://img.shields.io/badge/Release-v1.0.0-blue)](https://github.com/duongbaphuc/ai-native-oms-api/releases/tag/v1.0.0)
 [![Java Version](https://img.shields.io/badge/Java-17%20LTS-blue)](#)
 [![Spring Boot](https://img.shields.io/badge/Spring%20Boot-3.3.5-success)](#)
 [![Automated Tests](https://img.shields.io/badge/Tests-117%20Passed-brightgreen)](#)
 [![JaCoCo Coverage](https://img.shields.io/badge/JaCoCo-100%25%20Line%20%26%20Branch-success)](#)
 [![RFC 7807](https://img.shields.io/badge/RFC%207807-Problem%20Details-blueviolet)](#)
-[![Security Posture](https://img.shields.io/badge/Security-Grade%20A%2B%20(100%2F100)-darkgreen)](#)
+[![Security Posture](https://img.shields.io/badge/Security-Review%20Pending-yellow)](#)
 
 Dịch vụ Outage Work Order là một microservice cốt lõi thuộc phân hệ Outage Management System (OMS). API này cung cấp các giao thức RESTful để tạo, quản lý và theo dõi vòng đời của các sự kiện mất điện trên lưới điện.
 
 Dự án áp dụng phương pháp luận **AI-Native SDLC**, phát triển theo mô hình **Spec-Driven Development** dưới sự ràng buộc chặt chẽ của kỹ thuật thiết kế ngữ cảnh (Context Engineering).
+
+> [!NOTE]
+> Không có GitHub Release/tag đang hoạt động sau khi `v1.0.0` được xóa. Các số liệu bên dưới phản ánh trạng thái `main` được kiểm định ngày 25/09/2026.
 
 ---
 

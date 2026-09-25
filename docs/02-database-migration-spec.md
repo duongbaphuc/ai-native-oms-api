@@ -106,6 +106,10 @@ Hệ thống sử dụng **Flyway** để quản lý phiên bản cơ sở dữ 
 
 ## 5. DDL Script Mẫu: `V1__init_work_orders_schema.sql`
 
+### Migration inventory hiện tại (25/09/2026)
+
+Repository hiện chỉ có một migration đã kiểm chứng: `src/main/resources/db/migration/V1__init_work_orders_schema.sql` (1,147 bytes). Không có `V2__...` trong source hiện tại; ví dụ V2 bên dưới chỉ là quy ước đặt tên cho thay đổi tương lai.
+
 Dưới đây là nội dung chuẩn của migration script khởi tạo ban đầu, tương thích hoàn toàn cho cả PostgreSQL và H2:
 
 ```sql

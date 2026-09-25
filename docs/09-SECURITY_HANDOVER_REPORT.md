@@ -8,6 +8,9 @@
 > **Đơn vị tiếp nhận:** Production Operations (Ops/SRE) & Security Operations Center (SOC)  
 > **Git Commit Thẩm định:** `main` (Post-PRs #64, #65, #67, #68)
 
+> [!WARNING]
+> Bản báo cáo này giữ lại kết quả security dossier trước đó. Trong đợt đồng bộ ngày 25/09/2026, source audit xác nhận chưa có cấu hình CORS/CSP/HSTS tường minh; vì vậy các claim “Production Ready/100.0” cần được tái thẩm định trước khi triển khai production.
+
 ---
 
 ## MỤC LỤC
@@ -32,7 +35,7 @@ Cuộc rà soát an ninh toàn diện và mô hình hóa mối đe dọa (Compre
 
 ```
 +-----------------------------------------------------------------------------------------+
-|   SECURITY POSTURE SCORE: 100.0 / 100  (GRADE A+ - XUẤT SẮC / PRODUCTION READY)         |
+|   SECURITY POSTURE SCORE: 100.0 / 100 (HISTORICAL; REASSESSMENT REQUIRED)               |
 +-----------------------------------------------------------------------------------------+
 |   - 0 Critical Vulnerabilities (Không có RCE, SQL Injection, Auth Bypass)               |
 |   - 0 High Severity Vulnerabilities (SEC-01 H2 Console exposure ĐÃ ĐƯỢC VÁ 100%)       |
@@ -46,7 +49,7 @@ Cuộc rà soát an ninh toàn diện và mô hình hóa mối đe dọa (Compre
 
 - **Thang đo CVSS v3.1 (Common Vulnerability Scoring System):** Điểm rủi ro cơ sở cao nhất của mã nguồn sau khắc phục là **0.0 (None)** đối với các lỗ hổng có thể khai thác từ xa trên môi trường Production.
 - **OWASP API Security Top 10:2023:** 10/10 hạng mục đều đạt trạng thái **PASS (SAFE)** hoặc có cơ chế phòng thủ chuyên sâu (Defense-in-Depth).
-- **Trạng thái sẵn sàng bàn giao (Verdict):** **APPROVED FOR PRODUCTION DEPLOYMENT (PHÊ DUYỆT BÀN GIAO VÀ TRIỂN KHAI SẢN XUẤT)**.
+- **Trạng thái sẵn sàng bàn giao (Verdict):** **PENDING SECURITY REASSESSMENT** do các header bảo mật và CORS chưa có bằng chứng implementation tường minh.
 
 ---
 
