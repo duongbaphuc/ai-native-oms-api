@@ -26,6 +26,29 @@ class ProblemTypesTest {
         assertThat(ProblemTypes.INVALID_STATE_TRANSITION)
                 .isEqualTo(URI.create("urn:problem-type:invalid-state-transition"));
         assertThat(ProblemTypes.INTERNAL_ERROR).isEqualTo(URI.create("urn:problem-type:internal-error"));
+        assertThat(ProblemTypes.RATE_LIMIT_EXCEEDED).isEqualTo(URI.create("urn:problem-type:rate-limit-exceeded"));
+
+        assertThat(ProblemTypes.PROPERTY_INVALID_PARAMS).isEqualTo("invalidParams");
+        assertThat(ProblemTypes.KEY_NAME).isEqualTo("name");
+        assertThat(ProblemTypes.KEY_REASON).isEqualTo("reason");
+        assertThat(ProblemTypes.FIELD_BODY).isEqualTo("body");
+
+        assertThat(ProblemTypes.TITLE_VALIDATION_FAILED).isEqualTo("Validation Failed");
+        assertThat(ProblemTypes.TITLE_MALFORMED_REQUEST_BODY).isEqualTo("Malformed Request Body");
+        assertThat(ProblemTypes.TITLE_ACCESS_DENIED).isEqualTo("Access Denied");
+        assertThat(ProblemTypes.TITLE_UNAUTHORIZED).isEqualTo("Unauthorized");
+        assertThat(ProblemTypes.TITLE_FORBIDDEN).isEqualTo("Forbidden");
+        assertThat(ProblemTypes.TITLE_TOO_MANY_REQUESTS).isEqualTo("Too Many Requests");
+
+        assertThat(ProblemTypes.DETAIL_MALFORMED_BODY)
+                .isEqualTo("Request body is malformed or contains an invalid enum value");
+        assertThat(ProblemTypes.DETAIL_UNAUTHORIZED_TOKEN)
+                .isEqualTo("Authentication token is missing or expired");
+        assertThat(ProblemTypes.DETAIL_FORBIDDEN_PERMISSION)
+                .isEqualTo("Access Denied: You do not have permission to access this resource");
+        assertThat(ProblemTypes.DETAIL_INTERNAL_ERROR)
+                .isEqualTo("An unexpected error occurred");
+        assertThat(ProblemTypes.REASON_INVALID_VALUE).isEqualTo("Invalid value");
     }
 
     @Test

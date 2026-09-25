@@ -1,6 +1,7 @@
 // AI Provenance: generated from docs/02-api-spec.md, docs/00-coding-rules.md, docs/drafts/draft-workorder-*.md
 package com.gpc.oms.controller;
 
+import com.gpc.oms.config.RoleConstants;
 import com.gpc.oms.domain.WorkOrderStatus;
 import com.gpc.oms.dto.PagedResponse;
 import com.gpc.oms.dto.WorkOrderRequest;
@@ -34,9 +35,16 @@ import java.util.UUID;
  * xem chi tiết và chuyển đổi trạng thái phiếu sự cố lưới điện.</p>
  */
 @RestController
-@RequestMapping("/api/v1/workorders")
+@RequestMapping(WorkOrderController.PATH_WORKORDERS)
 public class WorkOrderController {
     private static final Logger log = LoggerFactory.getLogger(WorkOrderController.class);
+
+    /** Đường dẫn cơ sở cho tài nguyên phiếu công tác WorkOrder. */
+    public static final String PATH_WORKORDERS = "/api/v1/workorders";
+
+    /** Đường dẫn chuyển trạng thái phiếu công tác. */
+    public static final String PATH_STATUS = "/{id}/status";
+
     private final WorkOrderService workOrderService;
 
     public WorkOrderController(WorkOrderService workOrderService) {
@@ -50,11 +58,11 @@ public class WorkOrderController {
      * @return HTTP 201 Created cùng Header {@code Location} và thông tin phiếu sự cố vừa tạo
      */
     @PostMapping
-    @PreAuthorize("hasAnyRole('DISPATCHER', 'TECHNICIAN', 'ADMIN')")
+    @PreAuthorize(RoleConstants.HAS_ROLE_DISPATCHER_TECHNICIAN_OR_ADMIN)
     public ResponseEntity<WorkOrderResponse> createWorkOrder(@Valid @RequestBody final WorkOrderRequest request) {
         log.info("create workorder equipmentId={}", request.equipmentId().hashCode());
         final WorkOrderResponse response = workOrderService.createWorkOrder(request);
-        final URI location = URI.create("/api/v1/workorders/" + response.id());
+        final URI location = URI.create(PATH_WORKORDERS + "/" + response.id());
         return ResponseEntity.created(location).body(response);
     }
 
@@ -66,7 +74,7 @@ public class WorkOrderController {
      * @return HTTP 200 OK cùng {@link PagedResponse} danh sách phiếu sự cố
      */
     @GetMapping
-    @PreAuthorize("hasAnyRole('DISPATCHER', 'TECHNICIAN', 'ADMIN')")
+    @PreAuthorize(RoleConstants.HAS_ROLE_DISPATCHER_TECHNICIAN_OR_ADMIN)
     public ResponseEntity<PagedResponse<WorkOrderResponse>> getWorkOrders(
             @PageableDefault(size = 20, sort = "createdAt", direction = Sort.Direction.DESC) final Pageable pageable,
             @RequestParam(required = false) final WorkOrderStatus status) {
@@ -82,7 +90,7 @@ public class WorkOrderController {
      * @return HTTP 200 OK cùng chi tiết phiếu sự cố nếu tìm thấy
      */
     @GetMapping("/{id}")
-    @PreAuthorize("hasAnyRole('DISPATCHER', 'TECHNICIAN', 'ADMIN')")
+    @PreAuthorize(RoleConstants.HAS_ROLE_DISPATCHER_TECHNICIAN_OR_ADMIN)
     public ResponseEntity<WorkOrderResponse> getWorkOrderById(@PathVariable final UUID id) {
         log.info("get workorder by id={}", id);
         final WorkOrderResponse response = workOrderService.getWorkOrderById(id);
@@ -96,8 +104,8 @@ public class WorkOrderController {
      * @param request DTO chứa trạng thái mới cần chuyển tiếp
      * @return HTTP 200 OK cùng thông tin phiếu sự cố sau khi cập nhật
      */
-    @PatchMapping("/{id}/status")
-    @PreAuthorize("hasAnyRole('TECHNICIAN', 'ADMIN')")
+    @PatchMapping(PATH_STATUS)
+    @PreAuthorize(RoleConstants.HAS_ROLE_TECHNICIAN_OR_ADMIN)
     public ResponseEntity<WorkOrderResponse> updateStatus(
             @PathVariable final UUID id,
             @Valid @RequestBody final WorkOrderStatusRequest request) {

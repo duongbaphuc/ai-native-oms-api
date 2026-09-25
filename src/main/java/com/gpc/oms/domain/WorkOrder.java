@@ -27,22 +27,34 @@ import java.util.UUID;
 @Table(name = "work_orders")
 public class WorkOrder {
 
+    /** Độ dài tối đa cho mã định danh thiết bị lưới điện. */
+    public static final int MAX_EQUIPMENT_ID_LENGTH = 50;
+
+    /** Độ dài tối thiểu cho mô tả sự cố. */
+    public static final int MIN_DESCRIPTION_LENGTH = 10;
+
+    /** Độ dài tối đa cho mô tả sự cố. */
+    public static final int MAX_DESCRIPTION_LENGTH = 500;
+
+    /** Độ dài tối đa cho chuỗi lưu trữ Enum (Priority, WorkOrderStatus). */
+    public static final int MAX_ENUM_LENGTH = 20;
+
     @Id
     @GeneratedValue(strategy = GenerationType.UUID)
     private UUID id;
 
-    @Column(nullable = false, length = 50)
+    @Column(nullable = false, length = MAX_EQUIPMENT_ID_LENGTH)
     private String equipmentId;
 
-    @Column(nullable = false, length = 500)
+    @Column(nullable = false, length = MAX_DESCRIPTION_LENGTH)
     private String description;
 
     @Enumerated(EnumType.STRING)
-    @Column(nullable = false, length = 20)
+    @Column(nullable = false, length = MAX_ENUM_LENGTH)
     private Priority priority;
 
     @Enumerated(EnumType.STRING)
-    @Column(nullable = false, length = 20)
+    @Column(nullable = false, length = MAX_ENUM_LENGTH)
     private WorkOrderStatus status;
 
     @Column(nullable = false, updatable = false)

@@ -39,4 +39,32 @@ public final class ProblemTypes {
 
     /** Lỗi nội bộ không xác định phía máy chủ (không để lộ chi tiết nhạy cảm ra ngoài). */
     public static final URI INTERNAL_ERROR = URI.create("urn:problem-type:internal-error");
+
+    /** Lỗi vượt quá giới hạn tần suất gọi API (HTTP 429 Too Many Requests). */
+    public static final URI RATE_LIMIT_EXCEEDED = URI.create("urn:problem-type:rate-limit-exceeded");
+
+    // Khóa thuộc tính mở rộng chuẩn RFC 7807 Problem Details
+    public static final String PROPERTY_INVALID_PARAMS = "invalidParams";
+    public static final String KEY_NAME = "name";
+    public static final String KEY_REASON = "reason";
+    public static final String FIELD_BODY = "body";
+
+    // Tiêu đề lỗi chuẩn hóa
+    public static final String TITLE_VALIDATION_FAILED = "Validation Failed";
+    public static final String TITLE_MALFORMED_REQUEST_BODY = "Malformed Request Body";
+    public static final String TITLE_ACCESS_DENIED = "Access Denied";
+    public static final String TITLE_UNAUTHORIZED = "Unauthorized";
+    public static final String TITLE_FORBIDDEN = "Forbidden";
+    public static final String TITLE_TOO_MANY_REQUESTS = "Too Many Requests";
+
+    // Thông điệp chi tiết chuẩn hóa
+    public static final String DETAIL_MALFORMED_BODY =
+            "Request body is malformed or contains an invalid enum value";
+    public static final String DETAIL_UNAUTHORIZED_TOKEN =
+            "Authentication token is missing or expired";
+    public static final String DETAIL_FORBIDDEN_PERMISSION =
+            "Access Denied: You do not have permission to access this resource";
+    public static final String DETAIL_INTERNAL_ERROR =
+            "An unexpected error occurred";
+    public static final String REASON_INVALID_VALUE = "Invalid value";
 }

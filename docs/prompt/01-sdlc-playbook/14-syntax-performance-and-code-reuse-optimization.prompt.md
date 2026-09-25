@@ -25,14 +25,14 @@ Thực hiện quy trình tối ưu hóa và đồng bộ hóa toàn diện theo 
      * Rà soát Logging: Đảm bảo 100% không thực hiện tính toán chuỗi hoặc gọi hàm tốn chi phí bên trong tham số log khi level không được kích hoạt (dùng SLF4J parametric `{}`).
      * Tối ưu hóa kiểm tra rỗng / null: Tận dụng các phương thức fast-path của JDK như `Objects.requireNonNull()`, `String.isBlank()`, `Collection.isEmpty()`.
    - *Rà soát Tái Sử Dụng Mã Nguồn (Code Reusability & DRY):*
-     * *Tầng Production (`src/main/`):* Các URI định danh lỗi RFC 7807 (`urn:problem-type:...`) đã được gom thành hằng số dùng chung chưa hay đang rải rác dưới dạng magic strings? Các message lỗi lặp lại có thể chuẩn hóa thành hằng số không?
+     * *Tầng Production (`src/main/`):* Triệt tiêu 100% Magic Numbers & Literal Strings: Các URI định danh lỗi RFC 7807 (`urn:problem-type:...`), tên Micrometer metrics, tag keys, role names, JSON error extension keys, boundary lengths đã được gom thành hằng số dùng chung (`public static final`) chưa hay đang rải rác dưới dạng magic strings/numbers? Các cấu hình rate limiting/cache đã được externalize ra `@ConfigurationProperties` chưa?
      * *Tầng Testing (`src/test/`):* Các đoạn khởi tạo đối tượng mẫu (`WorkOrder`, `WorkOrderRequest`, `UUID`) có bị sao chép lặp lại qua nhiều test classes (`WorkOrderServiceTest`, `WorkOrderIntegrationTest`, `DtoMappingTest`) không? Cần áp dụng Test Data Builder / Object Mother pattern để tái sử dụng.
 2. **Kiểm tra toàn bộ tài liệu Markdown (`docs/`, `docs/drafts/`, `.github/`):**
    - Rà soát code snippet mẫu trong:
      * `.github/copilot-instructions.md`
      * `docs/drafts/*.md` (`draft-dtos.md`, `draft-workorder-service.md`, `draft-workorder-domain.md`, `draft-global-exception-handler.md`, `draft-workorder-tests.md`)
      * `docs/00-internal-coding-standards.md`, `docs/02-api-spec.md`
-   - Phát hiện các đoạn code blueprint còn dùng cú pháp Java cũ, magic strings, hoặc chưa áp dụng các kỹ thuật tối ưu hóa hiệu năng & tái sử dụng.
+   - Phát hiện các đoạn code blueprint còn dùng cú pháp Java cũ, magic numbers, magic strings, hoặc chưa áp dụng các kỹ thuật tối ưu hóa hiệu năng & tái sử dụng.
 3. **Lập bảng Ma Trận Tối Ưu Hóa (Optimization Matrix):**
    - Liệt kê: `Tệp/Thành phần` | `Khía cạnh (Cú pháp / Hiệu năng / Tái sử dụng)` | `Hiện trạng` | `Hành động Tối ưu hóa`.
 
@@ -46,8 +46,9 @@ Thực hiện các tinh chỉnh vi mô (Micro-refactoring) đảm bảo giữ ng
    - Pre-sizing các Collections (`ArrayList`, `HashMap`) với công thức dung tích chính xác: `new ArrayList<>(size)` hoặc `new HashMap<>(expectedSize / 0.75f + 1)`.
    - Giữ vững từ khóa `final` cho 100% parameters và local variables để hỗ trợ JIT Compiler tối ưu hóa Escape Analysis và Inline Caching.
    - Sử dụng Fast-path null check `Objects.requireNonNull()` tại ranh giới public API.
-3. **Tái Sử Dụng Mã Nguồn & Triệt Tiêu Magic Strings:**
-   - Định nghĩa lớp hằng số dùng chung (ví dụ `ProblemTypeConstants` hoặc hằng số tập trung) đóng gói các URN RFC 7807 (`urn:problem-type:validation-error`, `urn:problem-type:not-found`, v.v.), tái sử dụng đồng bộ giữa `GlobalExceptionHandler`, Controller và Security Configuration.
+3. **Tái Sử Dụng Mã Nguồn & Triệt Tiêu Magic Numbers & Literal Strings:**
+   - Định nghĩa các lớp hằng số dùng chung: `ProblemTypes` (đóng gói URI RFC 7807, extension keys), `WorkOrderMetrics` (metric names, tag keys), `RoleConstants` (chuỗi role RBAC `ROLE_*`), các hằng số độ dài trường dùng chung giữa Entity và DTO.
+   - Chuyển các giá trị số cấu hình (rate limit window, cache max size, TTL) sang `@ConfigurationProperties` trong `application.yml`. Bắt buộc dùng `MediaType` và `HttpHeaders` từ Spring Framework.
 
 ### Bước 3: Tối Ưu Tầng Kiểm Thử & Thiết Kế Thư Viện Fixture Dùng Chung (`src/test/`)
 1. **Hiện thực hóa Object Mother / Test Fixture Pattern:**

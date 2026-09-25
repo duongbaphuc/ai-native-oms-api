@@ -26,8 +26,17 @@ Khởi tạo toàn bộ cấu trúc nền móng kỹ thuật và cơ chế quả
      * Cấm dùng Lombok, bắt buộc dùng Java 17 immutable records và explicit POJOs.
      * Tuân thủ kiến trúc 3 tầng Clean Architecture (Controller $\rightarrow$ Service $\rightarrow$ Repository).
      * Bắt buộc kiểm thử 100% trước khi mở Pull Request.
+     * Cấm 100% Magic Numbers và Literal Strings: Bắt buộc sử dụng hằng số có tên tự mô tả (`public static final`), Enum, hoặc externalize qua `@ConfigurationProperties` trong `application.yml`.
    - Tạo `docs/00-coding-rules.md`: Thiết lập bộ quy chuẩn viết mã (Java Coding Standards & Design Patterns Guide) theo phong cách của **Senior Java Engineer tại Oracle (Oracle Core Platform & JDK Team)**:
      * **Code Style Chuẩn Oracle & Effective Java (Joshua Bloch):** Immutability by default, Fail-Fast principle, Defensive Programming, đóng gói dữ liệu triệt để, cấm hoàn toàn Project Lombok (`@Data`, `@Getter`, `@Setter`), bắt buộc 100% Constructor Injection với `private final` fields.
+     * **Triệt Tiêu 100% Magic Numbers & Literal Strings (Zero Magic Values Principle - Joshua Bloch Item 68):**
+       + *Cấm Tuyệt Đối Magic Numbers:* Nghiêm cấm các con số thô (raw numeric literals: 20, 60, 401, 429, 10000, 10m) trực tiếp trong logic điều kiện, vòng lặp, kiểm tra trạng thái hoặc annotations mà không rõ ngữ nghĩa. Bắt buộc: (1) Khai báo hằng số self-explanatory (`private static final int MAX_CACHE_ENTRIES = 10_000`); (2) Dùng hằng số chuẩn từ Spring/JDK (`HttpStatus.TOO_MANY_REQUESTS.value()`); (3) Externalize các tham số dung lượng, giới hạn lưu lượng, thời gian hết hạn (Rate Limiting, Cache, Timeout) vào `application.yml` qua `@ConfigurationProperties`.
+       + *Cấm Tuyệt Đối Literal Strings:* Nghiêm cấm các chuỗi ký tự ma thuật (inline strings) phân tán trong mã nguồn:
+         - Tên Metric & Tag Keys (Micrometer): Cấm viết chuỗi tự do trong `registry.counter(...)`. Bắt buộc gom vào lớp hằng số `WorkOrderMetrics` hoặc Enum chuyên biệt.
+         - Tên Role & Quyền Hạn (Security RBAC): Cấm viết chuỗi thô (`"ADMIN"`, `"DISPATCHER"`, `"TECHNICIAN"`) trong SecurityConfig và Controller. Bắt buộc gom vào lớp hằng số `RoleConstants` (kèm tiền tố `ROLE_`).
+         - Thuộc tính JSON & Mã lỗi (RFC 7807): Gom các khóa mở rộng (`invalidParams`, `name`, `reason`, `type`) thành hằng số `public static final` trong `ProblemTypes`.
+         - Tiêu đề HTTP & Media Types: Bắt buộc dùng `HttpHeaders.RETRY_AFTER`, `MediaType.APPLICATION_PROBLEM_JSON_VALUE`.
+         - Ràng buộc dữ liệu: Hằng số độ dài tối đa/tối thiểu của trường dữ liệu phải được dùng chung giữa Entity JPA và DTO Bean Validation để chống lệch pha.
      * **Ứng Dụng Các Mẫu Thiết Kế (Design Patterns) Tối Ưu Hóa Class:**
        + *Static Factory Method Pattern (`from()`, `of()`):* Thay thế constructors thô, tăng tính biểu đạt ngữ nghĩa và kiểm soát cấp phát đối tượng (vd: `WorkOrderResponse.from(entity)`).
        + *State Pattern / Strategy Pattern:* Đóng gói các máy trạng thái (State Machine) và thuật toán rẽ nhánh nghiệp vụ phức tạp vào Enums/State classes với các phương thức thẩm định chuyển đổi (`canTransitionTo()`), triệt tiêu các khối `if-else` lồng nhau.
@@ -35,6 +44,10 @@ Khởi tạo toàn bộ cấu trúc nền móng kỹ thuật và cơ chế quả
        + *Explicit Mapper / Adapter Pattern:* Chuyển đổi thủ công tường minh giữa Entity và DTO, tối ưu hóa CPU và bộ nhớ, cấm sử dụng các thư viện reflection nặng như ModelMapper hay BeanUtils.
        + *Chain of Responsibility Pattern:* Ứng dụng trong việc xử lý tuần tự qua Filter chains (`SecurityFilterChain`, `CorrelationIdFilter`) và Controller Advice bắt lỗi tập trung (`GlobalExceptionHandler`).
      * **Tối Ưu Hóa Hiệu Năng JVM & Bộ Nhớ (GC Pressure):** Quản lý chặt chẽ phạm vi biến (Variable Scoping), ưu tiên biến `final` cục bộ để hỗ trợ JIT Compiler Escape Analysis, khởi tạo kích thước ban đầu (initial capacity) cho Collections, phân biệt rạch ròi khi nào dùng nối chuỗi `+` (invokedynamic) và khi nào dùng `StringBuilder` trong vòng lặp lớn.
+   - Tạo `docs/00-internal-coding-standards.md`: Thiết lập quy chuẩn kỹ thuật vi mô, thời gian UTC Instant, chuyển đổi DTO tường minh (Zero ModelMapper), và quy chuẩn quản lý hằng số tập trung (Centralized Constants & No Magic Values Policy):
+     * Cấm tuyệt đối magic numbers (thời gian timeout, kích thước cache, giới hạn rate limit, HTTP status codes thô).
+     * Cấm tuyệt đối literal strings (metric names, tag keys, role names, JSON error keys, media types).
+     * Bắt buộc định nghĩa các class hằng số dùng chung (`ProblemTypes`, `WorkOrderMetrics`, `RoleConstants`) và externalize tham số cấu hình ra `application.yml` qua `@ConfigurationProperties`.
    - Tạo `.copilotignore`: Ngăn chặn AI đọc hoặc rò rỉ dữ liệu từ các file nhạy cảm (`.env`, certificates, private keys, database dumps).
    - Khởi tạo khung tài liệu `docs/03-CONTEXT_INDEX.md`: Tạo bản đồ nguồn chân lý (Single Source of Truth) ban đầu.
 

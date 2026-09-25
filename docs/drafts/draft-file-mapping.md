@@ -33,33 +33,39 @@ Copilot/LLM **KHÔNG được tạo file ngoài danh sách này** trừ khi có 
 | 17 | `CorrelationIdFilter.java` | `com.gpc.oms.config` | `src/main/java/com/gpc/oms/config/CorrelationIdFilter.java` | NEW | [`draft-observability-filters.md`](draft-observability-filters.md) §3 |
 | 18 | `RateLimitingFilter.java` | `com.gpc.oms.config` | `src/main/java/com/gpc/oms/config/RateLimitingFilter.java` | NEW | [`draft-observability-filters.md`](draft-observability-filters.md) §4 |
 | 19 | `StringToWorkOrderStatusConverter.java` | `com.gpc.oms.config` | `src/main/java/com/gpc/oms/config/StringToWorkOrderStatusConverter.java` | NEW | [`draft-shared-components.md`](draft-shared-components.md) §4 |
+| 20 | `RoleConstants.java` | `com.gpc.oms.config` | `src/main/java/com/gpc/oms/config/RoleConstants.java` | NEW | [`draft-security-config.md`](draft-security-config.md), [`00-coding-rules.md`](../00-coding-rules.md) |
+| 21 | `RateLimitProperties.java` | `com.gpc.oms.config` | `src/main/java/com/gpc/oms/config/RateLimitProperties.java` | NEW | [`draft-observability-filters.md`](draft-observability-filters.md), [`00-coding-rules.md`](../00-coding-rules.md) |
+| 22 | `WorkOrderMetrics.java` | `com.gpc.oms.service` | `src/main/java/com/gpc/oms/service/WorkOrderMetrics.java` | NEW | [`draft-workorder-service.md`](draft-workorder-service.md), [`00-coding-rules.md`](../00-coding-rules.md) |
 
 ---
 
-## 2. Test Code (`src/test/java/`) — 20 Files
+## 2. Test Code (`src/test/java/`) — 23 Files
 
 | # | File | Package | Full Path | Action | Draft Nguồn Tham Chiếu |
 |---|---|---|---|---|---|
-| 20 | `OmsApiApplicationTests.java` | `com.gpc.oms` | `src/test/java/com/gpc/oms/OmsApiApplicationTests.java` | NEW | [`draft-workorder-tests.md`](draft-workorder-tests.md) §1 (#1) |
-| 21 | `WorkOrderIntegrationTest.java` | `com.gpc.oms` | `src/test/java/com/gpc/oms/WorkOrderIntegrationTest.java` | NEW | [`draft-workorder-tests.md`](draft-workorder-tests.md) §1 (#2) |
-| 22 | `ActuatorSecurityTest.java` | `com.gpc.oms.config` | `src/test/java/com/gpc/oms/config/ActuatorSecurityTest.java` | NEW | [`draft-security-config.md`](draft-security-config.md) §5, [`draft-workorder-tests.md`](draft-workorder-tests.md) |
-| 23 | `CorrelationIdFilterTest.java` | `com.gpc.oms.config` | `src/test/java/com/gpc/oms/config/CorrelationIdFilterTest.java` | NEW | [`draft-observability-filters.md`](draft-observability-filters.md) §5, [`draft-workorder-tests.md`](draft-workorder-tests.md) |
-| 24 | `H2ConsoleSecurityTest.java` | `com.gpc.oms.config` | `src/test/java/com/gpc/oms/config/H2ConsoleSecurityTest.java` | NEW | [`draft-security-config.md`](draft-security-config.md) §5, [`draft-workorder-tests.md`](draft-workorder-tests.md) |
-| 25 | `JwtRoleConverterTest.java` | `com.gpc.oms.config` | `src/test/java/com/gpc/oms/config/JwtRoleConverterTest.java` | NEW | [`draft-security-config.md`](draft-security-config.md) §5, [`draft-workorder-tests.md`](draft-workorder-tests.md) |
-| 26 | `OAuth2JwtSecurityIntegrationTest.java` | `com.gpc.oms.config` | `src/test/java/com/gpc/oms/config/OAuth2JwtSecurityIntegrationTest.java` | NEW | [`draft-security-config.md`](draft-security-config.md) §5, [`draft-workorder-tests.md`](draft-workorder-tests.md) |
-| 27 | `RateLimitingFilterTest.java` | `com.gpc.oms.config` | `src/test/java/com/gpc/oms/config/RateLimitingFilterTest.java` | NEW | [`draft-observability-filters.md`](draft-observability-filters.md) §5, [`draft-workorder-tests.md`](draft-workorder-tests.md) |
-| 28 | `StringToWorkOrderStatusConverterTest.java` | `com.gpc.oms.config` | `src/test/java/com/gpc/oms/config/StringToWorkOrderStatusConverterTest.java` | NEW | [`draft-shared-components.md`](draft-shared-components.md) §6, [`draft-workorder-tests.md`](draft-workorder-tests.md) |
-| 29 | `GlobalExceptionHandlerUnitTest.java` | `com.gpc.oms.controller` | `src/test/java/com/gpc/oms/controller/GlobalExceptionHandlerUnitTest.java` | NEW | [`draft-workorder-tests.md`](draft-workorder-tests.md) §1 (#10) |
-| 30 | `WorkOrderControllerTest.java` | `com.gpc.oms.controller` | `src/test/java/com/gpc/oms/controller/WorkOrderControllerTest.java` | NEW | [`draft-workorder-tests.md`](draft-workorder-tests.md) §Sketch 2 |
-| 31 | `PriorityTest.java` | `com.gpc.oms.domain` | `src/test/java/com/gpc/oms/domain/PriorityTest.java` | NEW | [`draft-workorder-tests.md`](draft-workorder-tests.md) §1 (#12) |
-| 32 | `WorkOrderStatusTest.java` | `com.gpc.oms.domain` | `src/test/java/com/gpc/oms/domain/WorkOrderStatusTest.java` | NEW | [`draft-workorder-tests.md`](draft-workorder-tests.md) §1 (#13) |
-| 33 | `WorkOrderTest.java` | `com.gpc.oms.domain` | `src/test/java/com/gpc/oms/domain/WorkOrderTest.java` | NEW | [`draft-workorder-tests.md`](draft-workorder-tests.md) §Sketch 1 |
-| 34 | `DtoMappingTest.java` | `com.gpc.oms.dto` | `src/test/java/com/gpc/oms/dto/DtoMappingTest.java` | NEW | [`draft-workorder-tests.md`](draft-workorder-tests.md) §1 (#15) |
-| 35 | `ProblemTypesTest.java` | `com.gpc.oms.exception` | `src/test/java/com/gpc/oms/exception/ProblemTypesTest.java` | NEW | [`draft-shared-components.md`](draft-shared-components.md) §6 |
-| 36 | `ResourceNotFoundExceptionTest.java` | `com.gpc.oms.exception` | `src/test/java/com/gpc/oms/exception/ResourceNotFoundExceptionTest.java` | NEW | [`draft-shared-components.md`](draft-shared-components.md) §6 |
-| 37 | `WorkOrderRepositoryTest.java` | `com.gpc.oms.repository` | `src/test/java/com/gpc/oms/repository/WorkOrderRepositoryTest.java` | NEW | [`draft-workorder-tests.md`](draft-workorder-tests.md) §Sketch 3 |
-| 38 | `WorkOrderServiceTest.java` | `com.gpc.oms.service` | `src/test/java/com/gpc/oms/service/WorkOrderServiceTest.java` | NEW | [`draft-workorder-tests.md`](draft-workorder-tests.md) §Sketch 2 |
-| 39 | `WorkOrderTestFixtures.java` | `com.gpc.oms.testutil` | `src/test/java/com/gpc/oms/testutil/WorkOrderTestFixtures.java` | NEW | [`draft-shared-components.md`](draft-shared-components.md) §5 |
+| 23 | `OmsApiApplicationTests.java` | `com.gpc.oms` | `src/test/java/com/gpc/oms/OmsApiApplicationTests.java` | NEW | [`draft-workorder-tests.md`](draft-workorder-tests.md) §1 (#1) |
+| 24 | `WorkOrderIntegrationTest.java` | `com.gpc.oms` | `src/test/java/com/gpc/oms/WorkOrderIntegrationTest.java` | NEW | [`draft-workorder-tests.md`](draft-workorder-tests.md) §1 (#2) |
+| 25 | `ActuatorSecurityTest.java` | `com.gpc.oms.config` | `src/test/java/com/gpc/oms/config/ActuatorSecurityTest.java` | NEW | [`draft-security-config.md`](draft-security-config.md) §5, [`draft-workorder-tests.md`](draft-workorder-tests.md) |
+| 26 | `CorrelationIdFilterTest.java` | `com.gpc.oms.config` | `src/test/java/com/gpc/oms/config/CorrelationIdFilterTest.java` | NEW | [`draft-observability-filters.md`](draft-observability-filters.md) §5, [`draft-workorder-tests.md`](draft-workorder-tests.md) |
+| 27 | `H2ConsoleSecurityTest.java` | `com.gpc.oms.config` | `src/test/java/com/gpc/oms/config/H2ConsoleSecurityTest.java` | NEW | [`draft-security-config.md`](draft-security-config.md) §5, [`draft-workorder-tests.md`](draft-workorder-tests.md) |
+| 28 | `JwtRoleConverterTest.java` | `com.gpc.oms.config` | `src/test/java/com/gpc/oms/config/JwtRoleConverterTest.java` | NEW | [`draft-security-config.md`](draft-security-config.md) §5, [`draft-workorder-tests.md`](draft-workorder-tests.md) |
+| 29 | `OAuth2JwtSecurityIntegrationTest.java` | `com.gpc.oms.config` | `src/test/java/com/gpc/oms/config/OAuth2JwtSecurityIntegrationTest.java` | NEW | [`draft-security-config.md`](draft-security-config.md) §5, [`draft-workorder-tests.md`](draft-workorder-tests.md) |
+| 30 | `RateLimitingFilterTest.java` | `com.gpc.oms.config` | `src/test/java/com/gpc/oms/config/RateLimitingFilterTest.java` | NEW | [`draft-observability-filters.md`](draft-observability-filters.md) §5, [`draft-workorder-tests.md`](draft-workorder-tests.md) |
+| 31 | `StringToWorkOrderStatusConverterTest.java` | `com.gpc.oms.config` | `src/test/java/com/gpc/oms/config/StringToWorkOrderStatusConverterTest.java` | NEW | [`draft-shared-components.md`](draft-shared-components.md) §6, [`draft-workorder-tests.md`](draft-workorder-tests.md) |
+| 32 | `RoleConstantsTest.java` | `com.gpc.oms.config` | `src/test/java/com/gpc/oms/config/RoleConstantsTest.java` | NEW | [`draft-security-config.md`](draft-security-config.md) |
+| 33 | `RateLimitPropertiesTest.java` | `com.gpc.oms.config` | `src/test/java/com/gpc/oms/config/RateLimitPropertiesTest.java` | NEW | [`draft-observability-filters.md`](draft-observability-filters.md) |
+| 34 | `GlobalExceptionHandlerUnitTest.java` | `com.gpc.oms.controller` | `src/test/java/com/gpc/oms/controller/GlobalExceptionHandlerUnitTest.java` | NEW | [`draft-workorder-tests.md`](draft-workorder-tests.md) §1 (#10) |
+| 35 | `WorkOrderControllerTest.java` | `com.gpc.oms.controller` | `src/test/java/com/gpc/oms/controller/WorkOrderControllerTest.java` | NEW | [`draft-workorder-tests.md`](draft-workorder-tests.md) §Sketch 2 |
+| 36 | `PriorityTest.java` | `com.gpc.oms.domain` | `src/test/java/com/gpc/oms/domain/PriorityTest.java` | NEW | [`draft-workorder-tests.md`](draft-workorder-tests.md) §1 (#12) |
+| 37 | `WorkOrderStatusTest.java` | `com.gpc.oms.domain` | `src/test/java/com/gpc/oms/domain/WorkOrderStatusTest.java` | NEW | [`draft-workorder-tests.md`](draft-workorder-tests.md) §1 (#13) |
+| 38 | `WorkOrderTest.java` | `com.gpc.oms.domain` | `src/test/java/com/gpc/oms/domain/WorkOrderTest.java` | NEW | [`draft-workorder-tests.md`](draft-workorder-tests.md) §Sketch 1 |
+| 39 | `DtoMappingTest.java` | `com.gpc.oms.dto` | `src/test/java/com/gpc/oms/dto/DtoMappingTest.java` | NEW | [`draft-workorder-tests.md`](draft-workorder-tests.md) §1 (#15) |
+| 40 | `ProblemTypesTest.java` | `com.gpc.oms.exception` | `src/test/java/com/gpc/oms/exception/ProblemTypesTest.java` | NEW | [`draft-shared-components.md`](draft-shared-components.md) §6 |
+| 41 | `ResourceNotFoundExceptionTest.java` | `com.gpc.oms.exception` | `src/test/java/com/gpc/oms/exception/ResourceNotFoundExceptionTest.java` | NEW | [`draft-shared-components.md`](draft-shared-components.md) §6 |
+| 42 | `WorkOrderRepositoryTest.java` | `com.gpc.oms.repository` | `src/test/java/com/gpc/oms/repository/WorkOrderRepositoryTest.java` | NEW | [`draft-workorder-tests.md`](draft-workorder-tests.md) §Sketch 3 |
+| 43 | `WorkOrderServiceTest.java` | `com.gpc.oms.service` | `src/test/java/com/gpc/oms/service/WorkOrderServiceTest.java` | NEW | [`draft-workorder-tests.md`](draft-workorder-tests.md) §Sketch 2 |
+| 44 | `WorkOrderMetricsTest.java` | `com.gpc.oms.service` | `src/test/java/com/gpc/oms/service/WorkOrderMetricsTest.java` | NEW | [`draft-workorder-service.md`](draft-workorder-service.md) |
+| 45 | `WorkOrderTestFixtures.java` | `com.gpc.oms.testutil` | `src/test/java/com/gpc/oms/testutil/WorkOrderTestFixtures.java` | NEW | [`draft-shared-components.md`](draft-shared-components.md) §5 |
 
 ---
 

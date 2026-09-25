@@ -194,3 +194,61 @@ Khi hệ thống tích hợp với các dịch vụ bên ngoài (vd: Hệ thốn
    }
    ```
 2. **Object Mother / Test Fixture Pattern (`WorkOrderTestFixtures.java`):** Tái sử dụng việc khởi tạo thực thể và DTO mẫu trong toàn bộ tầng kiểm thử Unit & Integration Tests, triệt tiêu mã boilerplate lặp lại.
+
+### 6.4. Zero Magic Numbers & Zero Literal Strings Policy
+Hệ thống áp dụng triệt để nguyên tắc **Zero Magic Values (Joshua Bloch Item 68)**:
+
+1. **Quy định về Centralized Constants:**
+   - **Tên Metrics & Tag Keys:** Bắt buộc định nghĩa trong `WorkOrderMetrics.java`:
+     ```java
+     public final class WorkOrderMetrics {
+         public static final String COUNTER_CREATED = "oms_workorders_created_total";
+         public static final String COUNTER_TRANSITIONS = "oms_workorder_status_transitions_total";
+         public static final String TAG_FROM_STATUS = "from_status";
+         public static final String TAG_TO_STATUS = "to_status";
+         public static final String TAG_PRIORITY = "priority";
+         public static final String TAG_STATUS = "status";
+         private WorkOrderMetrics() {}
+     }
+     ```
+   - **Quyền Hạn & Vai Trò (RBAC):** Bắt buộc định nghĩa trong `RoleConstants.java`:
+     ```java
+     public final class RoleConstants {
+         public static final String ROLE_ADMIN = "ROLE_ADMIN";
+         public static final String ROLE_DISPATCHER = "ROLE_DISPATCHER";
+         public static final String ROLE_TECHNICIAN = "ROLE_TECHNICIAN";
+         public static final String ROLE_ANONYMOUS = "ROLE_ANONYMOUS";
+         public static final String HAS_ROLE_ADMIN_OR_DISPATCHER = 
+             "hasAnyRole('" + ROLE_ADMIN + "', '" + ROLE_DISPATCHER + "')";
+         private RoleConstants() {}
+     }
+     ```
+   - **RFC 7807 Error Keys & Problem Types:** Bắt buộc định nghĩa trong `ProblemTypes.java`:
+     ```java
+     public static final String KEY_INVALID_PARAMS = "invalidParams";
+     public static final String KEY_NAME = "name";
+     public static final String KEY_REASON = "reason";
+     public static final String TITLE_VALIDATION_FAILED = "Validation Failed";
+     ```
+   - **Ràng Buộc Độ Dài Thực Thể & DTO:** Dùng chung hằng số công khai để chống lệch pha:
+     ```java
+     public static final int MAX_EQUIPMENT_ID_LENGTH = 50;
+     public static final int MIN_DESCRIPTION_LENGTH = 10;
+     public static final int MAX_DESCRIPTION_LENGTH = 500;
+     ```
+
+2. **Quy định về Configuration Properties (`@ConfigurationProperties`):**
+   - Mọi tham số số học về Rate Limiting (giới hạn request, cửa sổ thời gian, dung lượng cache) hoặc timeouts phải được externalize vào `application.yml`:
+     ```yaml
+     oms:
+       rate-limit:
+         max-requests-per-minute: 60
+         window-minutes: 10
+         cache-max-size: 10000
+     ```
+   - Đọc qua Spring `@ConfigurationProperties(prefix = "oms.rate-limit")` thay vì hardcode trong Filter.
+
+3. **Quy định về Media Types & HTTP Headers:**
+   - Cấm viết chuỗi thô `"application/problem+json"` $\rightarrow$ dùng `MediaType.APPLICATION_PROBLEM_JSON_VALUE`.
+   - Cấm viết chuỗi thô `"Retry-After"` $\rightarrow$ dùng `HttpHeaders.RETRY_AFTER`.
+

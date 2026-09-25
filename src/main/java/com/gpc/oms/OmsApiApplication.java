@@ -1,8 +1,10 @@
 // Nguồn gốc AI: sinh từ docs/00-coding-rules.md, docs/01-domain-model.md
 package com.gpc.oms;
 
+import com.gpc.oms.config.RateLimitProperties;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
+import org.springframework.boot.context.properties.EnableConfigurationProperties;
 
 /**
  * Lớp khởi động chính của phân hệ Outage Management System (OMS) REST API.
@@ -14,6 +16,7 @@ import org.springframework.boot.autoconfigure.SpringBootApplication;
  * @since 1.0.0
  */
 @SpringBootApplication
+@EnableConfigurationProperties(RateLimitProperties.class)
 public class OmsApiApplication {
 
     /**

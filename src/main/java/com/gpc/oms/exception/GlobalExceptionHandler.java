@@ -39,17 +39,22 @@ public class GlobalExceptionHandler {
     @ExceptionHandler(MethodArgumentNotValidException.class)
     public ProblemDetail handleValidationErrors(final MethodArgumentNotValidException ex) {
         log.warn("Validation failed: {}", ex.getMessage());
-        final ProblemDetail problem = ProblemDetail.forStatusAndDetail(HttpStatus.BAD_REQUEST, "Validation Failed");
+        final ProblemDetail problem = ProblemDetail.forStatusAndDetail(
+                HttpStatus.BAD_REQUEST, ProblemTypes.TITLE_VALIDATION_FAILED);
         problem.setType(ProblemTypes.VALIDATION_ERROR);
         
         final List<FieldError> fieldErrors = ex.getBindingResult().getFieldErrors();
         final List<Map<String, String>> invalidParams = new ArrayList<>(fieldErrors.size());
         for (final FieldError error : fieldErrors) {
-            final String reason = error.getDefaultMessage() != null ? error.getDefaultMessage() : "Invalid value";
-            invalidParams.add(Map.of("name", error.getField(), "reason", reason));
+            final String reason = error.getDefaultMessage() != null
+                    ? error.getDefaultMessage()
+                    : ProblemTypes.REASON_INVALID_VALUE;
+            invalidParams.add(Map.of(
+                    ProblemTypes.KEY_NAME, error.getField(),
+                    ProblemTypes.KEY_REASON, reason));
         }
             
-        problem.setProperty("invalidParams", invalidParams);
+        problem.setProperty(ProblemTypes.PROPERTY_INVALID_PARAMS, invalidParams);
         return problem;
     }
 
@@ -60,10 +65,12 @@ public class GlobalExceptionHandler {
     public ProblemDetail handleMalformedJson(final HttpMessageNotReadableException ex) {
         log.warn("Malformed request body");
         final ProblemDetail problem = ProblemDetail.forStatusAndDetail(
-                HttpStatus.BAD_REQUEST, "Malformed Request Body");
+                HttpStatus.BAD_REQUEST, ProblemTypes.TITLE_MALFORMED_REQUEST_BODY);
         problem.setType(ProblemTypes.MALFORMED_JSON);
-        problem.setProperty("invalidParams",
-            List.of(Map.of("name", "body", "reason", "Request body is malformed or contains an invalid enum value")));
+        problem.setProperty(ProblemTypes.PROPERTY_INVALID_PARAMS,
+            List.of(Map.of(
+                    ProblemTypes.KEY_NAME, ProblemTypes.FIELD_BODY,
+                    ProblemTypes.KEY_REASON, ProblemTypes.DETAIL_MALFORMED_BODY)));
         return problem;
     }
 
@@ -74,10 +81,13 @@ public class GlobalExceptionHandler {
     @ExceptionHandler(MethodArgumentTypeMismatchException.class)
     public ProblemDetail handleQueryParamTypeMismatch(final MethodArgumentTypeMismatchException ex) {
         log.warn("Query parameter type mismatch: {}", ex.getName());
-        final ProblemDetail problem = ProblemDetail.forStatusAndDetail(HttpStatus.BAD_REQUEST, "Validation Failed");
+        final ProblemDetail problem = ProblemDetail.forStatusAndDetail(
+                HttpStatus.BAD_REQUEST, ProblemTypes.TITLE_VALIDATION_FAILED);
         problem.setType(ProblemTypes.VALIDATION_ERROR);
-        problem.setProperty("invalidParams",
-            List.of(Map.of("name", ex.getName(), "reason", "Invalid value for parameter '" + ex.getName() + "'")));
+        problem.setProperty(ProblemTypes.PROPERTY_INVALID_PARAMS,
+            List.of(Map.of(
+                    ProblemTypes.KEY_NAME, ex.getName(),
+                    ProblemTypes.KEY_REASON, "Invalid value for parameter '" + ex.getName() + "'")));
         return problem;
     }
 
@@ -87,7 +97,8 @@ public class GlobalExceptionHandler {
     @ExceptionHandler(AccessDeniedException.class)
     public ProblemDetail handleAccessDenied(final AccessDeniedException ex) {
         log.warn("Access denied");
-        final ProblemDetail problem = ProblemDetail.forStatusAndDetail(HttpStatus.FORBIDDEN, "Access Denied");
+        final ProblemDetail problem = ProblemDetail.forStatusAndDetail(
+                HttpStatus.FORBIDDEN, ProblemTypes.TITLE_ACCESS_DENIED);
         problem.setType(ProblemTypes.FORBIDDEN);
         return problem;
     }
@@ -120,7 +131,7 @@ public class GlobalExceptionHandler {
     public ProblemDetail handleUnexpected(final Exception ex) {
         log.error("Unexpected error", ex); // Chi tiết lỗi chỉ được ghi lại tại server log
         final ProblemDetail problem = ProblemDetail.forStatusAndDetail(
-            HttpStatus.INTERNAL_SERVER_ERROR, "An unexpected error occurred");
+            HttpStatus.INTERNAL_SERVER_ERROR, ProblemTypes.DETAIL_INTERNAL_ERROR);
         problem.setType(ProblemTypes.INTERNAL_ERROR);
         return problem;
     }

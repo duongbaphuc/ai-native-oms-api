@@ -7,6 +7,8 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Profile;
 import org.springframework.core.annotation.Order;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
 import org.springframework.security.config.Customizer;
 import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
@@ -82,32 +84,36 @@ public class SecurityConfig {
                 .requestMatchers(
                     AntPathRequestMatcher.antMatcher("/h2-console/**"),
                     AntPathRequestMatcher.antMatcher("/h2-console")
-                ).hasRole("ADMIN")
-                .requestMatchers("/actuator/prometheus").hasRole("ADMIN")
+                ).hasRole(RoleConstants.ADMIN)
+                .requestMatchers("/actuator/prometheus").hasRole(RoleConstants.ADMIN)
                 .anyRequest().authenticated()
             )
             .exceptionHandling(exceptions -> exceptions
                 .authenticationEntryPoint((request, response, authException) -> {
-                    response.setStatus(401);
-                    response.setContentType("application/problem+json");
+                    response.setStatus(HttpStatus.UNAUTHORIZED.value());
+                    response.setContentType(MediaType.APPLICATION_PROBLEM_JSON_VALUE);
                     response.getWriter().write("""
                         {"type":"%s",\
-                        "title":"Unauthorized",\
-                        "status":401,\
-                        "detail":"Authentication token is missing or expired",\
+                        "title":"%s",\
+                        "status":%d,\
+                        "detail":"%s",\
                         "instance":"%s"}"""
-                        .formatted(ProblemTypes.UNAUTHORIZED, request.getRequestURI()));
+                        .formatted(ProblemTypes.UNAUTHORIZED, ProblemTypes.TITLE_UNAUTHORIZED,
+                                HttpStatus.UNAUTHORIZED.value(), ProblemTypes.DETAIL_UNAUTHORIZED_TOKEN,
+                                request.getRequestURI()));
                 })
                 .accessDeniedHandler((request, response, accessDeniedException) -> {
-                    response.setStatus(403);
-                    response.setContentType("application/problem+json");
+                    response.setStatus(HttpStatus.FORBIDDEN.value());
+                    response.setContentType(MediaType.APPLICATION_PROBLEM_JSON_VALUE);
                     response.getWriter().write("""
                         {"type":"%s",\
-                        "title":"Forbidden",\
-                        "status":403,\
-                        "detail":"Access Denied: You do not have permission to access this resource",\
+                        "title":"%s",\
+                        "status":%d,\
+                        "detail":"%s",\
                         "instance":"%s"}"""
-                        .formatted(ProblemTypes.FORBIDDEN, request.getRequestURI()));
+                        .formatted(ProblemTypes.FORBIDDEN, ProblemTypes.TITLE_FORBIDDEN,
+                                HttpStatus.FORBIDDEN.value(), ProblemTypes.DETAIL_FORBIDDEN_PERMISSION,
+                                request.getRequestURI()));
                 })
             )
             .httpBasic(Customizer.withDefaults());
@@ -117,18 +123,19 @@ public class SecurityConfig {
             http.oauth2ResourceServer(oauth2 -> oauth2
                 .jwt(jwt -> jwt.decoder(jwtDecoder).jwtAuthenticationConverter(jwtAuthenticationConverter()))
                 .authenticationEntryPoint((request, response, authException) -> {
-                    response.setStatus(401);
-                    response.setContentType("application/problem+json");
+                    response.setStatus(HttpStatus.UNAUTHORIZED.value());
+                    response.setContentType(MediaType.APPLICATION_PROBLEM_JSON_VALUE);
                     String detailMsg = authException.getMessage() != null
                             ? authException.getMessage()
-                            : "Authentication token is missing or expired";
+                            : ProblemTypes.DETAIL_UNAUTHORIZED_TOKEN;
                     response.getWriter().write("""
                         {"type":"%s",\
-                        "title":"Unauthorized",\
-                        "status":401,\
+                        "title":"%s",\
+                        "status":%d,\
                         "detail":"%s",\
                         "instance":"%s"}"""
-                        .formatted(ProblemTypes.UNAUTHORIZED, detailMsg, request.getRequestURI()));
+                        .formatted(ProblemTypes.UNAUTHORIZED, ProblemTypes.TITLE_UNAUTHORIZED,
+                                HttpStatus.UNAUTHORIZED.value(), detailMsg, request.getRequestURI()));
                 })
             );
         }
@@ -160,15 +167,15 @@ public class SecurityConfig {
     public UserDetailsService userDetailsService() {
         UserDetails admin = User.withUsername("admin")
             .password("{noop}admin123")
-            .roles("ADMIN", "DISPATCHER", "TECHNICIAN")
+            .roles(RoleConstants.ADMIN, RoleConstants.DISPATCHER, RoleConstants.TECHNICIAN)
             .build();
         UserDetails dispatcher = User.withUsername("dispatcher")
             .password("{noop}dispatcher123")
-            .roles("DISPATCHER")
+            .roles(RoleConstants.DISPATCHER)
             .build();
         UserDetails technician = User.withUsername("technician")
             .password("{noop}technician123")
-            .roles("TECHNICIAN")
+            .roles(RoleConstants.TECHNICIAN)
             .build();
         return new InMemoryUserDetailsManager(admin, dispatcher, technician);
     }
