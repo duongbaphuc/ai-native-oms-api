@@ -44,12 +44,16 @@ Dự án đạt mốc kiểm thử hoàn hảo: **117/117 automated tests PASS (
 - **Bổ sung Prompt Giai Đoạn 18: Bản Địa Hóa Tiếng Việt ([PR #87](https://github.com/duongbaphuc/ai-native-oms-api/pull/87) - Closes [Issue #86](https://github.com/duongbaphuc/ai-native-oms-api/issues/86)):**
   - Biên soạn `docs/prompt/01-sdlc-playbook/18-vietnamese-localization-api-docs-and-comments.prompt.md` với chu trình 5 bước và Glossary SSOT song ngữ.
   - Cập nhật sơ đồ Mermaid 20 giai đoạn và bảng danh mục trong `00-MASTER-AI-NATIVE-SDLC-PLAYBOOK.md` cùng `docs/03-CONTEXT_INDEX.md`.
-- **Thực thi Bản địa hóa toàn diện Tiếng Việt cho Javadoc, Comments & API Docs - Pha 18 (Closes [Issue #88](https://github.com/duongbaphuc/ai-native-oms-api/issues/88)):**
+- **Thực thi Bản địa hóa toàn diện Tiếng Việt cho Javadoc, Comments & API Docs - Pha 18 ([PR #89](https://github.com/duongbaphuc/ai-native-oms-api/pull/89) - Closes [Issue #88](https://github.com/duongbaphuc/ai-native-oms-api/issues/88)):**
   - Bản địa hóa 100% Javadoc, khối chú thích (block comments) và chú thích dòng (inline comments) trong toàn bộ 39 tệp mã nguồn Java (19 production files, 20 test files).
   - Đảm bảo 100% dòng mã nguồn trong `src/main/java` đều $\le$ 120 ký tự (0 vi phạm).
   - Bảo toàn 100% khả năng thực thi và tính toàn vẹn (Zero Code Regression): 117/117 automated tests PASS (100%), JaCoCo Quality Gate đạt 100% Line & Branch Coverage.
   - Mã hóa UTF-8 chuẩn xác, không lỗi font chữ (Zero Mojibake).
   - Khởi tạo báo cáo kiểm định `docs/audit-logs/vietnamese-localization-audit-report-2026-09-25.md`.
+- **Bổ sung Prompt Giai Đoạn 19: Đặc Tả Yêu Cầu Kỹ Thuật & Khung Ma Trận Kiểm Định Review Dự Án ([PR #91](https://github.com/duongbaphuc/ai-native-oms-api/pull/91) - Closes [Issue #90](https://github.com/duongbaphuc/ai-native-oms-api/issues/90)):**
+  - Xây dựng tệp prompt `docs/prompt/01-sdlc-playbook/19-technical-requirements-and-review-matrix.prompt.md` trích xuất 100% các yêu cầu kỹ thuật từ `CHANGELOG.md` theo 8 trụ cột kỹ thuật chuẩn mực doanh nghiệp (Domain, API, Security, Resilience, Code Standards, Testing, DevOps, SDLC Governance).
+  - Thiết lập khung Ma trận Truy vết Yêu cầu Kỹ thuật (TRTM) và bộ checklist kiểm định review 3 cấp độ (Code Reviewer, Software Architect, Security & QA Auditor) làm căn cứ khách quan phục vụ nghiệm thu dự án.
+  - Tích hợp Pha 19 vào quy trình 21 giai đoạn tuyến tính trong `00-MASTER-AI-NATIVE-SDLC-PLAYBOOK.md` và `docs/03-CONTEXT_INDEX.md`.
 
 ---
 
@@ -221,7 +225,10 @@ Dự án đạt mốc kiểm thử hoàn hảo: **117/117 automated tests PASS (
 | 85 | [PR #85](https://github.com/duongbaphuc/ai-native-oms-api/pull/85) | docs(changelog): complete full Issues and Pull Requests traceability from inception to v1.0.0 (closes #84) | Docs | Pha 12 | Merged |
 | 86 | [Issue #86](https://github.com/duongbaphuc/ai-native-oms-api/issues/86) | feat(playbook): Thêm Prompt Giai Đoạn 18 - Bản Địa Hóa Tiếng Việt Cho API Docs, Javadoc & Comments | Playbook | Pha 18 | Closed |
 | 87 | [PR #87](https://github.com/duongbaphuc/ai-native-oms-api/pull/87) | feat(playbook): add Phase 18 Vietnamese Localization prompt to SDLC Playbook (closes #86) | Playbook | Pha 18 | Merged |
-| 88 | [Issue #88](https://github.com/duongbaphuc/ai-native-oms-api/issues/88) | feat(localization): localize Javadoc, code comments and API docs to Vietnamese (Phase 18) | Core / Docs | Pha 18 | Open |
+| 88 | [Issue #88](https://github.com/duongbaphuc/ai-native-oms-api/issues/88) | feat(localization): localize Javadoc, code comments and API docs to Vietnamese (Phase 18) | Core / Docs | Pha 18 | Closed |
+| 89 | [PR #89](https://github.com/duongbaphuc/ai-native-oms-api/pull/89) | feat(localization): standardize Javadoc, comments and API docs to Vietnamese (closes #88) | Core / Docs | Pha 18 | Merged |
+| 90 | [Issue #90](https://github.com/duongbaphuc/ai-native-oms-api/issues/90) | docs(playbook): add Phase 19 Technical Requirements Specification & Review Matrix prompt | Playbook | Pha 19 | Closed |
+| 91 | [PR #91](https://github.com/duongbaphuc/ai-native-oms-api/pull/91) | docs(playbook): add Phase 19 Technical Requirements Specification & Review Matrix prompt (closes #90) | Playbook | Pha 19 | Open |
 
 ---
 
