@@ -134,6 +134,16 @@ pie title Phân loại tình trạng lỗ hổng & Issue an ninh
 - **Biện pháp thực hiện (Merged PR #68):** Tích hợp Spring Security OAuth2 Resource Server trên profile `prod`. Bộ chuyển đổi `JwtRoleConverter` phân tích cả `realm_access.roles` và `resource_access.*.roles` thành `ROLE_` authorities. Bộ test `OAuth2JwtSecurityIntegrationTest.java` (5 tests) và `JwtRoleConverterTest.java` (4 tests) kiểm chứng toàn diện.
 - **Trạng thái:** **CLOSED / RESOLVED ([Issue #33](https://github.com/duongbaphuc/ai-native-oms-api/issues/33))**.
 
+#### ✅ SEC-06: Giới Hạn Tần Suất Truy Cập Bucket4j & Caffeine Cache LRU Eviction (`RateLimitingFilter`)
+- **Mức độ:** `Medium / P1` (CWE-770 - CVSS: 5.3) & `Medium / P1` (CWE-400 - CVSS: 5.3)
+- **Vị trí tệp mã nguồn:** [`src/main/java/com/gpc/oms/config/RateLimitingFilter.java`](file:///c:/ai-native-oms-api/src/main/java/com/gpc/oms/config/RateLimitingFilter.java)
+- **Biện pháp thực hiện (Merged PR #79 / Issue #78):**
+  - Thuật toán Token Bucket (Bucket4j 8.10.1): Giới hạn 20 write req/min và 60 read req/min cho mỗi địa chỉ IP. Trả về HTTP 429 Too Many Requests kèm RFC 7807 problem details và header `Retry-After`.
+  - Bộ nhớ đệm Caffeine Cache (`com.github.ben-manes.caffeine:caffeine`): Cấu hình `maximumSize(10,000)` và `expireAfterAccess(10m)` với thuật toán Window TinyLFU / LRU eviction tự động.
+  - **Triệt tiêu lỗ hổng DoS Un-throttling:** Loại bỏ hoàn toàn cơ chế `buckets.clear()`. Khi vượt quá 10,000 mục, chỉ các bucket hết hạn hoặc ít truy cập nhất bị thu hồi; các IP vi phạm tiếp tục bị chặn nghiêm ngặt.
+  - Bộ test `RateLimitingFilterTest.java` (10 tests) bao quát toàn bộ kịch bản đọc, ghi, IP isolation, và ranh giới bỏ qua filter.
+- **Trạng thái:** **CLOSED / RESOLVED ([Issue #78](https://github.com/duongbaphuc/ai-native-oms-api/issues/78) / [PR #79](https://github.com/duongbaphuc/ai-native-oms-api/pull/79))**.
+
 ---
 
 ## 4. KIỂM ĐỊNH KIẾN TRÚC SPRING SECURITY & RANH GIỚI MẠNG (PERIMETER AUDIT)

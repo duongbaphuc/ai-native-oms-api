@@ -26,7 +26,7 @@ Dự án được xây dựng và hoàn thiện theo phương pháp luận **AI-
 | **Độ bao phủ JaCoCo** | **100% Line & 100% Branch Coverage** | Đạt ngưỡng Quality Gate trên toàn bộ 12 monitored classes nghiệp vụ |
 | **Bảo mật & Phân quyền** | **Dual SecurityFilterChain (Basic / JWT)** | Cô lập H2 Console ở non-prod; OAuth2 JWT Resource Server chuẩn Production |
 | **Distributed Tracing** | **SEC-03 CorrelationIdFilter** | MDC Trace/Correlation ID tự động sinh hoặc kế thừa header `X-Correlation-Id` |
-| **Kiểm soát lưu lượng** | **SEC-06 Bucket4j RateLimitingFilter** | 20 write req/min, 60 read req/min per IP; cơ chế giải phóng bộ nhớ LRU |
+| **Kiểm soát lưu lượng** | **SEC-06 Bucket4j RateLimitingFilter** | 20 write req/min, 60 read req/min per IP; cơ chế giải phóng bộ nhớ Caffeine Cache LRU eviction |
 | **Giám sát & Chỉ số** | **OPS-01 Actuator & Prometheus** | Endpoint `/actuator/prometheus`, Liveness/Readiness probes, custom business metrics |
 | **Toàn vẹn Dữ liệu** | **Flyway DDL Migration** | H2 In-Memory (Dev/Test) & PostgreSQL (Prod) với `ddl-auto: validate` |
 | **Đóng gói & Phân phối** | **Multi-stage Dockerfile Non-root** | Eclipse Temurin 17 JRE Alpine, user `10001:appuser`, docker-compose.yml |
@@ -40,7 +40,7 @@ Tất cả các API được công bố dưới tiền tố `/api/v1/workorders`
 
 ### 3.1 Tiếp Nhận & Khởi Tạo Phiếu Công Tác
 - **Phương thức:** `POST /api/v1/workorders`
-- **Quyền hạn:** `ROLE_ADMIN`, `ROLE_DISPATCHER`
+- **Quyền hạn:** `ROLE_ADMIN`, `ROLE_DISPATCHER`, `ROLE_TECHNICIAN`
 - **Mã phản hồi thành công:** `HTTP 201 Created`
 - **Header phản hồi:** `Location: /api/v1/workorders/{id}`, `X-Correlation-Id`
 - **Mã lỗi:** `HTTP 400 Bad Request` (RFC 7807) khi vi phạm ràng buộc dữ liệu (`equipmentId` không rỗng, `description` từ 10 đến 500 ký tự, `priority` hợp lệ).
