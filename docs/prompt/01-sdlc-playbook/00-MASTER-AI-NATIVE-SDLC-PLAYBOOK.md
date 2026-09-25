@@ -4,7 +4,7 @@ Tài liệu này tổng hợp toàn bộ chuỗi Prompt chuẩn mực theo cấu
 
 ---
 
-## 1. Sơ Đồ Quy Trình 20 Giai Đoạn Tuyến Tính (Pha 00 - 18 kèm 04B)
+## 1. Sơ Đồ Quy Trình 21 Giai Đoạn Tuyến Tính (Pha 00 - 19 kèm 04B)
 
 ```mermaid
 graph TD
@@ -40,10 +40,11 @@ graph TD
         P14 --> P15["Pha 15: Sinh Checklist Nghiêm Ngặt & Tự Động Xuất Bằng Chứng Kiểm Định (15-strict-checklist-and-automated-audit-generation.prompt.md)"]
     end
 
-    subgraph "Giai đoạn 16-18: Kiểm Toán Chất Lượng, Khắc Phục & Bản Địa Hóa Kỹ Thuật"
+    subgraph "Giai đoạn 16-19: Kiểm Toán Chất Lượng, Khắc Phục, Bản Địa Hóa & Review Matrix"
         P15 --> P16["Pha 16: Kiểm Toán Toàn Diện Mã Nguồn 13 Tiêu Chí (16-comprehensive-quality-audit-13-criteria.prompt.md)"]
         P16 --> P17["Pha 17: Khắc Phục Toàn Diện 13 Tiêu Chí Chất Lượng (17-remediation-13-criteria-quality-audit.prompt.md)"]
         P17 --> P18["Pha 18: Bản Địa Hóa Tiếng Anh Sang Tiếng Việt Cho API Docs & Comments (18-vietnamese-localization-api-docs-and-comments.prompt.md)"]
+        P18 --> P19["Pha 19: Đặc Tả Yêu Cầu Kỹ Thuật & Khung Ma Trận Review Dự Án (19-technical-requirements-and-review-matrix.prompt.md)"]
     end
 ```
 
@@ -73,6 +74,7 @@ graph TD
 | **16** | [`16-comprehensive-quality-audit-13-criteria.prompt.md`](16-comprehensive-quality-audit-13-criteria.prompt.md) | Principal Quality Assurance Architect & Lead Code Auditor | Kiểm toán toàn diện mã nguồn dự án theo 13 tiêu chí chất lượng (Triangulation SSOT) | Báo cáo kiểm toán Markdown ghi nhận PASS/FAIL cho từng tiêu chí kèm bằng chứng |
 | **17** | [`17-remediation-13-criteria-quality-audit.prompt.md`](17-remediation-13-criteria-quality-audit.prompt.md) | Principal Software Architect & Lead Remediation Engineer | Khắc phục toàn bộ các lỗi tồn đọng từ đợt kiểm toán 13 tiêu chí (Caffeine LRU, Clean Code, Javadoc) | 13/13 tiêu chí đạt PASS (100%), 117 tests Green, JaCoCo 100% Line & Branch |
 | **18** | [`18-vietnamese-localization-api-docs-and-comments.prompt.md`](18-vietnamese-localization-api-docs-and-comments.prompt.md) | Principal Technical Localization Architect & Java Documentation Specialist | Bản địa hóa 100% API docs, Javadoc và chú thích mã nguồn từ Tiếng Anh sang Tiếng Việt | 100% Javadoc & comments tiếng Việt chuẩn mực, dòng <= 120 ký tự, 117 tests Green |
+| **19** | [`19-technical-requirements-and-review-matrix.prompt.md`](19-technical-requirements-and-review-matrix.prompt.md) | Principal Systems Architect & Technical Requirements Review Lead | Trích xuất và đặc tả toàn diện các yêu cầu kỹ thuật từ CHANGELOG.md, thiết lập Ma trận Kiểm định Review Dự án (TRTM) | File `02-technical-requirements-and-review-matrix.md`, 8 trụ cột kỹ thuật, TRTM 100%, 3-tier checklist |
 
 ---
 
