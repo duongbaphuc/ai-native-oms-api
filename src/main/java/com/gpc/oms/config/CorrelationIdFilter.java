@@ -1,4 +1,4 @@
-// AI Provenance: generated from docs/02-observability-and-logging.md, docs/09-SECURITY_HANDOVER_REPORT.md
+// Nguồn gốc AI: sinh từ docs/02-observability-and-logging.md, docs/09-SECURITY_HANDOVER_REPORT.md
 package com.gpc.oms.config;
 
 import jakarta.servlet.FilterChain;
@@ -15,20 +15,20 @@ import java.io.IOException;
 import java.util.UUID;
 
 /**
- * Top-precedence HTTP Servlet Filter establishing distributed correlation identifiers and MDC context.
+ * Bộ lọc HTTP Servlet có độ ưu tiên cao nhất, thiết lập mã định danh truy vết tương quan và ngữ cảnh SLF4J MDC.
  *
- * <p>Mitigates CWE-778 (Insufficient Logging) and bridges Forensic Audit gaps by ensuring every incoming
- * request across the microservice ecosystem is assigned a deterministic or generated tracing identity.</p>
+ * <p>Giảm thiểu lỗ hổng CWE-778 (Ghi nhật ký không đầy đủ) và phục vụ kiểm toán kỹ thuật bằng cách bảo đảm
+ * mọi yêu cầu gửi đến hệ thống đều được cấp phát định danh duy nhất xác định hoặc tự sinh ngẫu nhiên.</p>
  *
- * @apiNote Intercepts all incoming HTTP requests before any security or application dispatchers.
- *          If the client provides an {@code X-Correlation-Id} header, its sanitized value is retained;
- *          otherwise, an RFC 4122 random UUID is generated. Both {@code traceId} and {@code correlationId}
- *          keys are populated into SLF4J MDC, and the header is propagated on the HTTP response.
- * @implSpec Extends {@link OncePerRequestFilter} to guarantee single execution per request thread dispatch.
- *           Configured with {@link Ordered#HIGHEST_PRECEDENCE} to precede Spring Security filter chains.
- * @implNote Enforces strict ThreadLocal lifecycle hygiene by removing MDC keys in an unconditional
- *           {@code finally} block, preventing context contamination across worker thread reuse in Tomcat.
- * @author GPC OMS Architecture Team
+ * @apiNote Chặn mọi yêu cầu HTTP trước chuỗi bảo mật hoặc bộ điều phối ứng dụng.
+ *          Nếu client cung cấp tiêu đề {@code X-Correlation-Id}, giá trị hợp lệ sẽ được tái sử dụng;
+ *          nếu không, mã UUID ngẫu nhiên (RFC 4122) sẽ được tạo mới. Cả hai khóa {@code traceId}
+ *          và {@code correlationId} đều được đưa vào MDC, đồng thời tiêu đề được gắn vào phản hồi HTTP.
+ * @implSpec Kế thừa {@link OncePerRequestFilter} đảm bảo mỗi yêu cầu chỉ thực thi một lần duy nhất trên luồng.
+ *           Được gắn nhãn {@link Ordered#HIGHEST_PRECEDENCE} để luôn chạy trước chuỗi lọc của Spring Security.
+ * @implNote Thực thi dọn dẹp biến ThreadLocal nghiêm ngặt thông qua việc xóa khóa MDC trong khối lệnh
+ *           {@code finally} vô điều kiện, ngăn ngừa ô nhiễm ngữ cảnh giữa các luồng worker được tái sử dụng.
+ * @author Đội ngũ Kiến trúc GPC OMS
  * @version 1.0.0
  * @since 1.0.0
  * @see <a href="https://cwe.mitre.org/data/definitions/778.html">CWE-778</a>
@@ -39,35 +39,35 @@ import java.util.UUID;
 public class CorrelationIdFilter extends OncePerRequestFilter {
 
     /**
-     * Standard HTTP header containing the distributed tracing correlation identifier.
+     * Tiêu đề HTTP tiêu chuẩn chứa mã định danh truy vết tương quan phân tán.
      */
     public static final String CORRELATION_ID_HEADER = "X-Correlation-Id";
 
     /**
-     * SLF4J MDC context key adhering to Elastic Common Schema (ECS) specification.
+     * Khóa ngữ cảnh SLF4J MDC tuân theo đặc tả Elastic Common Schema (ECS).
      */
     public static final String TRACE_ID_MDC_KEY = "traceId";
 
     /**
-     * SLF4J MDC context key adhering to Outage Work Order domain business audit logging.
+     * Khóa ngữ cảnh SLF4J MDC phục vụ nhật ký kiểm toán nghiệp vụ sự cố lưới điện.
      */
     public static final String CORRELATION_ID_MDC_KEY = "correlationId";
 
     /**
-     * Default constructor for Spring container instantiation.
+     * Constructor mặc định phục vụ việc khởi tạo bean trong Spring container.
      */
     public CorrelationIdFilter() {
         super();
     }
 
     /**
-     * Executes the filter logic, establishing MDC context and propagating correlation headers.
+     * Thực thi logic bộ lọc, thiết lập ngữ cảnh MDC và truyền tiếp tiêu đề tương quan.
      *
-     * @param request The current HTTP servlet request
-     * @param response The HTTP servlet response being constructed
-     * @param filterChain The downstream filter chain
-     * @throws ServletException if an error occurs during downstream chain processing
-     * @throws IOException if an I/O error occurs writing or streaming the response
+     * @param request Yêu cầu HTTP servlet hiện tại
+     * @param response Phản hồi HTTP servlet đang được tạo lập
+     * @param filterChain Chuỗi các bộ lọc tiếp theo
+     * @throws ServletException nếu phát sinh lỗi trong quá trình xử lý chuỗi lọc phía sau
+     * @throws IOException nếu phát sinh lỗi I/O khi ghi hoặc truyền dữ liệu phản hồi
      */
     @Override
     protected void doFilterInternal(HttpServletRequest request,

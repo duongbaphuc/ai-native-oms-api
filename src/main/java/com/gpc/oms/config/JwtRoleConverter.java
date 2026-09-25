@@ -1,4 +1,4 @@
-// AI Provenance: generated from docs/02-security-auth-spec.md, docs/09-SECURITY_HANDOVER_REPORT.md
+// Nguồn gốc AI: sinh từ docs/02-security-auth-spec.md, docs/09-SECURITY_HANDOVER_REPORT.md
 package com.gpc.oms.config;
 
 import org.springframework.core.convert.converter.Converter;
@@ -12,18 +12,19 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 /**
- * Custom converter extracting and normalizing RBAC role authorities from JSON Web Tokens (JWT).
+ * Bộ chuyển đổi tùy chỉnh trích xuất và chuẩn hóa quyền vai trò RBAC từ JSON Web Tokens (JWT).
  *
- * <p>Mitigates CWE-798 (Hardcoded / Local Credentials in Production Gap) by bridging external Identity
- * Provider (IdP) claims with Spring Security's Method Security infrastructure.</p>
+ * <p>Giảm thiểu nguy cơ CWE-798 (Thông tin xác thực nhúng cứng) bằng cách kết nối các claims từ Nhà cung cấp
+ * định danh (Identity Provider) bên ngoài với hạ tầng Method Security của Spring Security.</p>
  *
- * @apiNote Parses the {@code roles} claim array from a decoded {@link Jwt}. Ensures every extracted
- *          authority possesses the canonical {@code ROLE_} prefix required by {@code @PreAuthorize("hasAnyRole(...)")}
- *          and Spring Security's RBAC evaluate engine.
- * @implSpec Implements {@link Converter} mapping {@link Jwt} to an unmodifiable collection of {@link GrantedAuthority}.
- *           Safely handles {@code null} or empty claims by returning {@link Collections#emptyList()}.
- * @implNote Thread-safe and stateless singleton. Does not retain any claim or security state.
- * @author GPC OMS Architecture Team
+ * @apiNote Phân tích mảng claim {@code roles} từ đối tượng {@link Jwt}. Bảo đảm mọi vai trò trích xuất
+ *          đều sở hữu tiền tố chuẩn mực {@code ROLE_} phục vụ kiểm tra qua {@code @PreAuthorize("hasAnyRole(...)")}
+ *          và cơ chế đánh giá quyền RBAC của Spring Security.
+ * @implSpec Triển khai {@link Converter} ánh xạ {@link Jwt} thành tập hợp không thể biến đổi
+ *           của các đối tượng {@link GrantedAuthority}.
+ *           Xử lý an toàn khi claims rỗng hoặc {@code null} bằng cách trả về {@link Collections#emptyList()}.
+ * @implNote Singleton an toàn luồng (thread-safe) và phi trạng thái (stateless). Không lưu giữ ngữ cảnh bảo mật.
+ * @author Đội ngũ Kiến trúc GPC OMS
  * @version 1.0.0
  * @since 1.0.0
  * @see org.springframework.security.oauth2.server.resource.authentication.JwtAuthenticationConverter
@@ -35,18 +36,18 @@ public class JwtRoleConverter implements Converter<Jwt, Collection<GrantedAuthor
     private static final String ROLE_PREFIX = "ROLE_";
 
     /**
-     * Default constructor for converter instantiation.
+     * Constructor mặc định phục vụ việc khởi tạo bộ chuyển đổi.
      */
     public JwtRoleConverter() {
         super();
     }
 
     /**
-     * Extracts and normalizes roles from the provided JWT token into granted authorities.
+     * Trích xuất và chuẩn hóa các vai trò từ mã JWT đã cung cấp thành danh sách các quyền hạn được cấp.
      *
-     * @param jwt The decoded JSON Web Token
-     * @return An unmodifiable collection of normalized {@link GrantedAuthority} objects,
-     *         or an empty collection if no roles are present
+     * @param jwt Đối tượng JSON Web Token đã được giải mã
+     * @return Tập hợp không thể biến đổi chứa các đối tượng {@link GrantedAuthority} đã chuẩn hóa,
+     *         hoặc tập hợp rỗng nếu không tồn tại claim vai trò
      */
     @Override
     public Collection<GrantedAuthority> convert(Jwt jwt) {

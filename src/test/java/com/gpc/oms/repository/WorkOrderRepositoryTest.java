@@ -1,4 +1,4 @@
-// AI Provenance: generated from docs/02-database-migration-spec.md, docs/01-domain-model.md
+// Nguồn gốc AI: sinh từ docs/02-database-migration-spec.md, docs/01-domain-model.md
 package com.gpc.oms.repository;
 
 import com.gpc.oms.domain.Priority;
@@ -18,8 +18,11 @@ import org.springframework.jdbc.core.JdbcTemplate;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
+/**
+ * Kiểm thử tầng lưu trữ DataJpaTest cho {@link WorkOrderRepository} (Xác thực ràng buộc CSDL).
+ */
 @DataJpaTest
-@DisplayName("WorkOrderRepository DataJpaTest (Persistence & Constraint Verification)")
+@DisplayName("Kiểm thử tầng dữ liệu WorkOrderRepository (Xác thực ràng buộc toàn vẹn)")
 class WorkOrderRepositoryTest {
 
     @Autowired
@@ -32,7 +35,7 @@ class WorkOrderRepositoryTest {
     private JdbcTemplate jdbcTemplate;
 
     @Test
-    @DisplayName("Persisting a new WorkOrder auto-generates a non-null UUID primary key")
+    @DisplayName("Lưu mới một WorkOrder tự động sinh khóa chính UUID non-null")
     void persist_generatesUuidPrimaryKey() {
         WorkOrder wo = new WorkOrder("EQ-01", "Transformer issue", Priority.CRITICAL);
         assertThat(wo.getId()).isNull();
@@ -46,7 +49,7 @@ class WorkOrderRepositoryTest {
     }
 
     @Test
-    @DisplayName("findByStatus filters records matching given status and supports pagination")
+    @DisplayName("findByStatus lọc đúng các bản ghi theo trạng thái và hỗ trợ phân trang")
     void findByStatus_filtersAndPaginates() {
         WorkOrder wo1 = new WorkOrder("EQ-10", "Substation outage", Priority.HIGH);
         WorkOrder wo2 = new WorkOrder("EQ-11", "Fuse blown", Priority.MEDIUM);
@@ -62,7 +65,8 @@ class WorkOrderRepositoryTest {
 
         Page<WorkOrder> openOrders = repository.findByStatus(WorkOrderStatus.OPEN, PageRequest.of(0, 10));
         assertThat(openOrders.getTotalElements()).isEqualTo(2);
-        assertThat(openOrders.getContent()).extracting(WorkOrder::getEquipmentId).containsExactlyInAnyOrder("EQ-10", "EQ-11");
+        assertThat(openOrders.getContent()).extracting(WorkOrder::getEquipmentId)
+                .containsExactlyInAnyOrder("EQ-10", "EQ-11");
 
         Page<WorkOrder> inProgressOrders = repository.findByStatus(WorkOrderStatus.IN_PROGRESS, PageRequest.of(0, 10));
         assertThat(inProgressOrders.getTotalElements()).isEqualTo(1);
@@ -73,7 +77,7 @@ class WorkOrderRepositoryTest {
     }
 
     @Test
-    @DisplayName("Check constraint chk_work_orders_priority rejects invalid priority strings")
+    @DisplayName("Ràng buộc kiểm tra chk_work_orders_priority từ chối chuỗi mức ưu tiên không hợp lệ")
     void checkConstraint_rejectsInvalidPriority() {
         assertThatThrownBy(() -> {
             jdbcTemplate.execute("""
@@ -84,7 +88,7 @@ class WorkOrderRepositoryTest {
     }
 
     @Test
-    @DisplayName("Check constraint chk_work_orders_status rejects invalid status strings")
+    @DisplayName("Ràng buộc kiểm tra chk_work_orders_status từ chối chuỗi trạng thái không hợp lệ")
     void checkConstraint_rejectsInvalidStatus() {
         assertThatThrownBy(() -> {
             jdbcTemplate.execute("""

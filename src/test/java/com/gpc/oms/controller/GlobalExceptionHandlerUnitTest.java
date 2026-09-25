@@ -1,4 +1,4 @@
-// AI Provenance: generated from docs/00-api-rules.md §2, docs/00-security-rules.md §4
+// Nguồn gốc AI: sinh từ docs/00-api-rules.md §2, docs/00-security-rules.md §4
 package com.gpc.oms.controller;
 
 import com.gpc.oms.exception.GlobalExceptionHandler;
@@ -22,7 +22,10 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
-@DisplayName("GlobalExceptionHandler Direct Unit Tests (RFC 7807 Verification)")
+/**
+ * Bộ kiểm thử đơn vị trực tiếp cho {@link GlobalExceptionHandler} xác thực chuẩn RFC 7807.
+ */
+@DisplayName("Kiểm thử đơn vị bộ xử lý ngoại lệ GlobalExceptionHandler (Xác thực RFC 7807)")
 class GlobalExceptionHandlerUnitTest {
 
     private GlobalExceptionHandler handler;
@@ -33,15 +36,15 @@ class GlobalExceptionHandlerUnitTest {
     }
 
     @Test
-    @DisplayName("Handler #1: MethodArgumentNotValidException maps 400 validation-error with non-null & null messages")
+    @DisplayName("Handler #1: MethodArgumentNotValidException ánh xạ thành 400 validation-error")
     void handleValidationErrors_withNonNullAndNullDefaultMessage() {
         MethodArgumentNotValidException ex = mock(MethodArgumentNotValidException.class);
         BeanPropertyBindingResult bindingResult = new BeanPropertyBindingResult(new Object(), "workOrderRequest");
 
-        // Branch 1: error.getDefaultMessage() != null
+        // Nhánh 1: error.getDefaultMessage() != null
         bindingResult.addError(new FieldError("workOrderRequest", "equipmentId", "equipmentId must not be blank"));
 
-        // Branch 2: error.getDefaultMessage() == null (forces fallback "Invalid value")
+        // Nhánh 2: error.getDefaultMessage() == null (kích hoạt fallback "Invalid value")
         bindingResult.addError(new FieldError("workOrderRequest", "description", null, false, null, null, null));
 
         when(ex.getBindingResult()).thenReturn(bindingResult);
@@ -62,7 +65,7 @@ class GlobalExceptionHandlerUnitTest {
     }
 
     @Test
-    @DisplayName("Handler #2: HttpMessageNotReadableException maps 400 malformed-json with body param")
+    @DisplayName("Handler #2: HttpMessageNotReadableException ánh xạ thành 400 malformed-json")
     void handleMalformedJson_returnsProblemDetail() {
         @SuppressWarnings("deprecation")
         HttpMessageNotReadableException ex = new HttpMessageNotReadableException("JSON parse error");
@@ -81,7 +84,7 @@ class GlobalExceptionHandlerUnitTest {
     }
 
     @Test
-    @DisplayName("Handler #3: AccessDeniedException maps 403 forbidden")
+    @DisplayName("Handler #3: AccessDeniedException ánh xạ thành 403 forbidden")
     void handleAccessDenied_returnsProblemDetail() {
         AccessDeniedException ex = new AccessDeniedException("Access is denied");
 
@@ -93,7 +96,7 @@ class GlobalExceptionHandlerUnitTest {
     }
 
     @Test
-    @DisplayName("Handler #4: ResourceNotFoundException maps 404 not-found")
+    @DisplayName("Handler #4: ResourceNotFoundException ánh xạ thành 404 not-found")
     void handleResourceNotFound_returnsProblemDetail() {
         ResourceNotFoundException ex = new ResourceNotFoundException("WorkOrder not found with id: a1b2c3d4");
 
@@ -105,7 +108,7 @@ class GlobalExceptionHandlerUnitTest {
     }
 
     @Test
-    @DisplayName("Handler #5: IllegalStateException maps 422 invalid-state-transition")
+    @DisplayName("Handler #5: IllegalStateException ánh xạ thành 422 invalid-state-transition")
     void handleIllegalStateTransition_returnsProblemDetail() {
         IllegalStateException ex = new IllegalStateException("Invalid state transition from OPEN to DONE");
 
@@ -117,7 +120,7 @@ class GlobalExceptionHandlerUnitTest {
     }
 
     @Test
-    @DisplayName("Handler #6: Exception fallback maps 500 internal-error without leaking internal details")
+    @DisplayName("Handler #6: Exception fallback ánh xạ thành 500 internal-error không lộ thông tin nhạy cảm")
     void handleUnexpected_returnsProblemDetail() {
         Exception ex = new RuntimeException("Sensitive database connection failure details");
 
@@ -126,7 +129,7 @@ class GlobalExceptionHandlerUnitTest {
         assertThat(problem.getStatus()).isEqualTo(HttpStatus.INTERNAL_SERVER_ERROR.value());
         assertThat(problem.getDetail()).isEqualTo("An unexpected error occurred");
         assertThat(problem.getType()).isEqualTo(URI.create("urn:problem-type:internal-error"));
-        // Assert sensitive exception details are not exposed in problem detail
+        // Xác nhận chi tiết ngoại lệ nhạy cảm không bị lộ ra bên ngoài
         assertThat(problem.getDetail()).doesNotContain("database connection failure");
     }
 }

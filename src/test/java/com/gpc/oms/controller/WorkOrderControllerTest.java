@@ -10,6 +10,7 @@ import com.gpc.oms.dto.WorkOrderResponse;
 import com.gpc.oms.exception.GlobalExceptionHandler;
 import com.gpc.oms.exception.ResourceNotFoundException;
 import com.gpc.oms.service.WorkOrderService;
+import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.mockito.ArgumentCaptor;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -31,8 +32,14 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
+/**
+ * Kiểm thử phân lớp Controller (WebMvcTest) cho {@link WorkOrderController}.
+ *
+ * <p>Kiểm tra các hành vi tiếp nhận request, phân tích cú pháp, ánh xạ tham số và xử lý mã trạng thái HTTP.</p>
+ */
 @WebMvcTest(WorkOrderController.class)
 @Import({SecurityConfig.class, GlobalExceptionHandler.class})
+@DisplayName("Kiểm thử phân lớp WebMvcTest cho WorkOrderController")
 class WorkOrderControllerTest {
 
     @Autowired

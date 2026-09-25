@@ -1,4 +1,4 @@
-// AI Provenance: generated from docs/02-api-spec.md, docs/02-security-auth-spec.md, docs/00-internal-coding-standards.md
+// Nguồn gốc AI: sinh từ docs/02-api-spec.md, docs/02-security-auth-spec.md, docs/00-internal-coding-standards.md
 package com.gpc.oms;
 
 import com.fasterxml.jackson.databind.JsonNode;
@@ -22,10 +22,13 @@ import static org.hamcrest.Matchers.*;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
+/**
+ * Bộ kiểm thử tích hợp đầu-cuối (End-to-End Integration Tests) xác thực toàn diện vòng đời phiếu công tác.
+ */
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 @AutoConfigureMockMvc
 @Transactional
-@DisplayName("WorkOrder End-to-End Integration Tests")
+@DisplayName("Kiểm thử tích hợp đầu-cuối vòng đời Outage Work Order (E2E Integration Tests)")
 class WorkOrderIntegrationTest {
 
     @Autowired
@@ -35,13 +38,13 @@ class WorkOrderIntegrationTest {
     private ObjectMapper objectMapper;
 
     @Nested
-    @DisplayName("Kịch bản 1: Happy Path Vòng Đời Phiếu Sự Cố (Lifecycle End-to-End)")
+    @DisplayName("Kịch bản 1: Luồng thành công vòng đời phiếu sự cố (Happy Path E2E)")
     class HappyPathLifecycleTests {
 
         @Test
-        @DisplayName("Complete WorkOrder Lifecycle: Create (DISPATCHER) -> List -> Detail (TECHNICIAN) -> InProgress -> Done")
+        @DisplayName("Vòng đời hoàn chỉnh: Tạo mới (DISPATCHER) -> Xem danh sách -> Chi tiết (TECHNICIAN) -> Đang thi công -> Hoàn tất")
         void fullWorkOrderLifecycle() throws Exception {
-            // Step 1: DISPATCHER creates a new work order
+            // Bước 1: Điều độ viên (DISPATCHER) tiếp nhận và tạo mới một phiếu sự cố
             String createJson = """
                 {
                     "equipmentId": "TR-500KV-HANOI",
@@ -69,7 +72,7 @@ class WorkOrderIntegrationTest {
             assertThat(createResult.getResponse().getHeader("Location"))
                 .isEqualTo("/api/v1/workorders/" + workOrderId);
 
-            // Step 2: DISPATCHER calls GET /api/v1/workorders with pagination
+            // Bước 2: Điều độ viên gọi GET /api/v1/workorders có phân trang
             mockMvc.perform(get("/api/v1/workorders")
                     .with(org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.user("dispatcher1").roles("DISPATCHER"))
                     .param("page", "0")
@@ -81,7 +84,7 @@ class WorkOrderIntegrationTest {
                 .andExpect(jsonPath("$.pageNumber").value(0))
                 .andExpect(jsonPath("$.pageSize").value(10));
 
-            // Step 3: TECHNICIAN calls GET /api/v1/workorders/{id}
+            // Bước 3: Kỹ thuật viên (TECHNICIAN) gọi GET /api/v1/workorders/{id} xem chi tiết
             mockMvc.perform(get("/api/v1/workorders/{id}", workOrderId)
                     .with(org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.user("tech1").roles("TECHNICIAN")))
                 .andExpect(status().isOk())
@@ -89,7 +92,7 @@ class WorkOrderIntegrationTest {
                 .andExpect(jsonPath("$.equipmentId").value("TR-500KV-HANOI"))
                 .andExpect(jsonPath("$.status").value("Open"));
 
-            // Step 4: TECHNICIAN updates status to InProgress
+            // Bước 4: Kỹ thuật viên cập nhật trạng thái sang Đang thi công (InProgress)
             mockMvc.perform(patch("/api/v1/workorders/{id}/status", workOrderId)
                     .with(org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.user("tech1").roles("TECHNICIAN"))
                     .contentType(MediaType.APPLICATION_JSON)
@@ -99,7 +102,7 @@ class WorkOrderIntegrationTest {
                 .andExpect(jsonPath("$.status").value("InProgress"))
                 .andExpect(jsonPath("$.resolvedAt").doesNotExist());
 
-            // Step 5: TECHNICIAN updates status to Done
+            // Bước 5: Kỹ thuật viên cập nhật trạng thái sang Hoàn tất (Done)
             mockMvc.perform(patch("/api/v1/workorders/{id}/status", workOrderId)
                     .with(org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.user("tech1").roles("TECHNICIAN"))
                     .contentType(MediaType.APPLICATION_JSON)
@@ -112,11 +115,11 @@ class WorkOrderIntegrationTest {
     }
 
     @Nested
-    @DisplayName("Kịch bản 2: Bảo mật & RBAC Boundary")
+    @DisplayName("Kịch bản 2: Bảo mật & Ranh giới phân quyền RBAC (Security & RBAC Boundary)")
     class SecurityAndRbacBoundaryTests {
 
         @Test
-        @DisplayName("6. Calling API without authentication token returns 401 Unauthorized (urn:problem-type:unauthorized)")
+        @DisplayName("6. Gọi API khi thiếu token xác thực trả về 401 Unauthorized (urn:problem-type:unauthorized)")
         void unauthenticatedRequest_returns401ProblemDetail() throws Exception {
             mockMvc.perform(get("/api/v1/workorders"))
                 .andExpect(status().isUnauthorized())
@@ -127,7 +130,7 @@ class WorkOrderIntegrationTest {
         }
 
         @Test
-        @DisplayName("7. DISPATCHER intentionally attempting to PATCH status returns 403 Forbidden (urn:problem-type:forbidden)")
+        @DisplayName("7. DISPATCHER cố ý gọi PATCH cập nhật trạng thái bị từ chối 403 Forbidden")
         @WithMockUser(username = "dispatcher_user", roles = {"DISPATCHER"})
         void dispatcherCannotPatchStatus_returns403ProblemDetail() throws Exception {
             UUID randomId = UUID.randomUUID();
@@ -144,11 +147,11 @@ class WorkOrderIntegrationTest {
     }
 
     @Nested
-    @DisplayName("Kịch bản 3: Validation & State Invariant")
+    @DisplayName("Kịch bản 3: Xác thực đầu vào & Bất biến máy trạng thái (Validation & State Invariant)")
     class ValidationAndStateInvariantTests {
 
         @Test
-        @DisplayName("8. POST with missing equipmentId and description < 10 chars returns 400 (urn:problem-type:validation-error)")
+        @DisplayName("8. POST thiếu equipmentId và description < 10 ký tự trả về 400 (validation-error)")
         @WithMockUser(username = "dispatcher_user", roles = {"DISPATCHER"})
         void validationError_returns400ProblemDetail() throws Exception {
             String invalidBody = """
@@ -172,10 +175,10 @@ class WorkOrderIntegrationTest {
         }
 
         @Test
-        @DisplayName("9. POST with unknown properties or invalid enum returns 400 (urn:problem-type:malformed-json)")
+        @DisplayName("9. POST chứa thuộc tính lạ hoặc enum không hợp lệ trả về 400 (malformed-json)")
         @WithMockUser(username = "dispatcher_user", roles = {"DISPATCHER"})
         void malformedJson_withUnknownPropertyOrInvalidEnum_returns400ProblemDetail() throws Exception {
-            // Case 9a: Invalid Enum value
+            // Trường hợp 9a: Giá trị Enum không hợp lệ
             String invalidEnumBody = """
                 {
                     "equipmentId": "EQ-VALID-01",
@@ -194,7 +197,7 @@ class WorkOrderIntegrationTest {
                 .andExpect(jsonPath("$.detail").value("Malformed Request Body"))
                 .andExpect(jsonPath("$.invalidParams[0].name").value("body"));
 
-            // Case 9b: Unknown property with fail-on-unknown-properties: true
+            // Trường hợp 9b: Thuộc tính lạ bị từ chối bởi fail-on-unknown-properties: true
             String unknownPropertyBody = """
                 {
                     "equipmentId": "EQ-VALID-01",
@@ -215,7 +218,7 @@ class WorkOrderIntegrationTest {
         }
 
         @Test
-        @DisplayName("10. GET with random non-existing UUID returns 404 Not Found (urn:problem-type:not-found)")
+        @DisplayName("10. GET với UUID ngẫu nhiên không tồn tại trả về 404 Not Found (not-found)")
         @WithMockUser(username = "tech_user", roles = {"TECHNICIAN"})
         void getWithNonExistingUuid_returns404ProblemDetail() throws Exception {
             UUID nonExistentId = UUID.randomUUID();
@@ -229,9 +232,9 @@ class WorkOrderIntegrationTest {
         }
 
         @Test
-        @DisplayName("11. Skipping state from Open directly to Done returns 422 (urn:problem-type:invalid-state-transition)")
+        @DisplayName("11. Nhảy cóc trạng thái từ Open trực tiếp sang Done trả về 422 (invalid-state-transition)")
         void skipStateTransition_openToDone_returns422ProblemDetail() throws Exception {
-            // First create a new WorkOrder (starts at Open)
+            // Tạo mới một WorkOrder (bắt đầu từ trạng thái OPEN)
             String createJson = """
                 {
                     "equipmentId": "EQ-SKIP-TEST",
@@ -249,7 +252,7 @@ class WorkOrderIntegrationTest {
 
             String id = objectMapper.readTree(createResult.getResponse().getContentAsString()).get("id").asText();
 
-            // Attempt to transition OPEN -> DONE directly
+            // Cố ý nhảy cóc trạng thái OPEN -> DONE
             mockMvc.perform(patch("/api/v1/workorders/{id}/status", id)
                     .with(org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.user("tech1").roles("TECHNICIAN"))
                     .contentType(MediaType.APPLICATION_JSON)

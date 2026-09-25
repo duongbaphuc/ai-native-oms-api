@@ -1,4 +1,4 @@
-// AI Provenance: generated from docs/security-auth-spec.md, docs/security-rules.md, docs/SECURITY_HANDOVER_REPORT.md
+// Nguồn gốc AI: sinh từ docs/security-auth-spec.md, docs/security-rules.md, docs/SECURITY_HANDOVER_REPORT.md
 package com.gpc.oms.config;
 
 import com.github.benmanes.caffeine.cache.Cache;
@@ -22,19 +22,19 @@ import java.time.Duration;
 import java.util.concurrent.TimeUnit;
 
 /**
- * HTTP Servlet Filter enforcing Token Bucket rate limiting and traffic throttling on REST endpoints.
+ * Bộ lọc HTTP Servlet thực thi giới hạn tần suất gọi API theo thuật toán thùng thẻ (Token Bucket Rate Limiting).
  *
- * <p>Mitigates CWE-770 (Allocation of Resources Without Limits or Throttling) and DoS / Brute-force attacks
- * by enforcing HTTP method-based token consumption policies on client IP addresses.</p>
+ * <p>Giảm thiểu nguy cơ CWE-770 (Cấp phát tài nguyên không giới hạn) và tấn công từ chối dịch vụ (DoS)
+ * bằng cách áp dụng hạn mức tiêu thụ thẻ dựa trên phương thức HTTP cho từng địa chỉ IP máy khách.</p>
  *
- * @apiNote Applies exclusively to {@code /api/v1/workorders/**} URI paths. Read operations ({@code GET})
- *          are throttled at 60 requests per minute; write operations ({@code POST}, {@code PATCH}) are
- *          throttled at 20 requests per minute. Exceeding the policy returns HTTP 429 Too Many Requests
- *          with RFC 7807 Problem Details and a {@code Retry-After} HTTP response header.
- * @implSpec Extends {@link OncePerRequestFilter} to guarantee idempotent single execution per dispatch.
- *           Uses thread-safe Caffeine Cache storage with LRU/Window TinyLFU eviction thresholds.
- * @implNote Non-blocking token consumption via Bucket4j lock-free atomic CAS primitives.
- * @author GPC OMS Architecture Team
+ * @apiNote Áp dụng độc quyền cho các tiền tố URI {@code /api/v1/workorders/**}. Thao tác đọc ({@code GET})
+ *          được cấp hạn mức 60 yêu cầu/phút; thao tác ghi ({@code POST}, {@code PATCH}) được cấp 20 yêu cầu/phút.
+ *          Khi vượt ngưỡng, hệ thống trả về HTTP 429 Too Many Requests kèm RFC 7807 Problem Details
+ *          và tiêu đề {@code Retry-After} trong phản hồi HTTP.
+ * @implSpec Kế thừa {@link OncePerRequestFilter} đảm bảo thực thi đúng một lần trên mỗi yêu cầu.
+ *           Sử dụng bộ nhớ đệm Caffeine Cache an toàn luồng với chính sách giải phóng LRU / TinyLFU.
+ * @implNote Tiêu thụ thẻ non-blocking thông qua các nguyên hàm atomic CAS không khóa của Bucket4j.
+ * @author Đội ngũ Kiến trúc GPC OMS
  * @version 1.0.0
  * @since 1.0.0
  * @see <a href="https://cwe.mitre.org/data/definitions/770.html">CWE-770</a>
@@ -61,17 +61,17 @@ public class RateLimitingFilter extends OncePerRequestFilter {
             .build();
 
     /**
-     * Default constructor for Spring Component instantiation.
+     * Constructor mặc định phục vụ việc khởi tạo bean bởi Spring Component scanning.
      */
     public RateLimitingFilter() {
         super();
     }
 
     /**
-     * Determines whether the given HTTP request should be excluded from rate limiting.
+     * Xác định xem yêu cầu HTTP hiện tại có được miễn trừ kiểm tra giới hạn tần suất hay không.
      *
-     * @param request Current HTTP request
-     * @return {@code true} if the request URI does not target {@code /api/v1/workorders/**}
+     * @param request Yêu cầu HTTP hiện tại
+     * @return {@code true} nếu URI không thuộc phạm vi {@code /api/v1/workorders/**}; {@code false} nếu cần lọc
      */
     @Override
     protected boolean shouldNotFilter(HttpServletRequest request) {
@@ -80,14 +80,14 @@ public class RateLimitingFilter extends OncePerRequestFilter {
     }
 
     /**
-     * Intercepts incoming requests, evaluates the token bucket for the client, and either allows
-     * execution or halts the chain with HTTP 429 Too Many Requests.
+     * Đánh chặn yêu cầu gửi đến, kiểm tra thùng thẻ của máy khách, và cho phép tiếp tục
+     * hoặc ngắt chuỗi với mã lỗi HTTP 429 Too Many Requests.
      *
-     * @param request The servlet request
-     * @param response The servlet response
-     * @param filterChain The filter chain
-     * @throws ServletException if an error occurs during filter processing
-     * @throws IOException if an I/O error occurs writing the error response
+     * @param request Yêu cầu HTTP servlet
+     * @param response Phản hồi HTTP servlet
+     * @param filterChain Chuỗi các bộ lọc tiếp theo
+     * @throws ServletException nếu phát sinh lỗi trong quá trình xử lý chuỗi lọc
+     * @throws IOException nếu phát sinh lỗi I/O khi ghi phản hồi lỗi
      */
     @Override
     protected void doFilterInternal(HttpServletRequest request,
@@ -129,11 +129,11 @@ Vui lòng thử lại sau %d giây.",\
     }
 
     /**
-     * Resolves the originating client IP address, evaluating {@code X-Forwarded-For} before falling back
-     * to {@link HttpServletRequest#getRemoteAddr()}.
+     * Phân giải địa chỉ IP máy khách, ưu tiên trích xuất từ tiêu đề {@code X-Forwarded-For}
+     * trước khi sử dụng địa chỉ mạng trực tiếp {@link HttpServletRequest#getRemoteAddr()}.
      *
-     * @param request The current HTTP request
-     * @return The canonical IP address string
+     * @param request Yêu cầu HTTP hiện tại
+     * @return Chuỗi địa chỉ IP chuẩn hóa
      */
     private String resolveClientIp(HttpServletRequest request) {
         String xForwardedFor = request.getHeader("X-Forwarded-For");
@@ -146,10 +146,10 @@ Vui lòng thử lại sau %d giây.",\
     }
 
     /**
-     * Instantiates a new {@link Bucket} configured with the appropriate bandwidth limits.
+     * Khởi tạo đối tượng {@link Bucket} mới được cấu hình các tham số giới hạn băng thông tương ứng.
      *
-     * @param isRead {@code true} for read operations (60 req/min), {@code false} for write operations (20 req/min)
-     * @return A thread-safe {@link Bucket} instance
+     * @param isRead {@code true} cho thao tác đọc (60 req/phút), {@code false} cho thao tác ghi (20 req/phút)
+     * @return Đối tượng {@link Bucket} an toàn luồng
      */
     private Bucket createNewBucket(boolean isRead) {
         long capacity = isRead ? READ_CAPACITY : WRITE_CAPACITY;

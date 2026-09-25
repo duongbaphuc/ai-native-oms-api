@@ -1,4 +1,4 @@
-// AI Provenance: generated from docs/00-internal-coding-standards.md, docs/02-api-spec.md
+// Nguồn gốc AI: sinh từ docs/00-internal-coding-standards.md, docs/02-api-spec.md
 package com.gpc.oms.dto;
 
 import com.gpc.oms.domain.Priority;
@@ -18,11 +18,14 @@ import java.util.UUID;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
-@DisplayName("DTO Mapping & Record Invariants Unit Tests")
+/**
+ * Kiểm thử đơn vị cho việc ánh xạ DTO và các hợp đồng bất biến của Java 17 Records.
+ */
+@DisplayName("Kiểm thử đơn vị ánh xạ DTO và hợp đồng bất biến Record")
 class DtoMappingTest {
 
     @Test
-    @DisplayName("WorkOrderResponse.from(entity) correctly maps all fields including null resolvedAt")
+    @DisplayName("WorkOrderResponse.from(entity) ánh xạ chính xác mọi trường bao gồm resolvedAt null")
     void workOrderResponse_from_openEntity() {
         WorkOrder entity = new WorkOrder("EQ-01", "Transformer inspection", Priority.HIGH);
 
@@ -38,7 +41,7 @@ class DtoMappingTest {
     }
 
     @Test
-    @DisplayName("WorkOrderResponse.from(entity) maps populated resolvedAt when status is DONE")
+    @DisplayName("WorkOrderResponse.from(entity) ánh xạ đúng resolvedAt khi trạng thái là DONE")
     void workOrderResponse_from_doneEntity() {
         WorkOrder entity = new WorkOrder("EQ-02", "Line maintenance", Priority.CRITICAL);
         entity.advanceStatus(WorkOrderStatus.IN_PROGRESS);
@@ -52,7 +55,7 @@ class DtoMappingTest {
     }
 
     @Test
-    @DisplayName("WorkOrderResponse.from(null) throws NullPointerException")
+    @DisplayName("WorkOrderResponse.from(null) ném NullPointerException")
     void workOrderResponse_from_nullEntity_throwsException() {
         assertThatThrownBy(() -> WorkOrderResponse.from(null))
             .isInstanceOf(NullPointerException.class)
@@ -60,13 +63,16 @@ class DtoMappingTest {
     }
 
     @Test
-    @DisplayName("WorkOrderResponse record contract: accessors, equals, hashCode, toString")
+    @DisplayName("Hợp đồng Record WorkOrderResponse: accessors, equals, hashCode, toString")
     void workOrderResponse_recordContract() {
         UUID id = UUID.randomUUID();
         Instant now = Instant.now();
-        WorkOrderResponse res1 = new WorkOrderResponse(id, "EQ-01", "Desc", Priority.LOW, WorkOrderStatus.OPEN, now, null);
-        WorkOrderResponse res2 = new WorkOrderResponse(id, "EQ-01", "Desc", Priority.LOW, WorkOrderStatus.OPEN, now, null);
-        WorkOrderResponse res3 = new WorkOrderResponse(UUID.randomUUID(), "EQ-02", "Desc2", Priority.HIGH, WorkOrderStatus.DONE, now, now);
+        WorkOrderResponse res1 = new WorkOrderResponse(
+                id, "EQ-01", "Desc", Priority.LOW, WorkOrderStatus.OPEN, now, null);
+        WorkOrderResponse res2 = new WorkOrderResponse(
+                id, "EQ-01", "Desc", Priority.LOW, WorkOrderStatus.OPEN, now, null);
+        WorkOrderResponse res3 = new WorkOrderResponse(
+                UUID.randomUUID(), "EQ-02", "Desc2", Priority.HIGH, WorkOrderStatus.DONE, now, now);
 
         assertThat(res1).isEqualTo(res2);
         assertThat(res1.hashCode()).isEqualTo(res2.hashCode());
@@ -77,7 +83,7 @@ class DtoMappingTest {
     }
 
     @Test
-    @DisplayName("PagedResponse.from(page) on first page (isFirst=true, isLast=false)")
+    @DisplayName("PagedResponse.from(page) trên trang đầu tiên (isFirst=true, isLast=false)")
     void pagedResponse_from_firstPage() {
         List<String> content = List.of("A", "B", "C");
         Page<String> page = new PageImpl<>(content, PageRequest.of(0, 3), 9);
@@ -94,7 +100,7 @@ class DtoMappingTest {
     }
 
     @Test
-    @DisplayName("PagedResponse.from(page) on middle page (isFirst=false, isLast=false)")
+    @DisplayName("PagedResponse.from(page) trên trang ở giữa (isFirst=false, isLast=false)")
     void pagedResponse_from_middlePage() {
         List<String> content = List.of("D", "E", "F");
         Page<String> page = new PageImpl<>(content, PageRequest.of(1, 3), 9);
@@ -111,7 +117,7 @@ class DtoMappingTest {
     }
 
     @Test
-    @DisplayName("PagedResponse.from(page) on last page (isFirst=false, isLast=true)")
+    @DisplayName("PagedResponse.from(page) trên trang cuối cùng (isFirst=false, isLast=true)")
     void pagedResponse_from_lastPage() {
         List<String> content = List.of("G", "H", "I");
         Page<String> page = new PageImpl<>(content, PageRequest.of(2, 3), 9);
@@ -128,7 +134,7 @@ class DtoMappingTest {
     }
 
     @Test
-    @DisplayName("PagedResponse.from(page) on empty page (isFirst=true, isLast=true)")
+    @DisplayName("PagedResponse.from(page) trên trang rỗng (isFirst=true, isLast=true)")
     void pagedResponse_from_emptyPage() {
         Page<String> emptyPage = new PageImpl<>(Collections.emptyList(), PageRequest.of(0, 10), 0);
 
@@ -144,7 +150,7 @@ class DtoMappingTest {
     }
 
     @Test
-    @DisplayName("PagedResponse.from(null) throws NullPointerException")
+    @DisplayName("PagedResponse.from(null) ném NullPointerException")
     void pagedResponse_from_nullPage_throwsException() {
         assertThatThrownBy(() -> PagedResponse.from(null))
             .isInstanceOf(NullPointerException.class)
@@ -152,7 +158,7 @@ class DtoMappingTest {
     }
 
     @Test
-    @DisplayName("PagedResponse record contract: accessors, equals, hashCode, toString")
+    @DisplayName("Hợp đồng Record PagedResponse: accessors, equals, hashCode, toString")
     void pagedResponse_recordContract() {
         PagedResponse<String> p1 = new PagedResponse<>(List.of("item"), 0, 10, 1, 1, true, true);
         PagedResponse<String> p2 = new PagedResponse<>(List.of("item"), 0, 10, 1, 1, true, true);
@@ -167,7 +173,7 @@ class DtoMappingTest {
     }
 
     @Test
-    @DisplayName("WorkOrderRequest record contract: getters, equals, hashCode, toString")
+    @DisplayName("Hợp đồng Record WorkOrderRequest: getters, equals, hashCode, toString")
     void workOrderRequest_recordContract() {
         WorkOrderRequest r1 = new WorkOrderRequest("EQ-10", "Description text", Priority.MEDIUM);
         WorkOrderRequest r2 = new WorkOrderRequest("EQ-10", "Description text", Priority.MEDIUM);
@@ -186,7 +192,7 @@ class DtoMappingTest {
     }
 
     @Test
-    @DisplayName("WorkOrderStatusRequest record contract: getter, equals, hashCode, toString")
+    @DisplayName("Hợp đồng Record WorkOrderStatusRequest: getter, equals, hashCode, toString")
     void workOrderStatusRequest_recordContract() {
         WorkOrderStatusRequest r1 = new WorkOrderStatusRequest(WorkOrderStatus.IN_PROGRESS);
         WorkOrderStatusRequest r2 = new WorkOrderStatusRequest(WorkOrderStatus.IN_PROGRESS);

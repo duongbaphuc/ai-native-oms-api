@@ -1,4 +1,4 @@
-// AI Provenance: generated from docs/security-auth-spec.md, docs/security-rules.md, docs/SECURITY_HANDOVER_REPORT.md
+// Nguồn gốc AI: sinh từ docs/security-auth-spec.md, docs/security-rules.md, docs/SECURITY_HANDOVER_REPORT.md
 package com.gpc.oms.config;
 
 import jakarta.servlet.FilterChain;
@@ -7,7 +7,6 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
-import org.springframework.mock.web.MockFilterChain;
 import org.springframework.mock.web.MockHttpServletRequest;
 import org.springframework.mock.web.MockHttpServletResponse;
 
@@ -17,15 +16,16 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Mockito.*;
 
 /**
- * Unit and slice verification suite for {@link RateLimitingFilter}.
+ * Bộ kiểm thử đơn vị và kiểm thử phân lớp cho bộ lọc {@link RateLimitingFilter}.
  *
- * @apiNote Verifies Token Bucket rate limiting invariants (60 req/min for GET, 20 req/min for POST/PATCH),
- *          RFC 7807 response schema, Retry-After headers, client IP isolation, and cache boundary controls.
- * @author GPC OMS Architecture Team
+ * <p>Kiểm tra các bất biến thuật toán thùng thẻ Token Bucket (60 yêu cầu/phút cho GET, 20 yêu cầu/phút cho POST/PATCH),
+ * cấu trúc phản hồi lỗi RFC 7807, tiêu đề Retry-After, cách ly địa chỉ IP máy khách và bộ nhớ đệm Caffeine.</p>
+ *
+ * @author Đội ngũ Kiến trúc GPC OMS
  * @version 1.0.0
  * @since 1.0.0
  */
-@DisplayName("RateLimitingFilter Unit Tests")
+@DisplayName("Kiểm thử đơn vị bộ lọc giới hạn tần suất RateLimitingFilter")
 class RateLimitingFilterTest {
 
     private RateLimitingFilter filter;
@@ -36,11 +36,11 @@ class RateLimitingFilterTest {
     }
 
     @Nested
-    @DisplayName("shouldNotFilter Evaluations")
+    @DisplayName("Kiểm định loại trừ đường dẫn (shouldNotFilter)")
     class ShouldNotFilterTests {
 
         @Test
-        @DisplayName("Returns true for non-workorder endpoints (actuator, static assets, h2-console)")
+        @DisplayName("Trả về true cho các endpoint không thuộc workorders (actuator, tài nguyên tĩnh, h2-console)")
         void shouldNotFilter_nonTargetPaths_returnsTrue() {
             MockHttpServletRequest actuatorReq = new MockHttpServletRequest("GET", "/actuator/health");
             MockHttpServletRequest h2Req = new MockHttpServletRequest("GET", "/h2-console");
@@ -54,10 +54,11 @@ class RateLimitingFilterTest {
         }
 
         @Test
-        @DisplayName("Returns false for /api/v1/workorders endpoints")
+        @DisplayName("Trả về false cho các endpoint thuộc /api/v1/workorders")
         void shouldNotFilter_workorderPaths_returnsFalse() {
             MockHttpServletRequest listReq = new MockHttpServletRequest("GET", "/api/v1/workorders");
-            MockHttpServletRequest detailReq = new MockHttpServletRequest("GET", "/api/v1/workorders/123e4567-e89b-12d3-a456-426614174000");
+            MockHttpServletRequest detailReq = new MockHttpServletRequest(
+                    "GET", "/api/v1/workorders/123e4567-e89b-12d3-a456-426614174000");
 
             assertThat(filter.shouldNotFilter(listReq)).isFalse();
             assertThat(filter.shouldNotFilter(detailReq)).isFalse();
@@ -65,11 +66,11 @@ class RateLimitingFilterTest {
     }
 
     @Nested
-    @DisplayName("Read Operations Rate Limiting (GET)")
+    @DisplayName("Chính sách giới hạn tần suất thao tác đọc (GET)")
     class ReadPolicyTests {
 
         @Test
-        @DisplayName("Allows up to 60 GET requests per minute for a single client IP")
+        @DisplayName("Cho phép tối đa 60 yêu cầu GET mỗi phút cho cùng một địa chỉ IP")
         void getRequests_withinLimit_allPass() throws ServletException, IOException {
             String clientIp = "192.168.1.100";
 
@@ -87,12 +88,12 @@ class RateLimitingFilterTest {
         }
 
         @Test
-        @DisplayName("Rejects 61st GET request with HTTP 429, Retry-After header, and RFC 7807 problem details")
+        @DisplayName("Từ chối yêu cầu GET thứ 61 với HTTP 429, tiêu đề Retry-After và chi tiết lỗi RFC 7807")
         void getRequests_exceedingLimit_returns429() throws ServletException, IOException {
             String clientIp = "192.168.1.101";
             FilterChain chain = mock(FilterChain.class);
 
-            // Exhaust all 60 tokens
+            // Dùng hết 60 thẻ token
             for (int i = 0; i < 60; i++) {
                 MockHttpServletRequest request = new MockHttpServletRequest("GET", "/api/v1/workorders");
                 request.setRemoteAddr(clientIp);
@@ -100,7 +101,7 @@ class RateLimitingFilterTest {
                 filter.doFilter(request, response, chain);
             }
 
-            // 61st request should be rejected
+            // Yêu cầu thứ 61 phải bị chặn
             MockHttpServletRequest blockedRequest = new MockHttpServletRequest("GET", "/api/v1/workorders");
             blockedRequest.setRemoteAddr(clientIp);
             MockHttpServletResponse blockedResponse = new MockHttpServletResponse();
@@ -120,17 +121,17 @@ class RateLimitingFilterTest {
             assertThat(body).contains("\"status\":429");
             assertThat(body).contains("\"instance\":\"/api/v1/workorders\"");
 
-            // Verify chain was only called 60 times, NOT for the 61st request
+            // Xác nhận chuỗi lọc chỉ được gọi đúng 60 lần, không gọi lần thứ 61
             verify(chain, times(60)).doFilter(any(), any());
         }
     }
 
     @Nested
-    @DisplayName("Write Operations Rate Limiting (POST, PATCH)")
+    @DisplayName("Chính sách giới hạn tần suất thao tác ghi (POST, PATCH)")
     class WritePolicyTests {
 
         @Test
-        @DisplayName("Allows up to 20 POST requests per minute for a single client IP")
+        @DisplayName("Cho phép tối đa 20 yêu cầu POST mỗi phút cho cùng một địa chỉ IP")
         void postRequests_withinLimit_allPass() throws ServletException, IOException {
             String clientIp = "192.168.2.100";
 
@@ -148,12 +149,12 @@ class RateLimitingFilterTest {
         }
 
         @Test
-        @DisplayName("Rejects 21st POST request with HTTP 429 Too Many Requests")
+        @DisplayName("Từ chối yêu cầu POST thứ 21 với HTTP 429 Too Many Requests")
         void postRequests_exceedingLimit_returns429() throws ServletException, IOException {
             String clientIp = "192.168.2.101";
             FilterChain chain = mock(FilterChain.class);
 
-            // Exhaust all 20 tokens
+            // Dùng hết 20 thẻ token
             for (int i = 0; i < 20; i++) {
                 MockHttpServletRequest request = new MockHttpServletRequest("POST", "/api/v1/workorders");
                 request.setRemoteAddr(clientIp);
@@ -161,7 +162,7 @@ class RateLimitingFilterTest {
                 filter.doFilter(request, response, chain);
             }
 
-            // 21st request should be blocked
+            // Yêu cầu thứ 21 phải bị chặn
             MockHttpServletRequest blockedRequest = new MockHttpServletRequest("POST", "/api/v1/workorders");
             blockedRequest.setRemoteAddr(clientIp);
             MockHttpServletResponse blockedResponse = new MockHttpServletResponse();
@@ -175,7 +176,7 @@ class RateLimitingFilterTest {
         }
 
         @Test
-        @DisplayName("Enforces 20 req/min limit on PATCH status update requests")
+        @DisplayName("Áp dụng giới hạn 20 yêu cầu/phút cho các yêu cầu cập nhật trạng thái PATCH")
         void patchRequests_enforcesWriteCapacity() throws ServletException, IOException {
             String clientIp = "192.168.2.102";
             FilterChain chain = mock(FilterChain.class);
@@ -199,11 +200,11 @@ class RateLimitingFilterTest {
     }
 
     @Nested
-    @DisplayName("Client IP Resolution & Isolation")
+    @DisplayName("Phân giải địa chỉ IP và cách ly máy khách")
     class ClientIpResolutionTests {
 
         @Test
-        @DisplayName("Resolves client IP from X-Forwarded-For header when present")
+        @DisplayName("Trích xuất chính xác địa chỉ IP từ tiêu đề X-Forwarded-For khi có mặt")
         void resolveClientIp_fromXForwardedFor() throws ServletException, IOException {
             MockHttpServletRequest request = new MockHttpServletRequest("GET", "/api/v1/workorders");
             request.addHeader("X-Forwarded-For", "203.0.113.195, 70.41.3.18, 150.172.238.178");
@@ -218,7 +219,7 @@ class RateLimitingFilterTest {
         }
 
         @Test
-        @DisplayName("Falls back to unknown-client when remoteAddr is null or blank")
+        @DisplayName("Sử dụng unknown-client khi remoteAddr có giá trị null hoặc rỗng")
         void resolveClientIp_fallbackToUnknownClient() throws ServletException, IOException {
             MockHttpServletRequest request = new MockHttpServletRequest("GET", "/api/v1/workorders");
             request.setRemoteAddr("");
@@ -232,13 +233,13 @@ class RateLimitingFilterTest {
         }
 
         @Test
-        @DisplayName("Isolates token buckets between distinct client IP addresses")
+        @DisplayName("Cách ly hoàn toàn các thùng thẻ giữa các địa chỉ IP máy khách khác nhau")
         void clientIpIsolation_independentBuckets() throws ServletException, IOException {
             String clientA = "10.0.0.1";
             String clientB = "10.0.0.2";
             FilterChain chain = mock(FilterChain.class);
 
-            // Client A exhausts all 60 read tokens
+            // Máy khách A tiêu thụ hết 60 token đọc
             for (int i = 0; i < 60; i++) {
                 MockHttpServletRequest requestA = new MockHttpServletRequest("GET", "/api/v1/workorders");
                 requestA.setRemoteAddr(clientA);
@@ -246,14 +247,14 @@ class RateLimitingFilterTest {
                 filter.doFilter(requestA, responseA, chain);
             }
 
-            // Client A 61st request is blocked
+            // Yêu cầu thứ 61 của máy khách A bị chặn
             MockHttpServletRequest blockedA = new MockHttpServletRequest("GET", "/api/v1/workorders");
             blockedA.setRemoteAddr(clientA);
             MockHttpServletResponse responseA = new MockHttpServletResponse();
             filter.doFilter(blockedA, responseA, chain);
             assertThat(responseA.getStatus()).isEqualTo(429);
 
-            // Client B makes a GET request and succeeds (has its own fresh 60 tokens)
+            // Máy khách B gửi yêu cầu GET thành công (sở hữu thùng 60 token độc lập)
             MockHttpServletRequest requestB = new MockHttpServletRequest("GET", "/api/v1/workorders");
             requestB.setRemoteAddr(clientB);
             MockHttpServletResponse responseB = new MockHttpServletResponse();

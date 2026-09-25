@@ -1,4 +1,4 @@
-// AI Provenance: generated from docs/02-security-auth-spec.md, docs/09-SECURITY_HANDOVER_REPORT.md
+// Nguồn gốc AI: sinh từ docs/02-security-auth-spec.md, docs/09-SECURITY_HANDOVER_REPORT.md
 package com.gpc.oms.config;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -39,17 +39,18 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 /**
- * Slice security tests validating OAuth2 JWT token authentication and Method Security RBAC boundaries.
+ * Kiểm thử phân lớp bảo mật (Web Slice Security Tests) xác thực OAuth2 JWT và ranh giới phân quyền RBAC.
  *
- * @apiNote Verifies Dispatcher and Technician role permissions, RBAC boundary enforcement (403 Forbidden),
- *          and unauthenticated request handling (401 Unauthorized Problem Details).
- * @author GPC OMS Architecture Team
+ * <p>Kiểm tra quyền hạn của vai trò Dispatcher và Technician, thực thi ranh giới bảo vệ (403 Forbidden),
+ * và xử lý các yêu cầu không xác thực (401 Unauthorized kèm RFC 7807 Problem Details).</p>
+ *
+ * @author Đội ngũ Kiến trúc GPC OMS
  * @version 1.0.0
  * @since 1.0.0
  */
 @WebMvcTest(WorkOrderController.class)
 @Import({SecurityConfig.class, GlobalExceptionHandler.class})
-@DisplayName("OAuth2 JWT Security Integration Tests")
+@DisplayName("Kiểm thử tích hợp bảo mật OAuth2 JWT và RBAC")
 class OAuth2JwtSecurityIntegrationTest {
 
     @Autowired
@@ -65,11 +66,11 @@ class OAuth2JwtSecurityIntegrationTest {
     private WorkOrderService workOrderService;
 
     @Nested
-    @DisplayName("JWT Authentication Converter Bean Verification")
+    @DisplayName("Kiểm định Bean JwtAuthenticationConverter")
     class ConverterBeanTests {
 
         @Test
-        @DisplayName("JwtAuthenticationConverter bean extracts authorities and principal name correctly")
+        @DisplayName("Bean JwtAuthenticationConverter trích xuất danh tính và vai trò chính xác")
         void jwtAuthenticationConverter_extractsPrincipalAndRoles() {
             Jwt jwt = new Jwt(
                     "mock-token-string",
@@ -89,11 +90,11 @@ class OAuth2JwtSecurityIntegrationTest {
     }
 
     @Nested
-    @DisplayName("OAuth2 JWT RBAC Enforcement on WorkOrder Endpoints")
+    @DisplayName("Thực thi phân quyền RBAC qua OAuth2 JWT trên các endpoint WorkOrder")
     class RbacEnforcementTests {
 
         @Test
-        @DisplayName("POST /api/v1/workorders with DISPATCHER role succeeds (201 Created)")
+        @DisplayName("POST /api/v1/workorders với vai trò DISPATCHER thành công (201 Created)")
         void createWorkOrder_withDispatcherRole_returns201() throws Exception {
             UUID id = UUID.randomUUID();
             WorkOrderResponse response = new WorkOrderResponse(
@@ -120,7 +121,7 @@ class OAuth2JwtSecurityIntegrationTest {
         }
 
         @Test
-        @DisplayName("PATCH /api/v1/workorders/{id}/status with DISPATCHER role is forbidden (403 Forbidden)")
+        @DisplayName("PATCH /api/v1/workorders/{id}/status với vai trò DISPATCHER bị từ chối (403 Forbidden)")
         void updateStatus_withDispatcherRole_returns403() throws Exception {
             UUID id = UUID.randomUUID();
             String requestBody = """
@@ -137,7 +138,7 @@ class OAuth2JwtSecurityIntegrationTest {
         }
 
         @Test
-        @DisplayName("PATCH /api/v1/workorders/{id}/status with TECHNICIAN role succeeds (200 OK)")
+        @DisplayName("PATCH /api/v1/workorders/{id}/status với vai trò TECHNICIAN thành công (200 OK)")
         void updateStatus_withTechnicianRole_returns200() throws Exception {
             UUID id = UUID.randomUUID();
             WorkOrderResponse response = new WorkOrderResponse(
@@ -159,7 +160,7 @@ class OAuth2JwtSecurityIntegrationTest {
         }
 
         @Test
-        @DisplayName("POST /api/v1/workorders without token returns 401 Unauthorized Problem Details")
+        @DisplayName("POST /api/v1/workorders không có token xác thực trả về 401 Unauthorized Problem Details")
         void createWorkOrder_unauthenticated_returns401() throws Exception {
             String requestBody = """
                 {

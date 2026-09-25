@@ -1,4 +1,4 @@
-// AI Provenance: generated from docs/02-security-auth-spec.md, docs/00-security-rules.md
+// Nguồn gốc AI: sinh từ docs/02-security-auth-spec.md, docs/00-security-rules.md
 package com.gpc.oms.config;
 
 import com.gpc.oms.exception.ProblemTypes;
@@ -21,14 +21,28 @@ import org.springframework.security.provisioning.InMemoryUserDetailsManager;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.util.matcher.AntPathRequestMatcher;
 
+/**
+ * Cấu hình bảo mật phân tầng (Layered Security Configuration) trên nền tảng Spring Security 6.
+ *
+ * <p>Thiết lập hai chuỗi lọc độc lập: chuỗi mở bảng điều khiển H2 Console (phi sản xuất)
+ * và chuỗi bảo vệ tài nguyên API kết hợp OAuth2 Resource Server (JWT) và HTTP Basic.</p>
+ *
+ * @author Đội ngũ Kiến trúc GPC OMS
+ * @version 1.0.0
+ * @since 1.0.0
+ */
 @Configuration
 @EnableWebSecurity
 @EnableMethodSecurity(prePostEnabled = true)
 public class SecurityConfig {
 
     /**
-     * SEC-01: H2 Console mở công khai chỉ ở non-prod (dev/test).
-     * Chain này ưu tiên cao hơn và chỉ match /h2-console/**.
+     * SEC-01: Bảng điều khiển H2 Console mở công khai chỉ ở môi trường phi sản xuất (!prod).
+     * Chuỗi lọc này có mức ưu tiên cao hơn (Order 1) và chỉ áp dụng cho đường dẫn /h2-console/**.
+     *
+     * @param http Đối tượng cấu hình HttpSecurity của Spring
+     * @return Chuỗi lọc {@link SecurityFilterChain} dành riêng cho H2 Console
+     * @throws Exception nếu xảy ra lỗi trong quá trình cấu hình
      */
     @Bean
     @Order(1)
@@ -46,6 +60,14 @@ public class SecurityConfig {
         return http.build();
     }
 
+    /**
+     * Chuỗi lọc bảo mật chính bảo vệ các endpoint API nghiệp vụ và giám sát hệ thống Actuator.
+     *
+     * @param http Đối tượng cấu hình HttpSecurity
+     * @param jwtDecoderProvider Nhà cung cấp bean JwtDecoder (tùy chọn)
+     * @return Chuỗi lọc {@link SecurityFilterChain} chính của ứng dụng
+     * @throws Exception nếu xảy ra lỗi trong quá trình cấu hình
+     */
     @Bean
     @Order(2)
     public SecurityFilterChain filterChain(
@@ -114,9 +136,10 @@ public class SecurityConfig {
     }
 
     /**
-     * Configures the JWT authentication converter with custom role mapping and principal claim resolution.
+     * Cấu hình bộ chuyển đổi xác thực JWT với ánh xạ vai trò RBAC
+     * và trích xuất danh tính chủ thể.
      *
-     * @return Configured {@link JwtAuthenticationConverter}
+     * @return Đối tượng {@link JwtAuthenticationConverter} đã được thiết lập
      */
     @Bean
     public JwtAuthenticationConverter jwtAuthenticationConverter() {
@@ -127,8 +150,10 @@ public class SecurityConfig {
     }
 
     /**
-     * Demo users KHONG dùng prod — chỉ load khi profile khác "prod"
-     * (web test console + browser testing ở dev). Prod dùng JWT (lane riêng).
+     * Tài khoản người dùng mẫu phục vụ môi trường phi sản xuất (!prod)
+     * để kiểm thử giao diện và API.
+     *
+     * @return Dịch vụ quản lý thông tin người dùng trong bộ nhớ {@link UserDetailsService}
      */
     @Bean
     @Profile("!prod")
