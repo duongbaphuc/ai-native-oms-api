@@ -1,4 +1,4 @@
-// AI Provenance: generated from docs/02-observability-and-logging.md, docs/09-SECURITY_HANDOVER_REPORT.md
+// Nguồn gốc AI: sinh từ docs/02-observability-and-logging.md, docs/09-SECURITY_HANDOVER_REPORT.md
 package com.gpc.oms.config;
 
 import jakarta.servlet.FilterChain;
@@ -8,7 +8,6 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.slf4j.MDC;
-import org.springframework.mock.web.MockFilterChain;
 import org.springframework.mock.web.MockHttpServletRequest;
 import org.springframework.mock.web.MockHttpServletResponse;
 
@@ -20,15 +19,16 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 /**
- * Unit verification suite for {@link CorrelationIdFilter}.
+ * Bộ kiểm thử đơn vị cho {@link CorrelationIdFilter}.
  *
- * @apiNote Verifies distributed tracing correlation extraction, UUID generation fallbacks,
- *          response header propagation, dual MDC key population, and ThreadLocal cleanup.
- * @author GPC OMS Architecture Team
+ * <p>Kiểm tra trích xuất mã định danh truy vết tương quan, cơ chế fallback tự sinh UUID,
+ * lan truyền tiêu đề phản hồi, đồng bộ hai khóa MDC và dọn dẹp biến ThreadLocal.</p>
+ *
+ * @author Đội ngũ Kiến trúc GPC OMS
  * @version 1.0.0
  * @since 1.0.0
  */
-@DisplayName("CorrelationIdFilter Unit Tests")
+@DisplayName("Kiểm thử đơn vị bộ lọc CorrelationIdFilter")
 class CorrelationIdFilterTest {
 
     private CorrelationIdFilter filter;
@@ -40,11 +40,11 @@ class CorrelationIdFilterTest {
     }
 
     @Nested
-    @DisplayName("Header Extraction and UUID Generation")
+    @DisplayName("Trích xuất tiêu đề và tự sinh UUID")
     class HeaderExtractionTests {
 
         @Test
-        @DisplayName("Generates new UUID and populates response and MDC when header is missing")
+        @DisplayName("Tự sinh UUID mới và nạp vào phản hồi cùng MDC khi thiếu tiêu đề")
         void doFilter_withoutHeader_generatesUUID() throws ServletException, IOException {
             MockHttpServletRequest request = new MockHttpServletRequest("GET", "/api/v1/workorders");
             MockHttpServletResponse response = new MockHttpServletResponse();
@@ -66,13 +66,13 @@ class CorrelationIdFilterTest {
             assertThat(capturedTraceId.get()).isEqualTo(responseHeader);
             assertThat(capturedCorrelationId.get()).isEqualTo(responseHeader);
 
-            // Verify MDC cleanup
+            // Xác nhận dọn dẹp MDC
             assertThat(MDC.get(CorrelationIdFilter.TRACE_ID_MDC_KEY)).isNull();
             assertThat(MDC.get(CorrelationIdFilter.CORRELATION_ID_MDC_KEY)).isNull();
         }
 
         @Test
-        @DisplayName("Preserves and trims client-supplied X-Correlation-Id header")
+        @DisplayName("Bảo toàn và loại bỏ khoảng trắng thừa của tiêu đề X-Correlation-Id từ client")
         void doFilter_withValidHeader_preservesCorrelationId() throws ServletException, IOException {
             String clientCorrelationId = "  custom-audit-trace-id-12345  ";
             String expectedId = "custom-audit-trace-id-12345";
@@ -95,13 +95,13 @@ class CorrelationIdFilterTest {
             assertThat(capturedTraceId.get()).isEqualTo(expectedId);
             assertThat(capturedCorrelationId.get()).isEqualTo(expectedId);
 
-            // Verify MDC cleanup
+            // Xác nhận dọn dẹp MDC
             assertThat(MDC.get(CorrelationIdFilter.TRACE_ID_MDC_KEY)).isNull();
             assertThat(MDC.get(CorrelationIdFilter.CORRELATION_ID_MDC_KEY)).isNull();
         }
 
         @Test
-        @DisplayName("Generates new UUID when client-supplied header contains only whitespace")
+        @DisplayName("Tự sinh UUID mới khi tiêu đề từ client chỉ chứa toàn khoảng trắng")
         void doFilter_withBlankHeader_generatesUUID() throws ServletException, IOException {
             MockHttpServletRequest request = new MockHttpServletRequest("GET", "/api/v1/workorders");
             request.addHeader(CorrelationIdFilter.CORRELATION_ID_HEADER, "    ");
@@ -120,18 +120,18 @@ class CorrelationIdFilterTest {
             assertThat(UUID.fromString(responseHeader)).isNotNull();
             assertThat(capturedTraceId.get()).isEqualTo(responseHeader);
 
-            // Verify MDC cleanup
+            // Xác nhận dọn dẹp MDC
             assertThat(MDC.get(CorrelationIdFilter.TRACE_ID_MDC_KEY)).isNull();
             assertThat(MDC.get(CorrelationIdFilter.CORRELATION_ID_MDC_KEY)).isNull();
         }
     }
 
     @Nested
-    @DisplayName("ThreadLocal Lifecycle & Exception Handling")
+    @DisplayName("Vòng đời ThreadLocal & Xử lý ngoại lệ")
     class LifecycleAndExceptionTests {
 
         @Test
-        @DisplayName("Ensures MDC cleanup even when downstream filter chain throws exception")
+        @DisplayName("Đảm bảo dọn dẹp MDC ngay cả khi chuỗi lọc phía sau ném ngoại lệ")
         void doFilter_downstreamThrowsException_cleansUpMdc() {
             MockHttpServletRequest request = new MockHttpServletRequest("GET", "/api/v1/workorders");
             MockHttpServletResponse response = new MockHttpServletResponse();
@@ -145,7 +145,7 @@ class CorrelationIdFilterTest {
                     .isInstanceOf(ServletException.class)
                     .hasMessage("Simulated downstream filter error");
 
-            // Verify MDC was cleaned up despite the exception
+            // Xác nhận MDC đã được giải phóng bất chấp ngoại lệ
             assertThat(MDC.get(CorrelationIdFilter.TRACE_ID_MDC_KEY)).isNull();
             assertThat(MDC.get(CorrelationIdFilter.CORRELATION_ID_MDC_KEY)).isNull();
         }

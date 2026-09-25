@@ -1,4 +1,4 @@
-// AI Provenance: generated from docs/00-coding-rules.md, docs/00-api-rules.md, docs/01-domain-model.md
+// Nguồn gốc AI: sinh từ docs/00-coding-rules.md, docs/00-api-rules.md, docs/01-domain-model.md
 package com.gpc.oms.service;
 
 import com.gpc.oms.domain.Priority;
@@ -34,8 +34,11 @@ import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
 
+/**
+ * Kiểm thử đơn vị cô lập tầng nghiệp vụ cho {@link WorkOrderService}.
+ */
 @ExtendWith(MockitoExtension.class)
-@DisplayName("WorkOrderService Unit Tests")
+@DisplayName("Kiểm thử đơn vị tầng nghiệp vụ WorkOrderService")
 class WorkOrderServiceTest {
 
     @Mock
@@ -51,14 +54,16 @@ class WorkOrderServiceTest {
     }
 
     @Nested
-    @DisplayName("createWorkOrder")
+    @DisplayName("Nghiệp vụ tạo mới phiếu công tác (createWorkOrder)")
     class CreateWorkOrderTests {
 
         @Test
-        @DisplayName("createWorkOrder saves entity and returns populated WorkOrderResponse")
+        @DisplayName("createWorkOrder lưu thực thể thành công và trả về DTO phản hồi đầy đủ dữ liệu")
         void createWorkOrder_success() {
-            final WorkOrderRequest request = WorkOrderTestFixtures.createRequest("EQ-100", "Faulty transformer", Priority.CRITICAL);
-            final WorkOrder saved = WorkOrderTestFixtures.createEntity("EQ-100", "Faulty transformer", Priority.CRITICAL);
+            final WorkOrderRequest request = WorkOrderTestFixtures.createRequest(
+                    "EQ-100", "Faulty transformer", Priority.CRITICAL);
+            final WorkOrder saved = WorkOrderTestFixtures.createEntity(
+                    "EQ-100", "Faulty transformer", Priority.CRITICAL);
             when(repo.save(any(WorkOrder.class))).thenReturn(saved);
 
             final WorkOrderResponse response = service.createWorkOrder(request);
@@ -72,10 +77,12 @@ class WorkOrderServiceTest {
         }
 
         @Test
-        @DisplayName("createWorkOrder increments oms_workorders_created_total with priority and status tags")
+        @DisplayName("createWorkOrder tăng biến đếm oms_workorders_created_total với tag priority và status")
         void createWorkOrder_incrementsCreatedCounter() {
-            final WorkOrderRequest request = WorkOrderTestFixtures.createRequest("EQ-101", "Feeder pillar fault", Priority.HIGH);
-            final WorkOrder saved = WorkOrderTestFixtures.createEntity("EQ-101", "Feeder pillar fault", Priority.HIGH);
+            final WorkOrderRequest request = WorkOrderTestFixtures.createRequest(
+                    "EQ-101", "Feeder pillar fault", Priority.HIGH);
+            final WorkOrder saved = WorkOrderTestFixtures.createEntity(
+                    "EQ-101", "Feeder pillar fault", Priority.HIGH);
             when(repo.save(any(WorkOrder.class))).thenReturn(saved);
 
             service.createWorkOrder(request);
@@ -86,14 +93,15 @@ class WorkOrderServiceTest {
     }
 
     @Nested
-    @DisplayName("getWorkOrders")
+    @DisplayName("Nghiệp vụ tra cứu danh sách có phân trang (getWorkOrders)")
     class GetWorkOrdersTests {
 
         @Test
-        @DisplayName("getWorkOrders with status != null delegates to repo.findByStatus()")
+        @DisplayName("getWorkOrders khi status != null ủy quyền sang repo.findByStatus()")
         void getWorkOrders_withStatusFilter_callsFindByStatus() {
             final Pageable pageable = PageRequest.of(0, 10);
-            final WorkOrder wo = WorkOrderTestFixtures.createEntity("EQ-100", "Faulty transformer", Priority.CRITICAL);
+            final WorkOrder wo = WorkOrderTestFixtures.createEntity(
+                    "EQ-100", "Faulty transformer", Priority.CRITICAL);
             final Page<WorkOrder> page = new PageImpl<>(List.of(wo), pageable, 1);
             when(repo.findByStatus(WorkOrderStatus.OPEN, pageable)).thenReturn(page);
 
@@ -106,10 +114,11 @@ class WorkOrderServiceTest {
         }
 
         @Test
-        @DisplayName("getWorkOrders with status == null delegates to repo.findAll()")
+        @DisplayName("getWorkOrders khi status == null ủy quyền sang repo.findAll()")
         void getWorkOrders_withoutStatusFilter_callsFindAll() {
             final Pageable pageable = PageRequest.of(0, 10);
-            final WorkOrder wo = WorkOrderTestFixtures.createEntity("EQ-200", "Line sagging", Priority.MEDIUM);
+            final WorkOrder wo = WorkOrderTestFixtures.createEntity(
+                    "EQ-200", "Line sagging", Priority.MEDIUM);
             final Page<WorkOrder> page = new PageImpl<>(List.of(wo), pageable, 1);
             when(repo.findAll(pageable)).thenReturn(page);
 
@@ -123,14 +132,15 @@ class WorkOrderServiceTest {
     }
 
     @Nested
-    @DisplayName("getWorkOrderById")
+    @DisplayName("Nghiệp vụ tra cứu chi tiết phiếu công tác (getWorkOrderById)")
     class GetWorkOrderByIdTests {
 
         @Test
-        @DisplayName("getWorkOrderById when found returns mapped WorkOrderResponse")
+        @DisplayName("getWorkOrderById khi tìm thấy trả về DTO phản hồi đã ánh xạ")
         void getWorkOrderById_found_returnsResponse() {
             final UUID id = UUID.randomUUID();
-            final WorkOrder wo = WorkOrderTestFixtures.createEntity("EQ-300", "Cable snapped", Priority.HIGH);
+            final WorkOrder wo = WorkOrderTestFixtures.createEntity(
+                    "EQ-300", "Cable snapped", Priority.HIGH);
             when(repo.findById(id)).thenReturn(Optional.of(wo));
 
             final WorkOrderResponse response = service.getWorkOrderById(id);
@@ -142,7 +152,7 @@ class WorkOrderServiceTest {
         }
 
         @Test
-        @DisplayName("getWorkOrderById when not found throws ResourceNotFoundException")
+        @DisplayName("getWorkOrderById khi không tìm thấy ném ngoại lệ ResourceNotFoundException")
         void getWorkOrderById_notFound_throwsException() {
             final UUID id = UUID.randomUUID();
             when(repo.findById(id)).thenReturn(Optional.empty());
@@ -156,14 +166,15 @@ class WorkOrderServiceTest {
     }
 
     @Nested
-    @DisplayName("updateStatus")
+    @DisplayName("Nghiệp vụ cập nhật chuyển trạng thái (updateStatus)")
     class UpdateStatusTests {
 
         @Test
-        @DisplayName("updateStatus with valid transition advances status, saves, and returns DTO")
+        @DisplayName("updateStatus với chuyển trạng thái hợp lệ cập nhật, lưu trữ và trả về DTO")
         void updateStatus_validTransition_savesAndReturnsDto() {
             final UUID id = UUID.randomUUID();
-            final WorkOrder wo = WorkOrderTestFixtures.createEntity("EQ-400", "Underground cable fault", Priority.HIGH);
+            final WorkOrder wo = WorkOrderTestFixtures.createEntity(
+                    "EQ-400", "Underground cable fault", Priority.HIGH);
             when(repo.findById(id)).thenReturn(Optional.of(wo));
             when(repo.save(wo)).thenReturn(wo);
 
@@ -177,10 +188,11 @@ class WorkOrderServiceTest {
         }
 
         @Test
-        @DisplayName("updateStatus increments oms_workorder_status_transitions_total with from and to tags")
+        @DisplayName("updateStatus tăng biến đếm oms_workorder_status_transitions_total với tag from và to")
         void updateStatus_incrementsTransitionCounter() {
             final UUID id = UUID.randomUUID();
-            final WorkOrder wo = WorkOrderTestFixtures.createEntity("EQ-401", "Pole mounted fault", Priority.MEDIUM);
+            final WorkOrder wo = WorkOrderTestFixtures.createEntity(
+                    "EQ-401", "Pole mounted fault", Priority.MEDIUM);
             when(repo.findById(id)).thenReturn(Optional.of(wo));
             when(repo.save(wo)).thenReturn(wo);
 
@@ -191,7 +203,7 @@ class WorkOrderServiceTest {
         }
 
         @Test
-        @DisplayName("updateStatus when work order does not exist throws ResourceNotFoundException")
+        @DisplayName("updateStatus khi phiếu công tác không tồn tại ném ResourceNotFoundException")
         void updateStatus_notFound_throwsException() {
             final UUID id = UUID.randomUUID();
             when(repo.findById(id)).thenReturn(Optional.empty());
@@ -206,13 +218,14 @@ class WorkOrderServiceTest {
         }
 
         @Test
-        @DisplayName("updateStatus with invalid transition rethrows IllegalStateException")
+        @DisplayName("updateStatus khi chuyển trạng thái không hợp lệ ném IllegalStateException")
         void updateStatus_invalidTransition_rethrowsIllegalStateException() {
             final UUID id = UUID.randomUUID();
-            final WorkOrder wo = WorkOrderTestFixtures.createEntity("EQ-500", "Meter defect", Priority.LOW);
+            final WorkOrder wo = WorkOrderTestFixtures.createEntity(
+                    "EQ-500", "Meter defect", Priority.LOW);
             when(repo.findById(id)).thenReturn(Optional.of(wo));
 
-            // Attempt OPEN -> DONE (invalid transition)
+            // Thử nhảy cóc OPEN -> DONE (chuyển trạng thái không hợp lệ)
             final WorkOrderStatusRequest req = WorkOrderTestFixtures.createStatusRequest(WorkOrderStatus.DONE);
 
             assertThatThrownBy(() -> service.updateStatus(id, req))

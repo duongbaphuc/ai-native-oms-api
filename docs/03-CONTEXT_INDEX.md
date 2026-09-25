@@ -106,4 +106,5 @@ Bảng này cung cấp ước tính dung lượng và token của các tệp tà
 | [`docs/09-SECURITY_HANDOVER_REPORT.md`](09-SECURITY_HANDOVER_REPORT.md) | Pha 09: Security Audit | 314 | 28,635 | ~7,150 | Hồ sơ bàn giao an ninh, thẩm định OWASP, SEC-01..06, 117 tests |
 | [`docs/10-devops-pipeline-spec.md`](10-devops-pipeline-spec.md) | Pha 10: DevOps & CI/CD | 216 | 8,272 | ~2,050 | Đặc tả Containerization, Docker Compose & GitHub Actions |
 | [`docs/11-RELEASE_NOTES_v1.0.0.md`](11-RELEASE_NOTES_v1.0.0.md) | Pha 11: Release Management | 103 | 6,123 | ~1,530 | Hồ sơ công bố phát hành chính thức v1.0.0, API contracts, Runbook |
+| [`docs/audit-logs/vietnamese-localization-audit-report-2026-09-25.md`](audit-logs/vietnamese-localization-audit-report-2026-09-25.md) | Pha 18: Vietnamese Localization | 115 | 8,500 | ~2,100 | Báo cáo kiểm định bản địa hóa tiếng Việt toàn diện 39 tệp Java |
 

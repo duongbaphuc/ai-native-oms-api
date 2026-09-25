@@ -1,4 +1,4 @@
-// AI Provenance: generated from docs/01-domain-model.md §Invariants, docs/02-api-spec.md §4
+// Nguồn gốc AI: sinh từ docs/01-domain-model.md §Invariants, docs/02-api-spec.md §4
 package com.gpc.oms.domain;
 
 import org.junit.jupiter.api.DisplayName;
@@ -8,11 +8,14 @@ import org.junit.jupiter.params.provider.CsvSource;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-@DisplayName("WorkOrderStatus Enum Unit Tests")
+/**
+ * Kiểm thử đơn vị cho Enum {@link WorkOrderStatus} và máy trạng thái đơn hướng.
+ */
+@DisplayName("Kiểm thử đơn vị Enum WorkOrderStatus và máy trạng thái")
 class WorkOrderStatusTest {
 
     @Test
-    @DisplayName("getValue() returns expected JSON string representation")
+    @DisplayName("getValue() trả về chuỗi biểu diễn JSON theo định dạng JsonValue")
     void getValue_returnsCorrectString() {
         assertThat(WorkOrderStatus.OPEN.getValue()).isEqualTo("Open");
         assertThat(WorkOrderStatus.IN_PROGRESS.getValue()).isEqualTo("InProgress");
@@ -20,7 +23,7 @@ class WorkOrderStatusTest {
     }
 
     @Test
-    @DisplayName("values() and valueOf() contain all 3 status constants")
+    @DisplayName("values() và valueOf() chứa đầy đủ 3 hằng số trạng thái")
     void enumValuesAndValueOf() {
         WorkOrderStatus[] values = WorkOrderStatus.values();
         assertThat(values).containsExactly(
@@ -33,7 +36,7 @@ class WorkOrderStatusTest {
         assertThat(WorkOrderStatus.valueOf("DONE")).isEqualTo(WorkOrderStatus.DONE);
     }
 
-    @ParameterizedTest(name = "canTransitionTo: {0} -> {1} expected {2}")
+    @ParameterizedTest(name = "canTransitionTo: {0} -> {1} mong đợi {2}")
     @CsvSource({
         "OPEN,        OPEN,        false",
         "OPEN,        IN_PROGRESS, true",
@@ -45,7 +48,7 @@ class WorkOrderStatusTest {
         "DONE,        IN_PROGRESS, false",
         "DONE,        DONE,        false"
     })
-    @DisplayName("Test all 9 state transition permutations for canTransitionTo")
+    @DisplayName("Kiểm thử toàn bộ 9 hoán vị chuyển trạng thái cho canTransitionTo")
     void canTransitionTo_allPermutations(WorkOrderStatus current, WorkOrderStatus next, boolean expected) {
         assertThat(current.canTransitionTo(next)).isEqualTo(expected);
     }

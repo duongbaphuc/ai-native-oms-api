@@ -1,4 +1,4 @@
-// AI Provenance: generated from docs/00-api-rules.md §2, docs/00-security-rules.md §4,
+// Nguồn gốc AI: sinh từ docs/00-api-rules.md §2, docs/00-security-rules.md §4,
 // docs/drafts/draft-global-exception-handler.md
 package com.gpc.oms.exception;
 
@@ -18,13 +18,24 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
+/**
+ * Bộ xử lý ngoại lệ toàn cục tập trung (Centralized Global Exception Handler) cho toàn bộ ứng dụng OMS API.
+ *
+ * <p>Đón bắt các ngoại lệ runtime, chuyển đổi thành cấu trúc phản hồi lỗi chuẩn hóa quốc tế
+ * theo đặc tả RFC 7807 Problem Details (Content-Type: {@code application/problem+json}).
+ * Bảo đảm che giấu hoàn toàn các thông tin kỹ thuật nhạy cảm (stack trace, SQL) đối với client.</p>
+ *
+ * @author Đội ngũ Kiến trúc GPC OMS
+ * @version 1.0.0
+ * @since 1.0.0
+ */
 @RestControllerAdvice
 public class GlobalExceptionHandler {
     private static final Logger log = LoggerFactory.getLogger(GlobalExceptionHandler.class);
 
-    // Handler #1: 400 — Xử lý lỗi xác thực đầu vào (@Valid fail)
-    // Trigger: @NotBlank, @NotNull, @Size violations
-    // Response: invalidParams[] chứa field name + reason
+    // Xử lý lỗi #1: HTTP 400 — Lỗi xác thực dữ liệu đầu vào (@Valid fail)
+    // Tác nhân kích hoạt: Vi phạm ràng buộc @NotBlank, @NotNull, @Size
+    // Dữ liệu phản hồi: invalidParams[] chứa tên trường dữ liệu và lý do vi phạm
     @ExceptionHandler(MethodArgumentNotValidException.class)
     public ProblemDetail handleValidationErrors(final MethodArgumentNotValidException ex) {
         log.warn("Validation failed: {}", ex.getMessage());
@@ -42,9 +53,9 @@ public class GlobalExceptionHandler {
         return problem;
     }
 
-    // Handler #2: 400 — JSON malformed hoặc enum value không hợp lệ
-    // Trigger: priority: "URGENT", body không parse được, ignoreUnknown=false reject
-    // Response: invalidParams[].name="body"
+    // Xử lý lỗi #2: HTTP 400 — Thân yêu cầu JSON sai định dạng cú pháp hoặc enum không hợp lệ
+    // Tác nhân: priority: "URGENT", JSON không parse được, hoặc ignoreUnknown=false từ chối trường lạ
+    // Dữ liệu phản hồi: invalidParams[].name="body"
     @ExceptionHandler(HttpMessageNotReadableException.class)
     public ProblemDetail handleMalformedJson(final HttpMessageNotReadableException ex) {
         log.warn("Malformed request body");
@@ -56,10 +67,10 @@ public class GlobalExceptionHandler {
         return problem;
     }
 
-    // Handler #3: 400 — Query/path param conversion fail (vd: ?status=URGENT)
-    // Trigger: StringToWorkOrderStatusConverter quăng IllegalArgumentException,
-    // Spring MVC wrap thành MethodArgumentTypeMismatchException
-    // Response: invalidParams[].name = tên param (vd: "status")
+    // Xử lý lỗi #3: HTTP 400 — Lỗi ép kiểu tham số truy vấn/đường dẫn (ví dụ: ?status=URGENT)
+    // Tác nhân kích hoạt: StringToWorkOrderStatusConverter ném IllegalArgumentException,
+    // được Spring MVC bao đóng thành MethodArgumentTypeMismatchException
+    // Dữ liệu phản hồi: invalidParams[].name = tên tham số (ví dụ: "status")
     @ExceptionHandler(MethodArgumentTypeMismatchException.class)
     public ProblemDetail handleQueryParamTypeMismatch(final MethodArgumentTypeMismatchException ex) {
         log.warn("Query parameter type mismatch: {}", ex.getName());
@@ -70,10 +81,9 @@ public class GlobalExceptionHandler {
         return problem;
     }
 
-    // Handler #4: 403 — @PreAuthorize fail
-    // Trigger: AccessDeniedException từ Spring Security khi role không đủ
-    // Import: org.springframework.security.access.AccessDeniedException
-    // (KHÔNG phải java.nio.file.AccessDeniedException)
+    // Xử lý lỗi #4: HTTP 403 — Từ chối truy cập do không đủ phân quyền (@PreAuthorize fail)
+    // Tác nhân: AccessDeniedException từ Spring Security khi vai trò của người dùng không thỏa mãn
+    // Thư viện: org.springframework.security.access.AccessDeniedException (không phải của java.nio.file)
     @ExceptionHandler(AccessDeniedException.class)
     public ProblemDetail handleAccessDenied(final AccessDeniedException ex) {
         log.warn("Access denied");
@@ -82,8 +92,8 @@ public class GlobalExceptionHandler {
         return problem;
     }
 
-    // Handler #5: 404 — Resource không tìm thấy
-    // Trigger: Service throw ResourceNotFoundException khi findById trả empty
+    // Xử lý lỗi #5: HTTP 404 — Tài nguyên yêu cầu không tồn tại
+    // Tác nhân kích hoạt: Tầng Service ném ResourceNotFoundException khi findById trả về Optional.empty()
     @ExceptionHandler(ResourceNotFoundException.class)
     public ProblemDetail handleResourceNotFound(final ResourceNotFoundException ex) {
         log.warn("Resource not found: {}", ex.getMessage());
@@ -92,8 +102,8 @@ public class GlobalExceptionHandler {
         return problem;
     }
 
-    // Handler #6: 422 — Vi phạm state machine (invalid state transition)
-    // Trigger: Entity throw IllegalStateException qua advanceStatus(), Service re-throw
+    // Xử lý lỗi #6: HTTP 422 — Vi phạm quy tắc máy trạng thái (chuyển trạng thái không hợp lệ)
+    // Tác nhân kích hoạt: Thực thể Domain ném IllegalStateException qua advanceStatus()
     @ExceptionHandler(IllegalStateException.class)
     public ProblemDetail handleIllegalStateTransition(final IllegalStateException ex) {
         log.warn("Illegal state transition: {}", ex.getMessage());
@@ -103,12 +113,12 @@ public class GlobalExceptionHandler {
         return problem;
     }
 
-    // Handler #7: 500 — Fallback cuối cùng, không lộ chi tiết nội bộ
-    // Trigger: mọi Exception không khớp handler #1-#6
-    // Response: message chung, KHÔNG lộ stack trace / SQL / class name
+    // Xử lý lỗi #7: HTTP 500 — Chốt chặn ngoại lệ cuối cùng, ngăn chặn rò rỉ dữ liệu nhạy cảm
+    // Tác nhân: Bất kỳ ngoại lệ không mong muốn nào chưa được xử lý ở các hàm trên
+    // Dữ liệu phản hồi: Thông điệp chung, tuyệt đối không lộ stack trace, SQL hay tên lớp nội bộ
     @ExceptionHandler(Exception.class)
     public ProblemDetail handleUnexpected(final Exception ex) {
-        log.error("Unexpected error", ex); // full stacktrace CHỈ ở server log, KHÔNG trả về client
+        log.error("Unexpected error", ex); // Chi tiết lỗi chỉ được ghi lại tại server log
         final ProblemDetail problem = ProblemDetail.forStatusAndDetail(
             HttpStatus.INTERNAL_SERVER_ERROR, "An unexpected error occurred");
         problem.setType(ProblemTypes.INTERNAL_ERROR);

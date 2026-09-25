@@ -41,6 +41,15 @@ Dự án đạt mốc kiểm thử hoàn hảo: **117/117 automated tests PASS (
   - Đồng bộ hóa liên kết trong `docs/prompt/03-module-task-prompts/README.md` và `docs/03-CONTEXT_INDEX.md` (§5).
 - **Cập nhật toàn diện truy vết Issues & Pull Requests trong CHANGELOG ([PR #85](https://github.com/duongbaphuc/ai-native-oms-api/pull/85) - Closes [Issue #84](https://github.com/duongbaphuc/ai-native-oms-api/issues/84)):**
   - Lập bảng ma trận đối chiếu 100% Issues và Pull Requests từ khởi tạo đến bản phát hành chính thức v1.0.0.
+- **Bổ sung Prompt Giai Đoạn 18: Bản Địa Hóa Tiếng Việt ([PR #87](https://github.com/duongbaphuc/ai-native-oms-api/pull/87) - Closes [Issue #86](https://github.com/duongbaphuc/ai-native-oms-api/issues/86)):**
+  - Biên soạn `docs/prompt/01-sdlc-playbook/18-vietnamese-localization-api-docs-and-comments.prompt.md` với chu trình 5 bước và Glossary SSOT song ngữ.
+  - Cập nhật sơ đồ Mermaid 20 giai đoạn và bảng danh mục trong `00-MASTER-AI-NATIVE-SDLC-PLAYBOOK.md` cùng `docs/03-CONTEXT_INDEX.md`.
+- **Thực thi Bản địa hóa toàn diện Tiếng Việt cho Javadoc, Comments & API Docs - Pha 18 (Closes [Issue #88](https://github.com/duongbaphuc/ai-native-oms-api/issues/88)):**
+  - Bản địa hóa 100% Javadoc, khối chú thích (block comments) và chú thích dòng (inline comments) trong toàn bộ 39 tệp mã nguồn Java (19 production files, 20 test files).
+  - Đảm bảo 100% dòng mã nguồn trong `src/main/java` đều $\le$ 120 ký tự (0 vi phạm).
+  - Bảo toàn 100% khả năng thực thi và tính toàn vẹn (Zero Code Regression): 117/117 automated tests PASS (100%), JaCoCo Quality Gate đạt 100% Line & Branch Coverage.
+  - Mã hóa UTF-8 chuẩn xác, không lỗi font chữ (Zero Mojibake).
+  - Khởi tạo báo cáo kiểm định `docs/audit-logs/vietnamese-localization-audit-report-2026-09-25.md`.
 
 ---
 
@@ -208,7 +217,11 @@ Dự án đạt mốc kiểm thử hoàn hảo: **117/117 automated tests PASS (
 | 81 | [PR #81](https://github.com/duongbaphuc/ai-native-oms-api/pull/81) | docs(sync): Phase 12 post-fix spec drift audit & documentation synchronization (closes #80) | Sync | Pha 12 | Merged |
 | 82 | [Issue #82](https://github.com/duongbaphuc/ai-native-oms-api/issues/82) | docs(sync): Đồng bộ Master SDLC Playbook và di dời Prompts 16 & 17 vào quy trình chuẩn (Giai đoạn 12) | Docs | Pha 12 | Closed |
 | 83 | [PR #83](https://github.com/duongbaphuc/ai-native-oms-api/pull/83) | docs(playbook): integrate Phases 16 & 17 into SDLC Master Playbook (closes #82) | Playbook | Pha 12 | Merged |
-| 84 | [Issue #84](https://github.com/duongbaphuc/ai-native-oms-api/issues/84) | docs(changelog): Cập nhật toàn diện CHANGELOG.md truy vết đầy đủ Issues và Pull Requests từ đầu đến v1.0.0 | Docs | Pha 12 | Open |
+| 84 | [Issue #84](https://github.com/duongbaphuc/ai-native-oms-api/issues/84) | docs(changelog): Cập nhật toàn diện CHANGELOG.md truy vết đầy đủ Issues và Pull Requests từ đầu đến v1.0.0 | Docs | Pha 12 | Closed |
+| 85 | [PR #85](https://github.com/duongbaphuc/ai-native-oms-api/pull/85) | docs(changelog): complete full Issues and Pull Requests traceability from inception to v1.0.0 (closes #84) | Docs | Pha 12 | Merged |
+| 86 | [Issue #86](https://github.com/duongbaphuc/ai-native-oms-api/issues/86) | feat(playbook): Thêm Prompt Giai Đoạn 18 - Bản Địa Hóa Tiếng Việt Cho API Docs, Javadoc & Comments | Playbook | Pha 18 | Closed |
+| 87 | [PR #87](https://github.com/duongbaphuc/ai-native-oms-api/pull/87) | feat(playbook): add Phase 18 Vietnamese Localization prompt to SDLC Playbook (closes #86) | Playbook | Pha 18 | Merged |
+| 88 | [Issue #88](https://github.com/duongbaphuc/ai-native-oms-api/issues/88) | feat(localization): localize Javadoc, code comments and API docs to Vietnamese (Phase 18) | Core / Docs | Pha 18 | Open |
 
 ---
 
@@ -228,3 +241,4 @@ Dự án đạt mốc kiểm thử hoàn hảo: **117/117 automated tests PASS (
 - [Đặc Tả Đóng Gói Container & Pipeline CI/CD (`docs/10-devops-pipeline-spec.md`)](docs/10-devops-pipeline-spec.md)
 - [Báo Cáo Phát Hành Chính Thức v1.0.0 (`docs/11-RELEASE_NOTES_v1.0.0.md`)](docs/11-RELEASE_NOTES_v1.0.0.md)
 - [Báo Cáo Kiểm Toán Độ Lệch Đặc Tả Post-Fix 13 Tiêu Chí (`docs/audit-logs/post-fix-spec-drift-audit-report-2026-09-25-13-criteria.md`)](docs/audit-logs/post-fix-spec-drift-audit-report-2026-09-25-13-criteria.md)
+- [Báo Cáo Kiểm Định Bản Địa Hóa Tiếng Việt Pha 18 (`docs/audit-logs/vietnamese-localization-audit-report-2026-09-25.md`)](docs/audit-logs/vietnamese-localization-audit-report-2026-09-25.md)

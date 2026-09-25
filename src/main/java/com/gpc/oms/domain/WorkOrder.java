@@ -1,4 +1,4 @@
-// AI Provenance: generated from docs/01-domain-model.md, docs/00-coding-rules.md
+// Nguồn gốc AI: sinh từ docs/01-domain-model.md, docs/00-coding-rules.md
 package com.gpc.oms.domain;
 
 import jakarta.persistence.Column;
@@ -10,46 +10,69 @@ import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.Table;
 import java.time.Instant;
+import java.util.Objects;
 import java.util.UUID;
 
+/**
+ * Gốc tập hợp (Aggregate Root) và Thực thể JPA đại diện cho Phiếu công tác xử lý sự cố mất điện.
+ *
+ * <p>Quản lý toàn bộ thông tin mã thiết bị, mô tả sự cố, độ ưu tiên, trạng thái vòng đời
+ * và mốc thời gian giải quyết sự cố theo các ràng buộc bất biến nghiệp vụ.</p>
+ *
+ * @author Đội ngũ Kiến trúc GPC OMS
+ * @version 1.0.0
+ * @since 1.0.0
+ */
 @Entity
 @Table(name = "work_orders")
 public class WorkOrder {
+
     @Id
     @GeneratedValue(strategy = GenerationType.UUID)
     private UUID id;
-    
+
     @Column(nullable = false, length = 50)
     private String equipmentId;
-    
+
     @Column(nullable = false, length = 500)
     private String description;
-    
+
     @Enumerated(EnumType.STRING)
     @Column(nullable = false, length = 20)
     private Priority priority;
-    
+
     @Enumerated(EnumType.STRING)
     @Column(nullable = false, length = 20)
     private WorkOrderStatus status;
-    
+
     @Column(nullable = false, updatable = false)
     private Instant createdAt;
-    
+
     @Column(nullable = true)
     private Instant resolvedAt;
 
-    protected WorkOrder() {} // JPA only — không gọi từ application code
+    /**
+     * Constructor mặc định phục vụ JPA proxying — Không sử dụng trực tiếp trong mã ứng dụng.
+     */
+    protected WorkOrder() {}
 
+    /**
+     * Khởi tạo một phiếu công tác mới với trạng thái mặc định là {@link WorkOrderStatus#OPEN}.
+     *
+     * @param equipmentId Mã định danh thiết bị điện gặp sự cố (không được null)
+     * @param description Mô tả chi tiết hiện trường sự cố (không được null)
+     * @param priority Mức độ ưu tiên xử lý (không được null)
+     */
     public WorkOrder(final String equipmentId, final String description, final Priority priority) {
-        this.equipmentId = java.util.Objects.requireNonNull(equipmentId, "equipmentId must not be null");
-        this.description = java.util.Objects.requireNonNull(description, "description must not be null");
-        this.priority = java.util.Objects.requireNonNull(priority, "priority must not be null");
+        this.equipmentId = Objects.requireNonNull(equipmentId, "equipmentId must not be null");
+        this.description = Objects.requireNonNull(description, "description must not be null");
+        this.priority = Objects.requireNonNull(priority, "priority must not be null");
         this.status = WorkOrderStatus.OPEN;
         this.createdAt = Instant.now();
     }
-    
-    // --- Getters (manual, không dùng Lombok — theo 00-coding-rules.md) ---
+
+    // --- Các phương thức Getter thủ công (Tuân thủ docs/00-coding-rules.md, không dùng Lombok) ---
+
     public UUID getId() { return id; }
     public String getEquipmentId() { return equipmentId; }
     public String getDescription() { return description; }
@@ -57,13 +80,18 @@ public class WorkOrder {
     public WorkOrderStatus getStatus() { return status; }
     public Instant getCreatedAt() { return createdAt; }
     public Instant getResolvedAt() { return resolvedAt; }
-    
+
     /**
-     * Chuyển trạng thái theo quy tắc bất biến (one-way state machine).
-     * Delegate validation sang WorkOrderStatus.canTransitionTo().
+     * Chuyển trạng thái phiếu công tác theo quy tắc máy trạng thái đơn hướng bất biến.
+     *
+     * <p>Ủy quyền kiểm tra tính hợp lệ sang {@link WorkOrderStatus#canTransitionTo(WorkOrderStatus)}.
+     * Khi chuyển sang trạng thái {@link WorkOrderStatus#DONE}, tự động cập nhật mốc thời gian {@code resolvedAt}.</p>
+     *
+     * @param newStatus Trạng thái mới cần chuyển tiếp tới
+     * @throws IllegalStateException nếu hành vi chuyển đổi trạng thái vi phạm quy tắc máy trạng thái
      */
     public void advanceStatus(final WorkOrderStatus newStatus) {
-        java.util.Objects.requireNonNull(newStatus, "newStatus must not be null");
+        Objects.requireNonNull(newStatus, "newStatus must not be null");
         if (!this.status.canTransitionTo(newStatus)) {
             throw new IllegalStateException(
                 "Invalid state transition from " + this.status + " to " + newStatus);
