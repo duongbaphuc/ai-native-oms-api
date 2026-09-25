@@ -40,6 +40,7 @@ public record PagedResponse<T>(
      */
     public static <T> PagedResponse<T> from(final Page<T> page) {
         Objects.requireNonNull(page, "page must not be null");
+
         return new PagedResponse<>(
             page.getContent(),
             page.getNumber(),
