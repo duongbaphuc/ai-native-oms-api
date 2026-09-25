@@ -88,3 +88,106 @@ jobs:
           file: ./Dockerfile
           push: false
           tags: oms-api-demo:latest
+
+  spec-drift-audit:
+    name: AI-Native Spec-to-Code Drift Audit
+    runs-on: ubuntu-latest
+    needs: build-and-test
+    steps:
+      - name: Checkout Source Code with Full History
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: 1. Git Diff Boundary Guard (PR Only)
+        if: github.event_name == 'pull_request'
+        run: |
+          echo "=== Auditing PR Code Changes vs Documentation Updates ==="
+          git fetch origin ${{ github.base_ref }} --depth=1
+          CHANGED_CODE=$(git diff --name-only origin/${{ github.base_ref }}...HEAD | grep '^src/main/' || true)
+          if [ -n "$CHANGED_CODE" ]; then
+            echo "Source code changes detected in src/main/:"
+            echo "$CHANGED_CODE"
+            CHANGED_DOCS=$(git diff --name-only origin/${{ github.base_ref }}...HEAD | grep '^docs/' || true)
+            if [ -z "$CHANGED_DOCS" ]; then
+              echo "::error::Zero-Drift Boundary Violation! Code changes in src/main/ require corresponding documentation or audit checklist updates in docs/ or docs/audit-logs/."
+              exit 1
+            fi
+            echo "Documentation synchronization verified:"
+            echo "$CHANGED_DOCS"
+          else
+            echo "No changes in src/main/. Boundary guard passed."
+          fi
+
+      - name: 2. Enum Synchronization Audit (Java Models vs Markdown Specs)
+        run: |
+          echo "=== Verifying Enum Synchronization between Java Models and Markdown Specs ==="
+          FAIL=0
+          for status in OPEN IN_PROGRESS DONE; do
+            if ! grep -rqi "$status" docs/01-domain-model.md; then
+              echo "::error::WorkOrderStatus '$status' missing in docs/01-domain-model.md"
+              FAIL=1
+            fi
+            if ! grep -rqi "$status" docs/02-api-spec.md; then
+              echo "::error::WorkOrderStatus '$status' missing in docs/02-api-spec.md"
+              FAIL=1
+            fi
+          done
+
+          for priority in LOW MEDIUM HIGH CRITICAL; do
+            if ! grep -rqi "$priority" docs/01-domain-model.md; then
+              echo "::error::Priority '$priority' missing in docs/01-domain-model.md"
+              FAIL=1
+            fi
+            if ! grep -rqi "$priority" docs/02-api-spec.md; then
+              echo "::error::Priority '$priority' missing in docs/02-api-spec.md"
+              FAIL=1
+            fi
+          done
+
+          if [ $FAIL -ne 0 ]; then
+            echo "Enum synchronization audit FAILED!"
+            exit 1
+          fi
+          echo "Enum synchronization audit PASSED (100% matched)."
+
+      - name: 3. RFC 7807 Problem Types URN Audit
+        run: |
+          echo "=== Auditing RFC 7807 Problem Type URNs ==="
+          FAIL=0
+          URNS=$(grep -oE 'urn:problem-type:[a-z0-9-]+' src/main/java/com/gpc/oms/exception/ProblemTypes.java | sort -u)
+          for urn in $URNS; do
+            if ! grep -q "$urn" docs/02-api-spec.md; then
+              echo "::error::Problem Type URN '$urn' defined in ProblemTypes.java is not documented in docs/02-api-spec.md"
+              FAIL=1
+            else
+              echo "Verified URN: $urn"
+            fi
+          done
+
+          if [ $FAIL -ne 0 ]; then
+            echo "RFC 7807 Problem Types audit FAILED!"
+            exit 1
+          fi
+          echo "RFC 7807 Problem Types audit PASSED (All URNs documented)."
+
+      - name: 4. Checklist Sign-off Verification
+        run: |
+          echo "=== Auditing Checklist Sign-offs in docs/audit-logs/ ==="
+          LATEST_CHECKLIST=$(ls -t docs/audit-logs/checklist-*.md 2>/dev/null | head -n 1)
+          if [ -z "$LATEST_CHECKLIST" ]; then
+            echo "::error::No checklist found in docs/audit-logs/!"
+            exit 1
+          fi
+          echo "Evaluating latest checklist: $LATEST_CHECKLIST"
+
+          UNPASSED=$(grep -E '\|\s*\[ \]|\|\s*(\[ \]\s*)?FAIL\s*\|' "$LATEST_CHECKLIST" || true)
+          if [ -n "$UNPASSED" ]; then
+            echo "::error::Checklist has unverified or failed criteria in $LATEST_CHECKLIST:"
+            echo "$UNPASSED"
+            exit 1
+          fi
+
+          PASSED_COUNT=$(grep -c '\[x\] PASS' "$LATEST_CHECKLIST" || true)
+          echo "Checklist sign-off audit PASSED: $PASSED_COUNT criteria 100% verified [x] PASS."
+
