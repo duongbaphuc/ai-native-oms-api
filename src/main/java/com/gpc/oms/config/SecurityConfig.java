@@ -43,7 +43,12 @@ public class SecurityConfig {
 
     @Bean
     @Order(2)
-    public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
+    public SecurityFilterChain filterChain(HttpSecurity http,
+                                           org.springframework.beans.factory.ObjectProvider<RateLimitingFilter> rateLimitingFilterProvider) throws Exception {
+        RateLimitingFilter rateLimitingFilter = rateLimitingFilterProvider.getIfAvailable();
+        if (rateLimitingFilter != null) {
+            http.addFilterBefore(rateLimitingFilter, org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter.class);
+        }
         http
             .csrf(csrf -> csrf.disable())
             .headers(headers -> headers.frameOptions(frame -> frame.sameOrigin()))
