@@ -21,4 +21,14 @@ public class ResourceNotFoundException extends RuntimeException {
     public ResourceNotFoundException(String message) {
         super(message);
     }
+
+    /**
+     * Tạo ngoại lệ ResourceNotFoundException chuẩn hóa cho phiếu sự cố WorkOrder.
+     *
+     * @param id Khóa chính UUID của phiếu sự cố không tìm thấy
+     * @return Đối tượng {@link ResourceNotFoundException} với thông điệp chuẩn hóa
+     */
+    public static ResourceNotFoundException forWorkOrder(java.util.UUID id) {
+        return new ResourceNotFoundException("WorkOrder not found with id: " + id);
+    }
 }

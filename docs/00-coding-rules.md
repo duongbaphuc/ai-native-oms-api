@@ -37,6 +37,15 @@ Mọi dòng mã do con người hay AI Coding Agents (GitHub Copilot / Cursor / 
    - **Nghiêm Cấm Field Injection:** Cấm tuyệt đối `@Autowired` trên field. Field injection phá vỡ tính bao đóng, ngăn cản việc viết Unit Tests bằng POJO thuần, và che giấu hiện tượng "God Class" (quá nhiều dependencies).
    - Mọi dependency fields phải được khai báo dạng `private final`.
 
+5. **Triệt Tiêu 100% Magic Numbers & Literal Strings (Zero Magic Values Principle - Joshua Bloch Item 68):**
+   - **Cấm Tuyệt Đối Magic Numbers:** Nghiêm cấm các con số thô (raw numeric literals: 20, 60, 401, 429, 10000, 10m) trực tiếp trong logic điều kiện, vòng lặp, kiểm tra trạng thái hoặc annotations mà không rõ ngữ nghĩa. Bắt buộc: (1) Khai báo hằng số self-explanatory (`private static final int MAX_CACHE_ENTRIES = 10_000`); (2) Dùng hằng số chuẩn từ Spring/JDK (`HttpStatus.TOO_MANY_REQUESTS.value()`); (3) Externalize các tham số dung lượng, giới hạn lưu lượng, thời gian hết hạn (Rate Limiting, Cache, Timeout) vào `application.yml` qua `@ConfigurationProperties`.
+   - **Cấm Tuyệt Đối Literal Strings:** Nghiêm cấm các chuỗi ký tự ma thuật (inline strings) phân tán trong mã nguồn:
+     * *Tên Metric & Tag Keys (Micrometer):* Cấm viết chuỗi tự do trong `registry.counter(...)`. Bắt buộc gom vào lớp hằng số `WorkOrderMetrics` hoặc Enum chuyên biệt.
+     * *Tên Role & Quyền Hạn (Security RBAC):* Cấm viết chuỗi thô (`"ADMIN"`, `"DISPATCHER"`, `"TECHNICIAN"`) trong SecurityConfig và Controller. Bắt buộc gom vào lớp hằng số `RoleConstants` (kèm tiền tố `ROLE_`).
+     * *Thuộc tính JSON & Mã lỗi (RFC 7807):* Gom các khóa mở rộng (`invalidParams`, `name`, `reason`, `type`) thành hằng số `public static final` trong `ProblemTypes`.
+     * *Tiêu đề HTTP & Media Types:* Bắt buộc dùng `HttpHeaders.RETRY_AFTER`, `MediaType.APPLICATION_PROBLEM_JSON_VALUE`.
+     * *Ràng buộc dữ liệu:* Hằng số độ dài tối đa/tối thiểu của trường dữ liệu phải được dùng chung giữa Entity JPA và DTO Bean Validation để chống lệch pha.
+
 ---
 
 ## 2. Cẩm Nang Ứng Dụng Design Patterns Tối Ưu Hóa Class (Good vs Bad Practice)
@@ -281,6 +290,54 @@ public class WorkOrderService {
         return WorkOrderResponse.from(updated);
     }
 }
+```
+
+---
+
+### 2.7 Centralized Constants & Configuration Properties Pattern
+- **Mục đích:** Tập trung hóa định nghĩa các giá trị không đổi, loại bỏ trùng lặp chuỗi, đảm bảo tính nhất quán giữa các tầng kiến trúc và cho phép điều chỉnh cấu hình môi trường mà không cần sửa code.
+- **Áp dụng tại:** Tầng Metrics, Security RBAC, RFC 7807 Problem Details, Validation Constraints, Rate Limiting & Caching.
+
+#### ❌ BAD PRACTICE (Magic Numbers, Inline Literal Strings rải rác):
+```java
+// BAD: Magic numbers và literal strings phân tán khắp nơi, dễ sai chính tả, khó bảo trì
+registry.counter("oms_workorders_created_total", "priority", request.priority().name()).increment();
+
+if (count > 60) {
+    response.setStatus(429);
+    response.setHeader("Retry-After", "60");
+    response.setContentType("application/problem+json");
+}
+
+@PreAuthorize("hasAnyRole('ADMIN', 'DISPATCHER')") // Chuỗi thô không thể tái cấu trúc an toàn
+```
+
+#### ✅ GOOD PRACTICE (Oracle Standard - Centralized Constants & Type-Safe Config):
+```java
+// GOOD: Gom metrics và tags vào lớp hằng số tập trung
+public final class WorkOrderMetrics {
+    public static final String COUNTER_CREATED = "oms_workorders_created_total";
+    public static final String TAG_PRIORITY = "priority";
+    private WorkOrderMetrics() {}
+}
+
+// GOOD: Gom roles vào RoleConstants
+public final class RoleConstants {
+    public static final String ROLE_ADMIN = "ROLE_ADMIN";
+    public static final String ROLE_DISPATCHER = "ROLE_DISPATCHER";
+    public static final String ROLE_TECHNICIAN = "ROLE_TECHNICIAN";
+    public static final String HAS_ROLE_ADMIN_OR_DISPATCHER = 
+        "hasAnyRole('" + ROLE_ADMIN + "', '" + ROLE_DISPATCHER + "')";
+    private RoleConstants() {}
+}
+
+// GOOD: Externalize cấu hình qua @ConfigurationProperties
+@ConfigurationProperties(prefix = "oms.rate-limit")
+public record RateLimitProperties(
+    int maxRequestsPerMinute,
+    Duration windowDuration,
+    int cacheMaxSize
+) {}
 ```
 
 ---

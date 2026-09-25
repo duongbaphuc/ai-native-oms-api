@@ -3,6 +3,7 @@ package com.gpc.oms.config;
 
 import com.github.benmanes.caffeine.cache.Cache;
 import com.github.benmanes.caffeine.cache.Caffeine;
+import com.gpc.oms.exception.ProblemTypes;
 import io.github.bucket4j.Bandwidth;
 import io.github.bucket4j.Bucket;
 import io.github.bucket4j.ConsumptionProbe;
@@ -13,7 +14,10 @@ import jakarta.servlet.http.HttpServletResponse;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.core.annotation.Order;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
 import org.springframework.stereotype.Component;
 import org.springframework.web.filter.OncePerRequestFilter;
 
@@ -47,24 +51,38 @@ public class RateLimitingFilter extends OncePerRequestFilter {
     private static final Logger log = LoggerFactory.getLogger(RateLimitingFilter.class);
 
     private static final String TARGET_PATH_PREFIX = "/api/v1/workorders";
-    private static final String PROBLEM_JSON_CONTENT_TYPE = "application/problem+json;charset=UTF-8";
-    private static final String RETRY_AFTER_HEADER = "Retry-After";
-    private static final int MAX_CACHE_ENTRIES = 10_000;
+    private static final String PROBLEM_JSON_CONTENT_TYPE =
+            MediaType.APPLICATION_PROBLEM_JSON_VALUE + ";charset=UTF-8";
+    private static final String RETRY_AFTER_HEADER = HttpHeaders.RETRY_AFTER;
+    private static final String HEADER_X_FORWARDED_FOR = "X-Forwarded-For";
+    private static final String UNKNOWN_CLIENT = "unknown-client";
 
-    static final long READ_CAPACITY = 60L;
-    static final long WRITE_CAPACITY = 20L;
-    static final Duration REFILL_DURATION = Duration.ofMinutes(1);
+    static final long READ_CAPACITY = RateLimitProperties.DEFAULT_READ_CAPACITY;
+    static final long WRITE_CAPACITY = RateLimitProperties.DEFAULT_WRITE_CAPACITY;
+    static final Duration REFILL_DURATION = RateLimitProperties.DEFAULT_REFILL_DURATION;
 
-    private final Cache<String, Bucket> buckets = Caffeine.newBuilder()
-            .maximumSize(MAX_CACHE_ENTRIES)
-            .expireAfterAccess(Duration.ofMinutes(10))
-            .build();
+    private final RateLimitProperties properties;
+    private final Cache<String, Bucket> buckets;
 
     /**
-     * Constructor mặc định phục vụ việc khởi tạo bean bởi Spring Component scanning.
+     * Khởi tạo bộ lọc với các thuộc tính cấu hình được tiêm từ Spring context.
+     *
+     * @param properties Cấu hình thuộc tính giới hạn tần suất {@link RateLimitProperties}
+     */
+    public RateLimitingFilter(final RateLimitProperties properties) {
+        super();
+        this.properties = properties != null ? properties : new RateLimitProperties();
+        this.buckets = Caffeine.newBuilder()
+                .maximumSize(this.properties.cacheMaxSize())
+                .expireAfterAccess(this.properties.cacheExpireDuration())
+                .build();
+    }
+
+    /**
+     * Constructor mặc định phục vụ việc khởi tạo bean với giá trị mặc định.
      */
     public RateLimitingFilter() {
-        super();
+        this(new RateLimitProperties());
     }
 
     /**
@@ -112,18 +130,19 @@ public class RateLimitingFilter extends OncePerRequestFilter {
         log.warn("Rate limit exceeded for client [ip={}, method={}, uri={}, retryAfterSeconds={}]",
                 clientIp, request.getMethod(), request.getRequestURI(), retryAfterSeconds);
 
-        response.setStatus(429);
+        response.setStatus(HttpStatus.TOO_MANY_REQUESTS.value());
         response.setHeader(RETRY_AFTER_HEADER, String.valueOf(retryAfterSeconds));
         response.setContentType(PROBLEM_JSON_CONTENT_TYPE);
 
         String problemJson = """
-            {"type":"urn:problem-type:rate-limit-exceeded",\
-            "title":"Too Many Requests",\
-            "status":429,\
+            {"type":"%s",\
+            "title":"%s",\
+            "status":%d,\
             "detail":"Bạn đã vượt quá giới hạn tần suất gọi API. \
 Vui lòng thử lại sau %d giây.",\
             "instance":"%s"}"""
-            .formatted(retryAfterSeconds, request.getRequestURI());
+            .formatted(ProblemTypes.RATE_LIMIT_EXCEEDED, ProblemTypes.TITLE_TOO_MANY_REQUESTS,
+                    HttpStatus.TOO_MANY_REQUESTS.value(), retryAfterSeconds, request.getRequestURI());
 
         response.getWriter().write(problemJson);
     }
@@ -136,13 +155,13 @@ Vui lòng thử lại sau %d giây.",\
      * @return Chuỗi địa chỉ IP chuẩn hóa
      */
     private String resolveClientIp(HttpServletRequest request) {
-        String xForwardedFor = request.getHeader("X-Forwarded-For");
+        String xForwardedFor = request.getHeader(HEADER_X_FORWARDED_FOR);
         if (xForwardedFor != null && !xForwardedFor.isBlank()) {
             String[] ips = xForwardedFor.split(",");
             return ips[0].trim();
         }
         String remoteAddr = request.getRemoteAddr();
-        return (remoteAddr != null && !remoteAddr.isBlank()) ? remoteAddr.trim() : "unknown-client";
+        return (remoteAddr != null && !remoteAddr.isBlank()) ? remoteAddr.trim() : UNKNOWN_CLIENT;
     }
 
     /**
@@ -152,10 +171,10 @@ Vui lòng thử lại sau %d giây.",\
      * @return Đối tượng {@link Bucket} an toàn luồng
      */
     private Bucket createNewBucket(boolean isRead) {
-        long capacity = isRead ? READ_CAPACITY : WRITE_CAPACITY;
+        long capacity = isRead ? properties.readCapacity() : properties.writeCapacity();
         Bandwidth bandwidth = Bandwidth.builder()
                 .capacity(capacity)
-                .refillGreedy(capacity, REFILL_DURATION)
+                .refillGreedy(capacity, properties.refillDuration())
                 .build();
         return Bucket.builder()
                 .addLimit(bandwidth)

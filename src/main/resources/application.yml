@@ -40,3 +40,12 @@ management:
       probes:
         enabled: true
 
+oms:
+  rate-limit:
+    read-capacity: 60
+    write-capacity: 20
+    refill-duration: 1m
+    cache-max-size: 10000
+    cache-expire-duration: 10m
+
+

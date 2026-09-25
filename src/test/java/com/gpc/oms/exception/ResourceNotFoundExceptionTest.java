@@ -21,4 +21,13 @@ class ResourceNotFoundExceptionTest {
         assertThat(ex).isInstanceOf(RuntimeException.class);
         assertThat(ex.getMessage()).isEqualTo(message);
     }
+
+    @Test
+    @DisplayName("forWorkOrder static factory method tạo ngoại lệ với định dạng thông điệp chuẩn")
+    void forWorkOrder_createsExceptionWithStandardMessage() {
+        java.util.UUID id = java.util.UUID.randomUUID();
+        ResourceNotFoundException ex = ResourceNotFoundException.forWorkOrder(id);
+
+        assertThat(ex.getMessage()).isEqualTo("WorkOrder not found with id: " + id);
+    }
 }

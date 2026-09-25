@@ -46,8 +46,9 @@ public class WorkOrderService {
     public WorkOrderResponse createWorkOrder(final WorkOrderRequest req) {
         final WorkOrder entity = new WorkOrder(req.equipmentId(), req.description(), req.priority());
         final WorkOrder saved = repo.save(entity);
-        registry.counter("oms_workorders_created_total",
-            "priority", saved.getPriority().name(), "status", saved.getStatus().name()).increment();
+        registry.counter(WorkOrderMetrics.COUNTER_CREATED,
+            WorkOrderMetrics.TAG_PRIORITY, saved.getPriority().name(),
+            WorkOrderMetrics.TAG_STATUS, saved.getStatus().name()).increment();
         log.info("created workorder id={}", saved.getId());
         return WorkOrderResponse.from(saved);
     }
@@ -75,7 +76,7 @@ public class WorkOrderService {
      */
     public WorkOrderResponse getWorkOrderById(final UUID id) {
         final WorkOrder entity = repo.findById(id)
-                .orElseThrow(() -> new ResourceNotFoundException("WorkOrder not found with id: " + id));
+                .orElseThrow(() -> ResourceNotFoundException.forWorkOrder(id));
         return WorkOrderResponse.from(entity);
     }
 
@@ -90,14 +91,15 @@ public class WorkOrderService {
      */
     public WorkOrderResponse updateStatus(final UUID id, final WorkOrderStatusRequest req) {
         final WorkOrder entity = repo.findById(id)
-                .orElseThrow(() -> new ResourceNotFoundException("WorkOrder not found with id: " + id));
+                .orElseThrow(() -> ResourceNotFoundException.forWorkOrder(id));
 
         final WorkOrderStatus fromStatus = entity.getStatus();
         entity.advanceStatus(req.status());
 
         final WorkOrder saved = repo.save(entity);
-        registry.counter("oms_workorder_status_transitions_total",
-            "from_status", fromStatus.name(), "to_status", saved.getStatus().name()).increment();
+        registry.counter(WorkOrderMetrics.COUNTER_TRANSITIONS,
+            WorkOrderMetrics.TAG_FROM_STATUS, fromStatus.name(),
+            WorkOrderMetrics.TAG_TO_STATUS, saved.getStatus().name()).increment();
         log.info("updated workorder id={} status={}", saved.getId(), saved.getStatus());
         return WorkOrderResponse.from(saved);
     }
