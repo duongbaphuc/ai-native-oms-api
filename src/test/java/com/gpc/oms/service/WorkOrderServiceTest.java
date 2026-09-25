@@ -32,7 +32,10 @@ import java.util.UUID;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Mockito.*;
+import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 
 /**
  * Kiểm thử đơn vị cô lập tầng nghiệp vụ cho {@link WorkOrderService}.
@@ -87,8 +90,16 @@ class WorkOrderServiceTest {
 
             service.createWorkOrder(request);
 
-            assertThat(registry.get("oms_workorders_created_total")
-                .tags("priority", "HIGH", "status", "OPEN").counter().count()).isEqualTo(1.0);
+            assertThat(registry.get(WorkOrderMetrics.COUNTER_CREATED)
+                .tags(WorkOrderMetrics.TAG_PRIORITY, "HIGH", WorkOrderMetrics.TAG_STATUS, "OPEN").counter().count()).isEqualTo(1.0);
+        }
+
+        @Test
+        @DisplayName("createWorkOrder từ chối null request với NullPointerException")
+        void createWorkOrder_rejectsNullRequest() {
+            assertThatThrownBy(() -> service.createWorkOrder(null))
+                .isInstanceOf(NullPointerException.class)
+                .hasMessage("req must not be null");
         }
     }
 
@@ -129,6 +140,14 @@ class WorkOrderServiceTest {
             verify(repo, times(1)).findAll(pageable);
             verify(repo, never()).findByStatus(any(), any());
         }
+
+        @Test
+        @DisplayName("getWorkOrders từ chối null pageable với NullPointerException")
+        void getWorkOrders_rejectsNullPageable() {
+            assertThatThrownBy(() -> service.getWorkOrders(null, null))
+                .isInstanceOf(NullPointerException.class)
+                .hasMessage("pageable must not be null");
+        }
     }
 
     @Nested
@@ -162,6 +181,14 @@ class WorkOrderServiceTest {
                 .hasMessage("WorkOrder not found with id: " + id);
 
             verify(repo, times(1)).findById(id);
+        }
+
+        @Test
+        @DisplayName("getWorkOrderById từ chối null id với NullPointerException")
+        void getWorkOrderById_rejectsNullId() {
+            assertThatThrownBy(() -> service.getWorkOrderById(null))
+                .isInstanceOf(NullPointerException.class)
+                .hasMessage("id must not be null");
         }
     }
 
@@ -198,8 +225,8 @@ class WorkOrderServiceTest {
 
             service.updateStatus(id, WorkOrderTestFixtures.createStatusRequest(WorkOrderStatus.IN_PROGRESS));
 
-            assertThat(registry.get("oms_workorder_status_transitions_total")
-                .tags("from_status", "OPEN", "to_status", "IN_PROGRESS").counter().count()).isEqualTo(1.0);
+            assertThat(registry.get(WorkOrderMetrics.COUNTER_TRANSITIONS)
+                .tags(WorkOrderMetrics.TAG_FROM_STATUS, "OPEN", WorkOrderMetrics.TAG_TO_STATUS, "IN_PROGRESS").counter().count()).isEqualTo(1.0);
         }
 
         @Test
@@ -234,6 +261,24 @@ class WorkOrderServiceTest {
 
             verify(repo, times(1)).findById(id);
             verify(repo, never()).save(any());
+        }
+
+        @Test
+        @DisplayName("updateStatus từ chối null id với NullPointerException")
+        void updateStatus_rejectsNullId() {
+            final WorkOrderStatusRequest req = WorkOrderTestFixtures.createStatusRequest(WorkOrderStatus.IN_PROGRESS);
+            assertThatThrownBy(() -> service.updateStatus(null, req))
+                .isInstanceOf(NullPointerException.class)
+                .hasMessage("id must not be null");
+        }
+
+        @Test
+        @DisplayName("updateStatus từ chối null request với NullPointerException")
+        void updateStatus_rejectsNullRequest() {
+            final UUID id = UUID.randomUUID();
+            assertThatThrownBy(() -> service.updateStatus(id, null))
+                .isInstanceOf(NullPointerException.class)
+                .hasMessage("req must not be null");
         }
     }
 }

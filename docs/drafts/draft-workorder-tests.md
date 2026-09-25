@@ -3,7 +3,7 @@ Role: Senior Engineer. Task: Comprehensive Acceptance Matrix & Test Sketches for
 Context files: docs/00-coding-rules.md, docs/01-domain-model.md, docs/02-api-spec.md, docs/02-security-auth-spec.md, docs/02-observability-and-logging.md, docs/08-SYSTEM_HANDOVER.md
 Constraints: 
 - JUnit 5 + Mockito + MockMvc + @DataJpaTest + @SpringBootTest.
-- Testing Pyramid: 10 Unit Tests, 3 Slice Tests, 4 Security Tests, 1 DataJpa Test, 1 Full Integration Test, 1 Smoke Test (Total 20 test classes, 117 test cases).
+- Testing Pyramid: 10 Unit Tests, 3 Slice Tests, 4 Security Tests, 1 DataJpa Test, 1 Full Integration Test, 1 Smoke Test (Total 20 test classes, 129 test cases).
 - 100% Line Coverage & 100% Branch Coverage via JaCoCo.
 - RFC 7807 assertions: type, title, status, instance, invalidParams.
 - Zero Lombok, Pure Java 17, Constructor Injection.
@@ -85,6 +85,7 @@ DRAFT ONLY — scoring target, never wired into app.
 // AI Provenance: generated from docs/01-domain-model.md §Invariants
 package com.gpc.oms.domain;
 
+import com.gpc.oms.testutil.WorkOrderTestFixtures;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import static org.junit.jupiter.api.Assertions.*;
@@ -94,7 +95,7 @@ class WorkOrderTest {
     @Test
     @DisplayName("advanceStatus: Linear flow OPEN -> IN_PROGRESS -> DONE sets resolvedAt")
     void advanceStatus_allowsLinearFlow_andSetsResolvedAtOnDone() {
-        final WorkOrder wo = new WorkOrder("EQ-77", "Quá tải máy biến áp", Priority.HIGH);
+        final WorkOrder wo = WorkOrderTestFixtures.createDefaultEntity();
         assertEquals(WorkOrderStatus.OPEN, wo.getStatus());
         assertNull(wo.getResolvedAt());
 
@@ -110,14 +111,14 @@ class WorkOrderTest {
     @Test
     @DisplayName("advanceStatus: Reject skipping from OPEN directly to DONE")
     void advanceStatus_rejectsSkip_openToDone() {
-        final WorkOrder wo = new WorkOrder("EQ-77", "Quá tải máy biến áp", Priority.HIGH);
+        final WorkOrder wo = WorkOrderTestFixtures.createDefaultEntity();
         assertThrows(IllegalStateException.class, () -> wo.advanceStatus(WorkOrderStatus.DONE));
     }
 
     @Test
     @DisplayName("advanceStatus: Reject rolling back from DONE to IN_PROGRESS")
     void advanceStatus_rejectsRollback_doneToInProgress() {
-        final WorkOrder wo = new WorkOrder("EQ-77", "Quá tải máy biến áp", Priority.HIGH);
+        final WorkOrder wo = WorkOrderTestFixtures.createDefaultEntity();
         wo.advanceStatus(WorkOrderStatus.IN_PROGRESS);
         wo.advanceStatus(WorkOrderStatus.DONE);
         assertThrows(IllegalStateException.class, () -> wo.advanceStatus(WorkOrderStatus.IN_PROGRESS));
@@ -242,4 +243,4 @@ class WorkOrderRepositoryTest {
 - [ ] **Deterministic UUID & Timestamps:** Sử dụng `WorkOrderTestFixtures` để khởi tạo dữ liệu đồng nhất.
 - [ ] **RFC 7807 Conformity:** Mọi phản hồi lỗi HTTP 400, 401, 403, 404, 422, 429, 500 đều assert trường `type`, `title`, `status`, `instance`.
 - [ ] **ThreadLocal Hygiene:** Khối `finally { MDC.clear(); }` được kiểm tra nghiêm ngặt trong `CorrelationIdFilterTest`.
-- [ ] **Zero-Warning & Zero-Failure:** Toàn bộ 117 bài kiểm thử vượt qua tuyệt đối trên môi trường máy chủ CI (`mvn clean verify`).
+- [ ] **Zero-Warning & Zero-Failure:** Toàn bộ 129 bài kiểm thử vượt qua tuyệt đối trên môi trường máy chủ CI (`mvn clean verify`).

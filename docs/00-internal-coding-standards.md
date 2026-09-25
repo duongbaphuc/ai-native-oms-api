@@ -48,7 +48,7 @@ Hệ thống yêu cầu chuyển đổi dữ liệu tường minh (Explicit Mapp
        Instant createdAt,
        Instant resolvedAt
    ) {
-       public static WorkOrderResponse from(WorkOrder entity) {
+       public static WorkOrderResponse from(final WorkOrder entity) {
            java.util.Objects.requireNonNull(entity, "workOrder must not be null");
            return new WorkOrderResponse(
                entity.getId(),
@@ -112,7 +112,8 @@ public record PagedResponse<T>(
     boolean isFirst,
     boolean isLast
 ) {
-    public static <T> PagedResponse<T> from(Page<T> page) {
+    public static <T> PagedResponse<T> from(final Page<T> page) {
+        java.util.Objects.requireNonNull(page, "page must not be null");
         return new PagedResponse<>(
             page.getContent(),
             page.getNumber(),
@@ -168,9 +169,11 @@ Khi hệ thống tích hợp với các dịch vụ bên ngoài (vd: Hệ thốn
 ## 6. Modern Java 17 Idioms, JVM Performance & Code Reusability Guide
 
 ### 6.1. Modern Java 17 Syntax Idioms
-1. **Compact Constructors for Records:** Sử dụng compact constructor `public RecordName { ... }` khi cần validate hoặc normalize dữ liệu đầu vào.
-2. **Enhanced Switch Expressions:** Sử dụng cú pháp arrow `->` trả về giá trị trực tiếp, loại trừ hoàn toàn câu lệnh `break` và lỗi fall-through.
-3. **Java Text Blocks:** Sử dụng `"""` cho multi-line templates (JSON RFC 7807 fallback, SQL scripts) thay vì phép cộng chuỗi `+`.
+1. **Compact Constructors for Records:** Sử dụng compact constructor `public RecordName { ... }` khi cần validate hoặc normalize dữ liệu đầu vào trong Record.
+2. **Enhanced Switch Expressions:** Sử dụng cú pháp arrow `->` trả về giá trị trực tiếp, loại trừ hoàn toàn câu lệnh `break` và lỗi fall-through; bao quát 100% case mà không cần `default` khi switch trên enum đã đầy đủ.
+3. **Java Text Blocks:** Sử dụng `"""` cho multi-line templates (JSON RFC 7807 fallback, SQL scripts, test payloads) thay vì phép cộng chuỗi `+`.
+4. **Stream Pipelines Tối Ưu (`Stream.toList()`):** Bắt buộc dùng `.toList()` trực tiếp trên Stream thay vì `.collect(Collectors.toList())` hoặc `.collect(Collectors.toUnmodifiableList())`. Phương thức `.toList()` trả về unmodifiable list hiệu năng cao với chi phí cấp phát tối thiểu.
+5. **Static Imports trong Kiểm Thử:** Đồng bộ 100% static imports cho assertions (`assertEquals`, `assertNotNull`, `assertThrows`, `assertThat`) và mocks (`when`, `verify`, `times`, `never`, `any`), nâng cao tỷ lệ tín hiệu trên nhiễu (Signal-to-Noise Ratio).
 
 ### 6.2. JVM & GC Performance Optimization
 1. **Pre-sizing Collections:** Khi đã biết trước số lượng phần tử, bắt buộc khởi tạo với `initialCapacity` để triệt tiêu chi phí mảng co giãn (array resizing / copying):
@@ -193,7 +196,31 @@ Khi hệ thống tích hợp với các dịch vụ bên ngoài (vd: Hệ thốn
        public static final URI INTERNAL_ERROR = URI.create("urn:problem-type:internal-error");
    }
    ```
-2. **Object Mother / Test Fixture Pattern (`WorkOrderTestFixtures.java`):** Tái sử dụng việc khởi tạo thực thể và DTO mẫu trong toàn bộ tầng kiểm thử Unit & Integration Tests, triệt tiêu mã boilerplate lặp lại.
+2. **Object Mother / Test Fixture Pattern (`WorkOrderTestFixtures.java`):** Tái sử dụng việc khởi tạo thực thể, DTO mẫu, và JSON request payload trong toàn bộ tầng kiểm thử Unit & Integration Tests, triệt tiêu mã boilerplate lặp lại:
+   ```java
+   public final class WorkOrderTestFixtures {
+       public static final UUID DEFAULT_ID = UUID.fromString("550e8400-e29b-41d4-a716-446655440000");
+       public static final String DEFAULT_EQUIPMENT_ID = "EQ-DEFAULT-01";
+       public static final String DEFAULT_DESCRIPTION = "Standard line maintenance work order";
+       public static final Priority DEFAULT_PRIORITY = Priority.HIGH;
+
+       public static WorkOrder createDefaultEntity() {
+           return new WorkOrder(DEFAULT_EQUIPMENT_ID, DEFAULT_DESCRIPTION, DEFAULT_PRIORITY);
+       }
+       public static WorkOrderRequest createDefaultRequest() {
+           return new WorkOrderRequest(DEFAULT_EQUIPMENT_ID, DEFAULT_DESCRIPTION, DEFAULT_PRIORITY);
+       }
+       public static String createDefaultRequestJson() {
+           return """
+               {
+                 "equipmentId": "%s",
+                 "description": "%s",
+                 "priority": "%s"
+               }
+               """.formatted(DEFAULT_EQUIPMENT_ID, DEFAULT_DESCRIPTION, DEFAULT_PRIORITY.name());
+       }
+   }
+   ```
 
 ### 6.4. Zero Magic Numbers & Zero Literal Strings Policy
 Hệ thống áp dụng triệt để nguyên tắc **Zero Magic Values (Joshua Bloch Item 68)**:

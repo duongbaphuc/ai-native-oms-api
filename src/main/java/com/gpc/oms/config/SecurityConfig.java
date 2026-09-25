@@ -49,7 +49,7 @@ public class SecurityConfig {
     @Bean
     @Order(1)
     @Profile("!prod")
-    public SecurityFilterChain h2ConsoleChain(HttpSecurity http) throws Exception {
+    public SecurityFilterChain h2ConsoleChain(final HttpSecurity http) throws Exception {
         http
             .securityMatchers(matchers -> matchers.requestMatchers(
                 AntPathRequestMatcher.antMatcher("/h2-console/**"),
@@ -73,8 +73,8 @@ public class SecurityConfig {
     @Bean
     @Order(2)
     public SecurityFilterChain filterChain(
-            HttpSecurity http,
-            ObjectProvider<JwtDecoder> jwtDecoderProvider) throws Exception {
+            final HttpSecurity http,
+            final ObjectProvider<JwtDecoder> jwtDecoderProvider) throws Exception {
         http
             .csrf(csrf -> csrf.disable())
             .headers(headers -> headers.frameOptions(frame -> frame.sameOrigin()))
@@ -118,14 +118,14 @@ public class SecurityConfig {
             )
             .httpBasic(Customizer.withDefaults());
 
-        JwtDecoder jwtDecoder = jwtDecoderProvider.getIfAvailable();
+        final JwtDecoder jwtDecoder = jwtDecoderProvider.getIfAvailable();
         if (jwtDecoder != null) {
             http.oauth2ResourceServer(oauth2 -> oauth2
                 .jwt(jwt -> jwt.decoder(jwtDecoder).jwtAuthenticationConverter(jwtAuthenticationConverter()))
                 .authenticationEntryPoint((request, response, authException) -> {
                     response.setStatus(HttpStatus.UNAUTHORIZED.value());
                     response.setContentType(MediaType.APPLICATION_PROBLEM_JSON_VALUE);
-                    String detailMsg = authException.getMessage() != null
+                    final String detailMsg = authException.getMessage() != null
                             ? authException.getMessage()
                             : ProblemTypes.DETAIL_UNAUTHORIZED_TOKEN;
                     response.getWriter().write("""
@@ -150,7 +150,7 @@ public class SecurityConfig {
      */
     @Bean
     public JwtAuthenticationConverter jwtAuthenticationConverter() {
-        var converter = new JwtAuthenticationConverter();
+        final var converter = new JwtAuthenticationConverter();
         converter.setJwtGrantedAuthoritiesConverter(new JwtRoleConverter());
         converter.setPrincipalClaimName("sub");
         return converter;
@@ -165,15 +165,15 @@ public class SecurityConfig {
     @Bean
     @Profile("!prod")
     public UserDetailsService userDetailsService() {
-        UserDetails admin = User.withUsername("admin")
+        final UserDetails admin = User.withUsername("admin")
             .password("{noop}admin123")
             .roles(RoleConstants.ADMIN, RoleConstants.DISPATCHER, RoleConstants.TECHNICIAN)
             .build();
-        UserDetails dispatcher = User.withUsername("dispatcher")
+        final UserDetails dispatcher = User.withUsername("dispatcher")
             .password("{noop}dispatcher123")
             .roles(RoleConstants.DISPATCHER)
             .build();
-        UserDetails technician = User.withUsername("technician")
+        final UserDetails technician = User.withUsername("technician")
             .password("{noop}technician123")
             .roles(RoleConstants.TECHNICIAN)
             .build();

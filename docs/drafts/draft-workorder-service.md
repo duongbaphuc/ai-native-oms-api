@@ -106,6 +106,7 @@ Entity (state machine, domain rules)
 // AI Provenance: generated from docs/00-coding-rules.md, docs/00-api-rules.md, docs/01-domain-model.md, docs/00-internal-coding-standards.md
 package com.gpc.oms.service;
 
+import com.gpc.oms.config.WorkOrderMetrics;
 import com.gpc.oms.domain.WorkOrder;
 import com.gpc.oms.domain.WorkOrderRepository;
 import com.gpc.oms.domain.WorkOrderStatus;
@@ -121,6 +122,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
+import java.util.Objects;
 import java.util.UUID;
 
 @Service
@@ -129,21 +131,24 @@ public class WorkOrderService {
     private final WorkOrderRepository repo;
     private final MeterRegistry registry;
 
-    public WorkOrderService(WorkOrderRepository repo, MeterRegistry registry) {
+    public WorkOrderService(final WorkOrderRepository repo, final MeterRegistry registry) {
         this.repo = repo;
         this.registry = registry;
     }
 
     public WorkOrderResponse createWorkOrder(final WorkOrderRequest req) {
+        Objects.requireNonNull(req, "workOrderRequest must not be null");
         final WorkOrder entity = new WorkOrder(req.equipmentId(), req.description(), req.priority());
         final WorkOrder saved = repo.save(entity);
-        registry.counter("oms_workorders_created_total",
-            "priority", saved.getPriority().name(), "status", saved.getStatus().name()).increment();
+        registry.counter(WorkOrderMetrics.COUNTER_CREATED,
+            WorkOrderMetrics.TAG_PRIORITY, saved.getPriority().name(),
+            WorkOrderMetrics.TAG_STATUS, saved.getStatus().name()).increment();
         log.info("created workorder id={}", saved.getId());
         return WorkOrderResponse.from(saved);
     }
 
     public PagedResponse<WorkOrderResponse> getWorkOrders(final Pageable pageable, final WorkOrderStatus status) {
+        Objects.requireNonNull(pageable, "pageable must not be null");
         final Page<WorkOrder> page = (status != null)
                 ? repo.findByStatus(status, pageable)
                 : repo.findAll(pageable);
@@ -151,12 +156,15 @@ public class WorkOrderService {
     }
 
     public WorkOrderResponse getWorkOrderById(final UUID id) {
+        Objects.requireNonNull(id, "id must not be null");
         final WorkOrder entity = repo.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("WorkOrder not found with id: " + id));
         return WorkOrderResponse.from(entity);
     }
 
     public WorkOrderResponse updateStatus(final UUID id, final WorkOrderStatusRequest req) {
+        Objects.requireNonNull(id, "id must not be null");
+        Objects.requireNonNull(req, "workOrderStatusRequest must not be null");
         final WorkOrder entity = repo.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("WorkOrder not found with id: " + id));
 
@@ -164,8 +172,9 @@ public class WorkOrderService {
         entity.advanceStatus(req.status());
 
         final WorkOrder saved = repo.save(entity);
-        registry.counter("oms_workorder_status_transitions_total",
-            "from_status", fromStatus.name(), "to_status", saved.getStatus().name()).increment();
+        registry.counter(WorkOrderMetrics.COUNTER_TRANSITIONS,
+            WorkOrderMetrics.TAG_FROM_STATUS, fromStatus.name(),
+            WorkOrderMetrics.TAG_TO_STATUS, saved.getStatus().name()).increment();
         log.info("updated workorder id={} status={}", saved.getId(), saved.getStatus());
         return WorkOrderResponse.from(saved);
     }

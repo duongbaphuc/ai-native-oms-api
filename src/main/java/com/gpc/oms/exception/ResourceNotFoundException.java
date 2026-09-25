@@ -18,7 +18,7 @@ public class ResourceNotFoundException extends RuntimeException {
      *
      * @param message Thông điệp giải thích lý do không tìm thấy tài nguyên
      */
-    public ResourceNotFoundException(String message) {
+    public ResourceNotFoundException(final String message) {
         super(message);
     }
 
@@ -28,7 +28,7 @@ public class ResourceNotFoundException extends RuntimeException {
      * @param id Khóa chính UUID của phiếu sự cố không tìm thấy
      * @return Đối tượng {@link ResourceNotFoundException} với thông điệp chuẩn hóa
      */
-    public static ResourceNotFoundException forWorkOrder(java.util.UUID id) {
+    public static ResourceNotFoundException forWorkOrder(final java.util.UUID id) {
         return new ResourceNotFoundException("WorkOrder not found with id: " + id);
     }
 }

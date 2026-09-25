@@ -73,6 +73,8 @@ public final class WorkOrderTestFixtures {
         return new WorkOrderRequest(equipmentId, description, priority);
     }
 
+    public static final UUID DEFAULT_ID = UUID.fromString("00000000-0000-0000-0000-000000000001");
+
     /**
      * Khởi tạo đối tượng DTO {@link WorkOrderStatusRequest} với trạng thái mong muốn.
      */
@@ -87,5 +89,47 @@ public final class WorkOrderTestFixtures {
                                                   final Priority priority, final WorkOrderStatus status,
                                                   final Instant createdAt, final Instant resolvedAt) {
         return new WorkOrderResponse(id, equipmentId, description, priority, status, createdAt, resolvedAt);
+    }
+
+    /**
+     * Khởi tạo đối tượng DTO {@link WorkOrderResponse} mặc định với ID chỉ định.
+     */
+    public static WorkOrderResponse createDefaultResponse(final UUID id) {
+        return createResponse(id, DEFAULT_EQUIPMENT_ID, DEFAULT_DESCRIPTION, DEFAULT_PRIORITY,
+                WorkOrderStatus.OPEN, Instant.now(), null);
+    }
+
+    /**
+     * Khởi tạo đối tượng DTO {@link WorkOrderResponse} với trạng thái chỉ định.
+     */
+    public static WorkOrderResponse createResponse(final UUID id, final WorkOrderStatus status) {
+        final Instant now = Instant.now();
+        return createResponse(id, DEFAULT_EQUIPMENT_ID, DEFAULT_DESCRIPTION, DEFAULT_PRIORITY,
+                status, now, status == WorkOrderStatus.DONE ? now : null);
+    }
+
+    /**
+     * Tạo chuỗi JSON mẫu cho payload tạo mới WorkOrderRequest.
+     */
+    public static String createRequestJson(final String equipmentId, final String description, final String priority) {
+        return """
+            {"equipmentId":"%s","description":"%s","priority":"%s"}"""
+            .formatted(equipmentId, description, priority);
+    }
+
+    /**
+     * Tạo chuỗi JSON mặc định cho payload tạo mới WorkOrderRequest.
+     */
+    public static String createDefaultRequestJson() {
+        return createRequestJson(DEFAULT_EQUIPMENT_ID, DEFAULT_DESCRIPTION, DEFAULT_PRIORITY.name());
+    }
+
+    /**
+     * Tạo chuỗi JSON mẫu cho payload cập nhật trạng thái WorkOrderStatusRequest.
+     */
+    public static String createStatusRequestJson(final String status) {
+        return """
+            {"status":"%s"}"""
+            .formatted(status);
     }
 }

@@ -17,6 +17,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
+import java.util.Objects;
 import java.util.UUID;
 
 /**
@@ -32,9 +33,9 @@ public class WorkOrderService {
     private final WorkOrderRepository repo;
     private final MeterRegistry registry;
 
-    public WorkOrderService(WorkOrderRepository repo, MeterRegistry registry) {
-        this.repo = repo;
-        this.registry = registry;
+    public WorkOrderService(final WorkOrderRepository repo, final MeterRegistry registry) {
+        this.repo = Objects.requireNonNull(repo, "repo must not be null");
+        this.registry = Objects.requireNonNull(registry, "registry must not be null");
     }
 
     /**
@@ -44,6 +45,7 @@ public class WorkOrderService {
      * @return {@link WorkOrderResponse} đại diện cho phiếu sự cố vừa được tạo
      */
     public WorkOrderResponse createWorkOrder(final WorkOrderRequest req) {
+        Objects.requireNonNull(req, "req must not be null");
         final WorkOrder entity = new WorkOrder(req.equipmentId(), req.description(), req.priority());
         final WorkOrder saved = repo.save(entity);
         registry.counter(WorkOrderMetrics.COUNTER_CREATED,
@@ -61,6 +63,7 @@ public class WorkOrderService {
      * @return {@link PagedResponse} chứa danh sách phiếu sự cố và metadata phân trang
      */
     public PagedResponse<WorkOrderResponse> getWorkOrders(final Pageable pageable, final WorkOrderStatus status) {
+        Objects.requireNonNull(pageable, "pageable must not be null");
         final Page<WorkOrder> page = (status != null)
                 ? repo.findByStatus(status, pageable)
                 : repo.findAll(pageable);
@@ -75,6 +78,7 @@ public class WorkOrderService {
      * @throws ResourceNotFoundException nếu không tìm thấy phiếu sự cố với ID đã cho
      */
     public WorkOrderResponse getWorkOrderById(final UUID id) {
+        Objects.requireNonNull(id, "id must not be null");
         final WorkOrder entity = repo.findById(id)
                 .orElseThrow(() -> ResourceNotFoundException.forWorkOrder(id));
         return WorkOrderResponse.from(entity);
@@ -90,6 +94,8 @@ public class WorkOrderService {
      * @throws IllegalStateException nếu vi phạm quy tắc chuyển trạng thái của máy trạng thái
      */
     public WorkOrderResponse updateStatus(final UUID id, final WorkOrderStatusRequest req) {
+        Objects.requireNonNull(id, "id must not be null");
+        Objects.requireNonNull(req, "req must not be null");
         final WorkOrder entity = repo.findById(id)
                 .orElseThrow(() -> ResourceNotFoundException.forWorkOrder(id));
 

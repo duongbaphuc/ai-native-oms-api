@@ -164,7 +164,7 @@ public enum WorkOrderStatus {
 
     private final String value;
 
-    WorkOrderStatus(String value) { this.value = value; }
+    WorkOrderStatus(final String value) { this.value = value; }
 
     @JsonValue
     public String getValue() { return value; }
@@ -173,7 +173,7 @@ public enum WorkOrderStatus {
      * Kiểm tra tính hợp lệ của chuyển trạng thái.
      * Bắt buộc: OPEN → IN_PROGRESS → DONE. Lùi hoặc nhảy cóc bị cấm tuyệt đối.
      */
-    public boolean canTransitionTo(WorkOrderStatus next) {
+    public boolean canTransitionTo(final WorkOrderStatus next) {
         return switch (this) {
             case OPEN        -> next == IN_PROGRESS;
             case IN_PROGRESS -> next == DONE;

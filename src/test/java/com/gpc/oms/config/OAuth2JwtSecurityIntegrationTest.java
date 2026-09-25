@@ -9,7 +9,9 @@ import com.gpc.oms.dto.WorkOrderRequest;
 import com.gpc.oms.dto.WorkOrderResponse;
 import com.gpc.oms.dto.WorkOrderStatusRequest;
 import com.gpc.oms.exception.GlobalExceptionHandler;
+import com.gpc.oms.exception.ProblemTypes;
 import com.gpc.oms.service.WorkOrderService;
+import com.gpc.oms.testutil.WorkOrderTestFixtures;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
@@ -72,20 +74,20 @@ class OAuth2JwtSecurityIntegrationTest {
         @Test
         @DisplayName("Bean JwtAuthenticationConverter trích xuất danh tính và vai trò chính xác")
         void jwtAuthenticationConverter_extractsPrincipalAndRoles() {
-            Jwt jwt = new Jwt(
+            final Jwt jwt = new Jwt(
                     "mock-token-string",
                     Instant.now(),
                     Instant.now().plusSeconds(3600),
                     Map.of("alg", "none"),
-                    Map.of("sub", "dispatcher-jane", "roles", List.of("DISPATCHER"))
+                    Map.of("sub", "dispatcher-jane", "roles", List.of(RoleConstants.DISPATCHER))
             );
 
-            var auth = jwtAuthenticationConverter.convert(jwt);
+            final var auth = jwtAuthenticationConverter.convert(jwt);
             assertThat(auth).isNotNull();
             assertThat(auth.getName()).isEqualTo("dispatcher-jane");
             assertThat(auth.getAuthorities())
                     .extracting("authority")
-                    .containsExactly("ROLE_DISPATCHER");
+                    .containsExactly(RoleConstants.ROLE_DISPATCHER);
         }
     }
 
@@ -96,85 +98,71 @@ class OAuth2JwtSecurityIntegrationTest {
         @Test
         @DisplayName("POST /api/v1/workorders với vai trò DISPATCHER thành công (201 Created)")
         void createWorkOrder_withDispatcherRole_returns201() throws Exception {
-            UUID id = UUID.randomUUID();
-            WorkOrderResponse response = new WorkOrderResponse(
+            final UUID id = UUID.randomUUID();
+            final WorkOrderResponse response = WorkOrderTestFixtures.createResponse(
                     id, "EQ-001", "Transformer overheating",
                     Priority.CRITICAL, WorkOrderStatus.OPEN, Instant.now(), null
             );
             when(workOrderService.createWorkOrder(any())).thenReturn(response);
 
-            String requestBody = """
-                {
-                    "equipmentId": "EQ-001",
-                    "description": "Transformer overheating",
-                    "priority": "CRITICAL"
-                }
-                """;
+            final String requestBody = WorkOrderTestFixtures.createRequestJson(
+                    "EQ-001", "Transformer overheating", "CRITICAL");
 
-            mockMvc.perform(post("/api/v1/workorders")
-                            .with(jwt().authorities(new SimpleGrantedAuthority("ROLE_DISPATCHER")))
+            mockMvc.perform(post(WorkOrderController.PATH_WORKORDERS)
+                            .with(jwt().authorities(new SimpleGrantedAuthority(RoleConstants.ROLE_DISPATCHER)))
                             .contentType(MediaType.APPLICATION_JSON)
                             .content(requestBody))
                     .andExpect(status().isCreated())
                     .andExpect(jsonPath("$.id").value(id.toString()))
-                    .andExpect(jsonPath("$.status").value("Open"));
+                    .andExpect(jsonPath("$.status").value(WorkOrderStatus.OPEN.getValue()));
         }
 
         @Test
         @DisplayName("PATCH /api/v1/workorders/{id}/status với vai trò DISPATCHER bị từ chối (403 Forbidden)")
         void updateStatus_withDispatcherRole_returns403() throws Exception {
-            UUID id = UUID.randomUUID();
-            String requestBody = """
-                {"status": "InProgress"}
-                """;
+            final UUID id = UUID.randomUUID();
+            final String requestBody = WorkOrderTestFixtures.createStatusRequestJson(WorkOrderStatus.IN_PROGRESS.getValue());
 
-            mockMvc.perform(patch("/api/v1/workorders/{id}/status", id)
-                            .with(jwt().authorities(new SimpleGrantedAuthority("ROLE_DISPATCHER")))
+            mockMvc.perform(patch(WorkOrderController.PATH_WORKORDERS + WorkOrderController.PATH_STATUS, id)
+                            .with(jwt().authorities(new SimpleGrantedAuthority(RoleConstants.ROLE_DISPATCHER)))
                             .contentType(MediaType.APPLICATION_JSON)
                             .content(requestBody))
                     .andExpect(status().isForbidden())
-                    .andExpect(jsonPath("$.type").value("urn:problem-type:forbidden"))
+                    .andExpect(jsonPath("$.type").value(ProblemTypes.FORBIDDEN.toString()))
                     .andExpect(jsonPath("$.status").value(403));
         }
 
         @Test
         @DisplayName("PATCH /api/v1/workorders/{id}/status với vai trò TECHNICIAN thành công (200 OK)")
         void updateStatus_withTechnicianRole_returns200() throws Exception {
-            UUID id = UUID.randomUUID();
-            WorkOrderResponse response = new WorkOrderResponse(
+            final UUID id = UUID.randomUUID();
+            final WorkOrderResponse response = WorkOrderTestFixtures.createResponse(
                     id, "EQ-001", "Transformer overheating",
                     Priority.CRITICAL, WorkOrderStatus.IN_PROGRESS, Instant.now(), null
             );
             when(workOrderService.updateStatus(eq(id), any(WorkOrderStatusRequest.class))).thenReturn(response);
 
-            String requestBody = """
-                {"status": "InProgress"}
-                """;
+            final String requestBody = WorkOrderTestFixtures.createStatusRequestJson(WorkOrderStatus.IN_PROGRESS.getValue());
 
-            mockMvc.perform(patch("/api/v1/workorders/{id}/status", id)
-                            .with(jwt().authorities(new SimpleGrantedAuthority("ROLE_TECHNICIAN")))
+            mockMvc.perform(patch(WorkOrderController.PATH_WORKORDERS + WorkOrderController.PATH_STATUS, id)
+                            .with(jwt().authorities(new SimpleGrantedAuthority(RoleConstants.ROLE_TECHNICIAN)))
                             .contentType(MediaType.APPLICATION_JSON)
                             .content(requestBody))
                     .andExpect(status().isOk())
-                    .andExpect(jsonPath("$.status").value("InProgress"));
+                    .andExpect(jsonPath("$.status").value(WorkOrderStatus.IN_PROGRESS.getValue()));
         }
 
         @Test
         @DisplayName("POST /api/v1/workorders không có token xác thực trả về 401 Unauthorized Problem Details")
         void createWorkOrder_unauthenticated_returns401() throws Exception {
-            String requestBody = """
-                {
-                    "equipmentId": "EQ-001",
-                    "description": "Transformer overheating",
-                    "priority": "CRITICAL"
-                }
-                """;
+            final String requestBody = WorkOrderTestFixtures.createRequestJson(
+                    "EQ-001", "Transformer overheating", "CRITICAL");
 
-            mockMvc.perform(post("/api/v1/workorders")
+            mockMvc.perform(post(WorkOrderController.PATH_WORKORDERS)
                             .contentType(MediaType.APPLICATION_JSON)
                             .content(requestBody))
                     .andExpect(status().isUnauthorized())
-                    .andExpect(jsonPath("$.type").value("urn:problem-type:unauthorized"))
+                    .andExpect(jsonPath("$.type").value(ProblemTypes.UNAUTHORIZED.toString()))
                     .andExpect(jsonPath("$.status").value(401));
         }
     }

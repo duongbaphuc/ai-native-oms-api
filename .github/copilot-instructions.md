@@ -14,8 +14,12 @@ Outage Work Order API — microservice quản lý sự kiện mất điện (OMS
 
 ## Stack notes (Java 17 + Spring Boot 3.3 + JPA/H2 dev, PostgreSQL prod)
 - **Oracle Senior Java Guidelines:** Pure Java 17, Effective Java (Joshua Bloch), Clean Architecture.
-- **Design Patterns:**
-  * *Static Factory Method Pattern:* DTOs (`WorkOrderResponse.from()`, `PagedResponse.from()`) with defensive `Objects.requireNonNull()`.
+- **Modern Java 17 Idioms:**
+  * *Compact Constructors:* Dùng compact constructor `public RecordName { ... }` để validate invariants trong Records.
+  * *Enhanced Switch Expressions:* 100% switch dùng arrow syntax `case X -> ...` không có `break`, bao quát exhaustive.
+  * *Text Blocks & Stream Pipelines:* Dùng `"""` cho multi-line strings; dùng `Stream.toList()` tối ưu thay vì `Collectors.toList()`.
+- **Design Patterns & Performance:**
+  * *Static Factory Method Pattern:* DTOs (`WorkOrderResponse.from()`, `PagedResponse.from()`) với defensive `Objects.requireNonNull()`.
   * *State Pattern / State Machine:* Enforce valid transitions (`canTransitionTo()`) in Enum; Domain Entities (`WorkOrder.advanceStatus()`) protect domain invariants with `IllegalStateException`.
   * *Pure Records & Immutability:* 100% Request/Response DTOs are Java 17 `record`. Local variables and parameters marked `final` for JIT escape analysis.
   * *Pre-sizing Collections & Array Caching:* Always supply `initialCapacity` when collection size is known (`new ArrayList<>(size)`). Cache `Enum.values()` static array clone in hot paths (e.g. converters).
@@ -27,10 +31,11 @@ Outage Work Order API — microservice quản lý sự kiện mất điện (OMS
 
 ## Testing
 - JUnit 5 + Spring Boot Test. `@WebMvcTest` for controller tests, `@DataJpaTest` for repository tests.
-- **Object Mother / Test Fixtures Pattern:** Use centralized `WorkOrderTestFixtures` (`src/test/java/com/gpc/oms/testutil/`) to generate mock entities and DTOs; eliminate boilerplate object instantiations across test suites.
+- **Static Imports:** Đồng bộ 100% static imports cho assertions (`assertThat`, `assertEquals`, `assertThrows`) và mocks (`when`, `verify`, `times`, `never`).
+- **Object Mother / Test Fixtures Pattern:** Use centralized `WorkOrderTestFixtures` (`src/test/java/com/gpc/oms/testutil/`) to generate mock entities, DTOs, and JSON payloads; eliminate boilerplate object instantiations across test suites.
 - Every endpoint must have tests for: success case, validation failure (400), unauthorized (401), forbidden (403), not found (404), invalid state transition (422).
 - Quality Gate: 100% Line & Branch JaCoCo coverage required across domain, service, controller, dto, exception packages.
-- Run `mvn test` — all tests must pass before any PR.
+- Run `mvn clean verify` — all tests must pass before any PR.
 
 ## References (AI-Native SDLC Order)
 - Phase 00 (Governance & Rules): [docs/00-coding-rules.md](../docs/00-coding-rules.md), [docs/00-internal-coding-standards.md](../docs/00-internal-coding-standards.md), [docs/00-api-rules.md](../docs/00-api-rules.md), [docs/00-security-rules.md](../docs/00-security-rules.md)
