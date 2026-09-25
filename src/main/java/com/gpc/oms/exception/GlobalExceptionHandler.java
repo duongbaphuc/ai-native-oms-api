@@ -1,4 +1,5 @@
-// AI Provenance: generated from docs/00-api-rules.md §2, docs/00-security-rules.md §4, docs/drafts/draft-global-exception-handler.md
+// AI Provenance: generated from docs/00-api-rules.md §2, docs/00-security-rules.md §4,
+// docs/drafts/draft-global-exception-handler.md
 package com.gpc.oms.exception;
 
 import org.slf4j.Logger;
@@ -7,11 +8,13 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ProblemDetail;
 import org.springframework.http.converter.HttpMessageNotReadableException;
 import org.springframework.security.access.AccessDeniedException;
+import org.springframework.validation.FieldError;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 import org.springframework.web.method.annotation.MethodArgumentTypeMismatchException;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
@@ -28,9 +31,9 @@ public class GlobalExceptionHandler {
         final ProblemDetail problem = ProblemDetail.forStatusAndDetail(HttpStatus.BAD_REQUEST, "Validation Failed");
         problem.setType(ProblemTypes.VALIDATION_ERROR);
         
-        final List<org.springframework.validation.FieldError> fieldErrors = ex.getBindingResult().getFieldErrors();
-        final List<Map<String, String>> invalidParams = new java.util.ArrayList<>(fieldErrors.size());
-        for (final org.springframework.validation.FieldError error : fieldErrors) {
+        final List<FieldError> fieldErrors = ex.getBindingResult().getFieldErrors();
+        final List<Map<String, String>> invalidParams = new ArrayList<>(fieldErrors.size());
+        for (final FieldError error : fieldErrors) {
             final String reason = error.getDefaultMessage() != null ? error.getDefaultMessage() : "Invalid value";
             invalidParams.add(Map.of("name", error.getField(), "reason", reason));
         }
@@ -45,7 +48,8 @@ public class GlobalExceptionHandler {
     @ExceptionHandler(HttpMessageNotReadableException.class)
     public ProblemDetail handleMalformedJson(final HttpMessageNotReadableException ex) {
         log.warn("Malformed request body");
-        final ProblemDetail problem = ProblemDetail.forStatusAndDetail(HttpStatus.BAD_REQUEST, "Malformed Request Body");
+        final ProblemDetail problem = ProblemDetail.forStatusAndDetail(
+                HttpStatus.BAD_REQUEST, "Malformed Request Body");
         problem.setType(ProblemTypes.MALFORMED_JSON);
         problem.setProperty("invalidParams",
             List.of(Map.of("name", "body", "reason", "Request body is malformed or contains an invalid enum value")));
@@ -68,7 +72,8 @@ public class GlobalExceptionHandler {
 
     // Handler #4: 403 — @PreAuthorize fail
     // Trigger: AccessDeniedException từ Spring Security khi role không đủ
-    // Import: org.springframework.security.access.AccessDeniedException (KHÔNG phải java.nio.file.AccessDeniedException)
+    // Import: org.springframework.security.access.AccessDeniedException
+    // (KHÔNG phải java.nio.file.AccessDeniedException)
     @ExceptionHandler(AccessDeniedException.class)
     public ProblemDetail handleAccessDenied(final AccessDeniedException ex) {
         log.warn("Access denied");
@@ -92,7 +97,8 @@ public class GlobalExceptionHandler {
     @ExceptionHandler(IllegalStateException.class)
     public ProblemDetail handleIllegalStateTransition(final IllegalStateException ex) {
         log.warn("Illegal state transition: {}", ex.getMessage());
-        final ProblemDetail problem = ProblemDetail.forStatusAndDetail(HttpStatus.UNPROCESSABLE_ENTITY, ex.getMessage());
+        final ProblemDetail problem = ProblemDetail.forStatusAndDetail(
+                HttpStatus.UNPROCESSABLE_ENTITY, ex.getMessage());
         problem.setType(ProblemTypes.INVALID_STATE_TRANSITION);
         return problem;
     }

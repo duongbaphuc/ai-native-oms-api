@@ -161,11 +161,7 @@ public class WorkOrderService {
                 .orElseThrow(() -> new ResourceNotFoundException("WorkOrder not found with id: " + id));
 
         final WorkOrderStatus fromStatus = entity.getStatus();
-        try {
-            entity.advanceStatus(req.status());
-        } catch (IllegalStateException ex) {
-            throw ex; // Re-throw — GlobalExceptionHandler sẽ map thành 422
-        }
+        entity.advanceStatus(req.status());
 
         final WorkOrder saved = repo.save(entity);
         registry.counter("oms_workorder_status_transitions_total",

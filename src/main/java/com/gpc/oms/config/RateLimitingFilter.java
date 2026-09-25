@@ -1,6 +1,8 @@
 // AI Provenance: generated from docs/security-auth-spec.md, docs/security-rules.md, docs/SECURITY_HANDOVER_REPORT.md
 package com.gpc.oms.config;
 
+import com.github.benmanes.caffeine.cache.Cache;
+import com.github.benmanes.caffeine.cache.Caffeine;
 import io.github.bucket4j.Bandwidth;
 import io.github.bucket4j.Bucket;
 import io.github.bucket4j.ConsumptionProbe;
@@ -17,8 +19,6 @@ import org.springframework.web.filter.OncePerRequestFilter;
 
 import java.io.IOException;
 import java.time.Duration;
-import java.util.Map;
-import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.TimeUnit;
 
 /**
@@ -32,7 +32,7 @@ import java.util.concurrent.TimeUnit;
  *          throttled at 20 requests per minute. Exceeding the policy returns HTTP 429 Too Many Requests
  *          with RFC 7807 Problem Details and a {@code Retry-After} HTTP response header.
  * @implSpec Extends {@link OncePerRequestFilter} to guarantee idempotent single execution per dispatch.
- *           Uses thread-safe {@link ConcurrentHashMap} storage with memory capacity eviction thresholds.
+ *           Uses thread-safe Caffeine Cache storage with LRU/Window TinyLFU eviction thresholds.
  * @implNote Non-blocking token consumption via Bucket4j lock-free atomic CAS primitives.
  * @author GPC OMS Architecture Team
  * @version 1.0.0
@@ -55,7 +55,10 @@ public class RateLimitingFilter extends OncePerRequestFilter {
     static final long WRITE_CAPACITY = 20L;
     static final Duration REFILL_DURATION = Duration.ofMinutes(1);
 
-    private final Map<String, Bucket> buckets = new ConcurrentHashMap<>();
+    private final Cache<String, Bucket> buckets = Caffeine.newBuilder()
+            .maximumSize(MAX_CACHE_ENTRIES)
+            .expireAfterAccess(Duration.ofMinutes(10))
+            .build();
 
     /**
      * Default constructor for Spring Component instantiation.
@@ -95,12 +98,7 @@ public class RateLimitingFilter extends OncePerRequestFilter {
         boolean isRead = HttpMethod.GET.matches(request.getMethod());
         String cacheKey = clientIp + ":" + (isRead ? "READ" : "WRITE");
 
-        if (buckets.size() > MAX_CACHE_ENTRIES) {
-            log.warn("RateLimitingFilter cache exceeded capacity limit [size={}]. Evicting entries to prevent OOM.", buckets.size());
-            buckets.clear();
-        }
-
-        Bucket bucket = buckets.computeIfAbsent(cacheKey, key -> createNewBucket(isRead));
+        Bucket bucket = buckets.get(cacheKey, key -> createNewBucket(isRead));
         ConsumptionProbe probe = bucket.tryConsumeAndReturnRemaining(1);
 
         if (probe.isConsumed()) {
@@ -119,7 +117,12 @@ public class RateLimitingFilter extends OncePerRequestFilter {
         response.setContentType(PROBLEM_JSON_CONTENT_TYPE);
 
         String problemJson = """
-            {"type":"urn:problem-type:rate-limit-exceeded","title":"Too Many Requests","status":429,"detail":"Bạn đã vượt quá giới hạn tần suất gọi API. Vui lòng thử lại sau %d giây.","instance":"%s"}"""
+            {"type":"urn:problem-type:rate-limit-exceeded",\
+            "title":"Too Many Requests",\
+            "status":429,\
+            "detail":"Bạn đã vượt quá giới hạn tần suất gọi API. \
+Vui lòng thử lại sau %d giây.",\
+            "instance":"%s"}"""
             .formatted(retryAfterSeconds, request.getRequestURI());
 
         response.getWriter().write(problemJson);

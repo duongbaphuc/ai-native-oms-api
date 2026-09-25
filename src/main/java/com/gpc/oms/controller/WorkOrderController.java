@@ -15,11 +15,24 @@ import org.springframework.data.domain.Sort;
 import org.springframework.data.web.PageableDefault;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PatchMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.RestController;
 
 import java.net.URI;
 import java.util.UUID;
 
+/**
+ * REST Controller tiếp nhận các yêu cầu quản lý vòng đời Outage Work Order.
+ *
+ * <p>Cung cấp các endpoints RESTful tiêu chuẩn cho phép tạo mới, tra cứu danh sách có phân trang,
+ * xem chi tiết và chuyển đổi trạng thái phiếu sự cố lưới điện.</p>
+ */
 @RestController
 @RequestMapping("/api/v1/workorders")
 public class WorkOrderController {
@@ -30,6 +43,12 @@ public class WorkOrderController {
         this.workOrderService = workOrderService;
     }
 
+    /**
+     * Tiếp nhận và tạo mới một phiếu sự cố mất điện (Outage Work Order).
+     *
+     * @param request DTO chứa thông tin mã thiết bị, mô tả sự cố và độ ưu tiên
+     * @return HTTP 201 Created cùng Header {@code Location} và thông tin phiếu sự cố vừa tạo
+     */
     @PostMapping
     @PreAuthorize("hasAnyRole('DISPATCHER', 'TECHNICIAN', 'ADMIN')")
     public ResponseEntity<WorkOrderResponse> createWorkOrder(@Valid @RequestBody final WorkOrderRequest request) {
@@ -39,6 +58,13 @@ public class WorkOrderController {
         return ResponseEntity.created(location).body(response);
     }
 
+    /**
+     * Tra cứu danh sách phiếu sự cố có phân trang và tùy chọn lọc theo trạng thái.
+     *
+     * @param pageable Tham số phân trang và sắp xếp (mặc định size=20, sort=createdAt DESC)
+     * @param status Trạng thái phiếu sự cố cần lọc (OPEN, IN_PROGRESS, DONE)
+     * @return HTTP 200 OK cùng {@link PagedResponse} danh sách phiếu sự cố
+     */
     @GetMapping
     @PreAuthorize("hasAnyRole('DISPATCHER', 'TECHNICIAN', 'ADMIN')")
     public ResponseEntity<PagedResponse<WorkOrderResponse>> getWorkOrders(
@@ -49,6 +75,12 @@ public class WorkOrderController {
         return ResponseEntity.ok(response);
     }
 
+    /**
+     * Tra cứu thông tin chi tiết một phiếu sự cố theo định danh UUID duy nhất.
+     *
+     * @param id Khóa chính UUID của phiếu sự cố
+     * @return HTTP 200 OK cùng chi tiết phiếu sự cố nếu tìm thấy
+     */
     @GetMapping("/{id}")
     @PreAuthorize("hasAnyRole('DISPATCHER', 'TECHNICIAN', 'ADMIN')")
     public ResponseEntity<WorkOrderResponse> getWorkOrderById(@PathVariable final UUID id) {
@@ -57,6 +89,13 @@ public class WorkOrderController {
         return ResponseEntity.ok(response);
     }
 
+    /**
+     * Cập nhật chuyển trạng thái vòng đời của phiếu sự cố theo máy trạng thái đơn hướng.
+     *
+     * @param id Khóa chính UUID của phiếu sự cố cần cập nhật
+     * @param request DTO chứa trạng thái mới cần chuyển tiếp
+     * @return HTTP 200 OK cùng thông tin phiếu sự cố sau khi cập nhật
+     */
     @PatchMapping("/{id}/status")
     @PreAuthorize("hasAnyRole('TECHNICIAN', 'ADMIN')")
     public ResponseEntity<WorkOrderResponse> updateStatus(
