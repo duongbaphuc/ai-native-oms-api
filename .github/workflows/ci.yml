@@ -191,3 +191,9 @@ jobs:
           PASSED_COUNT=$(grep -c '\[x\] PASS' "$LATEST_CHECKLIST" || true)
           echo "Checklist sign-off audit PASSED: $PASSED_COUNT criteria 100% verified [x] PASS."
 
+      - name: 5. Verify All AI-Native SDLC Playbook Gates (Phases 05 -> 15)
+        run: |
+          chmod +x scripts/verify-sdlc-playbook.sh
+          ./scripts/verify-sdlc-playbook.sh
+
+

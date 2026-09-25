@@ -46,6 +46,7 @@
 | 4.2 | **Enum Synchronization** | Đồng bộ enum code và đặc tả | So khớp 100% các giá trị `WorkOrderStatus` (`OPEN`, `IN_PROGRESS`, `DONE`) và `Priority` (`LOW`, `MEDIUM`, `HIGH`, `CRITICAL`) với `docs/01-domain-model.md` và `docs/02-api-spec.md` | [x] PASS |
 | 4.3 | **RFC 7807 Problem Types URN Audit** | Đối chiếu 1-1 danh mục lỗi hệ thống | Quét toàn bộ hằng số URN trong `ProblemTypes.java` đối chiếu với bảng catalog trong `docs/02-api-spec.md` | [x] PASS |
 | 4.4 | **Checklist Sign-off Verification** | Thẩm định biên bản nghiệm thu | Kiểm tra file checklist gần nhất trong `docs/audit-logs/checklist-*.md`, cấm tồn tại `[ ] FAIL`, đạt 100% `[x] PASS` | [x] PASS |
+| 4.5 | **Toàn diện SDLC Playbook (Pha 05 - Pha 15)** | Kiểm định 11 giai đoạn SDLC tự động | Script `scripts/verify-sdlc-playbook.sh` kiểm tra 100% đạt chuẩn từ Pha 05 đến Pha 15 | [x] PASS |
 
 ### PHẦN 5: Giám Sát Khả Dụng & Bảo Mật Actuator Probes
 | STT | Tiêu chí kỹ thuật (Technical Criteria) | Yêu cầu chuẩn | Bằng chứng kiểm chứng thực tế | Trạng thái |
@@ -72,31 +73,87 @@ $ curl.exe -s -o nul -w "%{http_code}" http://localhost:8080/actuator/env
 401
 ```
 
-### 2.2. Kiểm Toán Chốt Chặn Đồng Bộ Ngữ Cảnh (Spec-Drift-Audit Run)
+### 2.2. Kiểm Toán Toàn Diện Quy Trình SDLC Playbook (Phases 05 -> 15 Run)
 ```bash
-=== 1. Enum Synchronization Audit ===
-Verified Status: OPEN
-Verified Status: IN_PROGRESS
-Verified Status: DONE
-Verified Priority: LOW
-Verified Priority: MEDIUM
-Verified Priority: HIGH
-Verified Priority: CRITICAL
-Enum synchronization audit PASSED (100% matched).
+$ ./scripts/verify-sdlc-playbook.sh
+======================================================================
+🚀 STARTING AI-NATIVE SDLC PLAYBOOK VERIFICATION (PHASES 05 -> 15)
+======================================================================
 
-=== 2. RFC 7807 Problem Types URN Audit ===
-Verified URN: urn:problem-type:forbidden
-Verified URN: urn:problem-type:internal-error
-Verified URN: urn:problem-type:invalid-state-transition
-Verified URN: urn:problem-type:malformed-json
-Verified URN: urn:problem-type:not-found
-Verified URN: urn:problem-type:unauthorized
-Verified URN: urn:problem-type:validation-error
-RFC 7807 Problem Types audit PASSED (All URNs documented).
+--- [PHASE 05] Automated Testing & JaCoCo 100% Quality Gate ---
+  ✅ [PASS] JaCoCo Quality Gate configured with 100% Line & Branch threshold in pom.xml
+  ✅ [PASS] Test class exists: src/test/java/com/gpc/oms/domain/WorkOrderStatusTest.java
+  ✅ [PASS] Test class exists: src/test/java/com/gpc/oms/domain/PriorityTest.java
+  ✅ [PASS] Test class exists: src/test/java/com/gpc/oms/domain/WorkOrderTest.java
+  ✅ [PASS] Test class exists: src/test/java/com/gpc/oms/service/WorkOrderServiceTest.java
+  ✅ [PASS] Test class exists: src/test/java/com/gpc/oms/controller/WorkOrderControllerTest.java
+  ✅ [PASS] Test class exists: src/test/java/com/gpc/oms/WorkOrderIntegrationTest.java
 
-=== 3. Checklist Sign-off Verification ===
-Evaluating latest checklist: docs/audit-logs/checklist-work-order-lifecycle-2026-09-25.md
-Checklist sign-off audit PASSED: 24 criteria 100% verified [x] PASS.
+--- [PHASE 06] Interactive Verification & Web Test Console ---
+  ✅ [PASS] Web test console asset exists: src/main/resources/static/index.html
+  ✅ [PASS] Role Switcher integrated (ADMIN, DISPATCHER, TECHNICIAN)
+  ✅ [PASS] Demo security credentials isolated with @Profile("!prod")
+
+--- [PHASE 07] Comprehensive Code Review Audit ---
+  ✅ [PASS] Code-vs-Spec comprehensive audit report exists: docs/archive/audit-logs/code-vs-spec-audit-report-2026-09-24-2.md
+  ✅ [PASS] Target architecture class verified: src/main/java/com/gpc/oms/domain/WorkOrder.java
+  ✅ [PASS] Target architecture class verified: src/main/java/com/gpc/oms/domain/WorkOrderStatus.java
+  ✅ [PASS] Target architecture class verified: src/main/java/com/gpc/oms/domain/Priority.java
+  ✅ [PASS] Target architecture class verified: src/main/java/com/gpc/oms/domain/WorkOrderRepository.java
+  ✅ [PASS] Target architecture class verified: src/main/java/com/gpc/oms/service/WorkOrderService.java
+  ✅ [PASS] Target architecture class verified: src/main/java/com/gpc/oms/controller/WorkOrderController.java
+  ✅ [PASS] Target architecture class verified: src/main/java/com/gpc/oms/exception/GlobalExceptionHandler.java
+  ✅ [PASS] Target architecture class verified: src/main/java/com/gpc/oms/config/SecurityConfig.java
+  ✅ [PASS] Target architecture class verified: src/main/java/com/gpc/oms/exception/ProblemTypes.java
+
+--- [PHASE 08] System Handover Documentation ---
+  ✅ [PASS] System Handover Dossier exists: docs/08-SYSTEM_HANDOVER.md
+  ✅ [PASS] System Handover contains all 9 required sections (9 sections detected)
+
+--- [PHASE 09] Security Audit & Vulnerability Assessment ---
+  ✅ [PASS] Security Handover Report exists: docs/09-SECURITY_HANDOVER_REPORT.md
+  ✅ [PASS] Trivy vulnerability scanner configured in CI pipeline
+
+--- [PHASE 10] Containerization & CI/CD Pipeline ---
+  ✅ [PASS] Multi-stage Dockerfile configured (builder + hardened runner)
+  ✅ [PASS] Non-root container hardening enforced (USER 10001:10001)
+  ✅ [PASS] docker-compose.yml configured with oms-api and postgres:15-alpine
+
+--- [PHASE 11] Feature Evolution & Bugfix Discipline ---
+  ✅ [PASS] CONTRIBUTING.md enforces feature/WO-<issue-id> branching and PR standards
+
+--- [PHASE 12] Post-Fix Documentation Synchronization ---
+  ✅ [PASS] Post-fix spec drift audit report exists: docs/archive/audit-logs/post-fix-spec-drift-audit-report-2026-09-24.md
+  ✅ [PASS] WorkOrderStatus 'OPEN' synchronized between code & docs
+  ✅ [PASS] WorkOrderStatus 'IN_PROGRESS' synchronized between code & docs
+  ✅ [PASS] WorkOrderStatus 'DONE' synchronized between code & docs
+  ✅ [PASS] Priority 'LOW' synchronized between code & docs
+  ✅ [PASS] Priority 'MEDIUM' synchronized between code & docs
+  ✅ [PASS] Priority 'HIGH' synchronized between code & docs
+  ✅ [PASS] Priority 'CRITICAL' synchronized between code & docs
+
+--- [PHASE 13] Coding Rules & Design Patterns Enforcement ---
+  ✅ [PASS] Zero-Lombok rule satisfied: No Lombok annotations detected in project
+  ✅ [PASS] Constructor Injection rule satisfied: No @Autowired field injection
+  ✅ [PASS] Immutable Java 17 Record verified: WorkOrderRequest
+  ✅ [PASS] Immutable Java 17 Record verified: WorkOrderResponse
+  ✅ [PASS] Immutable Java 17 Record verified: WorkOrderStatusRequest
+  ✅ [PASS] Immutable Java 17 Record verified: PagedResponse
+  ✅ [PASS] Invariant encapsulation verified: No public setStatus method on WorkOrder entity
+
+--- [PHASE 14] Syntax Performance & Code Reuse Optimization ---
+  ✅ [PASS] Centralized RFC 7807 Problem Type URI constants in ProblemTypes.java
+  ✅ [PASS] Java 17 Enhanced Switch Expression verified in WorkOrderStatus.java
+  ✅ [PASS] Test Fixture Pattern verified: WorkOrderTestFixtures.java
+  ✅ [PASS] UTC Instant timestamps verified on domain entity
+
+--- [PHASE 15] Strict Checklist & Automated Audit Generation ---
+  ✅ [PASS] Physical audit checklist artifact found: docs/audit-logs/checklist-docker-cicd-2026-09-25.md
+  ✅ [PASS] Checklist sign-off audit PASSED: 26 criteria 100% verified [x] PASS (Zero unpassed items)
+
+======================================================================
+🎉 ALL AI-NATIVE SDLC GATES (PHASES 05 -> 15) PASSED WITH 100% SUCCESS!
+======================================================================
 ```
 
 ### 2.3. Báo Cáo Kiểm Thử Tự Động Toàn Hệ Thống (Maven Clean Verify)
