@@ -4,7 +4,7 @@ Task: Structured Logging Standard, Correlation ID Lifecycle, PII Masking, and Mi
 Context files: docs/00-coding-rules.md, docs/00-security-rules.md, docs/00-api-rules.md
 Constraints: Logback JSON / ECS format, SLF4J MDC, PII-free logs, Spring Boot Actuator & Prometheus
 Target Files:
-- src/main/java/com/gpc/oms/filter/CorrelationIdFilter.java
+- src/main/java/com/gpc/oms/config/CorrelationIdFilter.java
 - src/main/resources/logback-spring.xml
 - src/main/resources/application.yml (actuator & metrics config)
 -->

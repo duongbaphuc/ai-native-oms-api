@@ -45,7 +45,7 @@ Dịch vụ **Outage Work Order API** là một microservice cốt lõi trong h�
 | **Cơ sở dữ liệu** | H2 Database Engine | `2.2.224` | Chế độ In-Memory, tương thích cú pháp PostgreSQL |
 | **Quản trị Schema** | Flyway Migration | `10.x` | Quản lý phiên bản migration tự động qua DDL |
 | **Bảo mật & Phân quyền** | Spring Security | `6.3.4` | HTTP Basic, Stateless Session, Method Security (`@PreAuthorize`) |
-| **Kiểm thử tự động** | JUnit 5 + Mockito + AssertJ | Latest Spring Boot | 89 automated test cases (Unit, Slice, Integration, Fixture-driven) |
+| **Kiểm thử tự động** | JUnit 5 + Mockito + AssertJ | Latest Spring Boot | 117 automated test cases (Unit, Slice, Integration, Security, Fixture-driven) |
 | **Đo lường Coverage** | JaCoCo Maven Plugin | `0.8.12` | Thực thi Quality Gate: **100% Line & 100% Branch Coverage** trên 12 monitored classes |
 | **Công cụ đóng gói** | Apache Maven | `3.8+` | Kèm theo Maven Wrapper (`mvnw.cmd` / `mvnw`) |
 
@@ -60,28 +60,35 @@ sequenceDiagram
     autonumber
     actor Client as Client / Browser Console
     participant CIF as CorrelationIdFilter
-    participant SEC as SecurityFilterChain
+    participant RLF as RateLimitingFilter
+    participant SEC as SecurityFilterChain (Basic/OAuth2)
     participant WOC as WorkOrderController
     participant WOS as WorkOrderService
     participant WOR as WorkOrderRepository
-    participant H2DB as H2 In-Memory Database
+    participant H2DB as H2 / PostgreSQL Database
 
     Client->>CIF: HTTP Request (Optional X-Correlation-Id)
-    Note over CIF: Thiết lập MDC & Gán Correlation ID
-    CIF->>SEC: Forward Request
-    Note over SEC: Kiểm tra Basic Auth & RBAC (@PreAuthorize)
-    alt Không hợp lệ / Chưa xác thực
-        SEC-->>Client: 401 Unauthorized / 403 Forbidden (RFC 7807)
-    else Hợp lệ
-        SEC->>WOC: Dispatch Endpoint
-        WOC->>WOS: Delegate Business Request (DTO Record)
-        Note over WOS: Validate Invariants & State Transitions
-        WOS->>WOR: Persist / Query Entity
-        WOR->>H2DB: SQL Operation (Flyway DDL)
-        H2DB-->>WOR: SQL Result Set
-        WOR-->>WOS: Domain Entity (WorkOrder)
-        WOS-->>WOC: WorkOrderResponse (DTO Record)
-        WOC-->>Client: HTTP 200/201 + X-Correlation-Id Header
+    Note over CIF: Thiết lập MDC traceId & Gán Correlation ID
+    CIF->>RLF: Forward Request
+    Note over RLF: Kiểm tra Token Bucket (10 write / 60 read req/min per IP)
+    alt Vượt quá Rate Limit
+        RLF-->>Client: 429 Too Many Requests (RFC 7807)
+    else Trong hạn mức
+        RLF->>SEC: Forward Request
+        Note over SEC: Kiểm tra Auth (!prod: Basic / prod: OAuth2 JWT) & RBAC
+        alt Không hợp lệ / Chưa xác thực
+            SEC-->>Client: 401 Unauthorized / 403 Forbidden (RFC 7807)
+        else Hợp lệ
+            SEC->>WOC: Dispatch Endpoint
+            WOC->>WOS: Delegate Business Request (DTO Record)
+            Note over WOS: Validate Invariants & State Transitions
+            WOS->>WOR: Persist / Query Entity
+            WOR->H2DB: SQL Operation (Flyway DDL)
+            H2DB-->>WOR: SQL Result Set
+            WOR-->>WOS: Domain Entity (WorkOrder)
+            WOS-->>WOC: WorkOrderResponse (DTO Record)
+            WOC-->>Client: HTTP 200/201 + X-Correlation-Id Header
+        end
     end
 ```
 
@@ -91,7 +98,10 @@ sequenceDiagram
 c:\ai-native-oms-api\src\main\java\com\gpc\oms
 ├── OmsApiApplication.java                   [Entry Point] Khởi động Spring Boot Application
 ├── config/
-│   ├── SecurityConfig.java                  [Security] Dual SecurityFilterChain (h2ConsoleChain !prod & filterChain), RFC 7807 401
+│   ├── CorrelationIdFilter.java              [Filter] OncePerRequestFilter gắn Correlation ID vào MDC và Response header (SEC-03)
+│   ├── JwtRoleConverter.java                 [Security] Converter trích xuất & chuẩn hóa role từ JWT claims sang GrantedAuthority (SEC-05)
+│   ├── RateLimitingFilter.java               [Security] Bucket4j Token Bucket rate limiter (10 write / 60 read req/min per IP) (SEC-06)
+│   ├── SecurityConfig.java                   [Security] Dual SecurityFilterChain (h2ConsoleChain !prod & filterChain), RFC 7807 401
 │   └── StringToWorkOrderStatusConverter.java [Converter] Web conversion chuỗi query param sang WorkOrderStatus Enum (kèm cache values array)
 ├── controller/
 │   └── WorkOrderController.java             [REST API] Tiếp nhận HTTP request, phân quyền @PreAuthorize
@@ -242,6 +252,7 @@ Toàn bộ các URN định danh loại lỗi được quản lý tập trung d�
 | `403 Forbidden` | `urn:problem-type:forbidden` | `ProblemTypes.FORBIDDEN` | Access Denied (Tài khoản không có quyền hạn phù hợp trong RBAC) | `handleAccessDenied` |
 | `404 Not Found` | `urn:problem-type:not-found` | `ProblemTypes.NOT_FOUND` | Resource Not Found (Phiếu công tác không tồn tại với ID chỉ định) | `handleResourceNotFound` |
 | `422 Unprocessable Entity` | `urn:problem-type:invalid-state-transition` | `ProblemTypes.INVALID_STATE_TRANSITION` | Illegal State Transition (Vi phạm quy tắc máy trạng thái một chiều) | `handleIllegalStateTransition` |
+| `429 Too Many Requests` | `urn:problem-type:rate-limit-exceeded` | `ProblemTypes.RATE_LIMIT_EXCEEDED` | Too Many Requests (Vượt quá hạn mức 10 write / 60 read req/min per IP) | `RateLimitingFilter` |
 | `500 Internal Server Error` | `urn:problem-type:internal-error` | `ProblemTypes.INTERNAL_ERROR` | An unexpected error occurred (Lỗi hệ thống bất khả kháng, che giấu stacktrace) | `handleUnexpected` |
 
 ---
@@ -250,17 +261,19 @@ Toàn bộ các URN định danh loại lỗi được quản lý tập trung d�
 
 > [!IMPORTANT]
 > **Hồ Sơ Đánh Giá An Ninh Toàn Diện (Security Handover Dossier):**  
-> Xem chi tiết kết quả thẩm định theo chuẩn OWASP API Security Top 10 (2023), danh mục lỗ hổng & tình trạng khắc phục 100% P0 (SEC-01, SEC-02, SEC-04), cùng biên bản ký nhận bàn giao an ninh tại [`docs/09-SECURITY_HANDOVER_REPORT.md`](09-SECURITY_HANDOVER_REPORT.md).  
-> **Security Posture Score:** **`98.0 / 100` (GRADE A+ - APPROVED FOR PRODUCTION DEPLOYMENT)**.
+> Xem chi tiết kết quả thẩm định theo chuẩn OWASP API Security Top 10 (2023), danh mục lỗ hổng & tình trạng khắc phục 100% các hạng mục an ninh (SEC-01..06, OPS-01), cùng biên bản ký nhận bàn giao an ninh tại [`docs/09-SECURITY_HANDOVER_REPORT.md`](09-SECURITY_HANDOVER_REPORT.md).  
+> **Security Posture Score:** **`100.0 / 100` (GRADE A+ - APPROVED FOR PRODUCTION DEPLOYMENT)**.
 
 ### 5.1 Kiến Trúc Bảo Mật & Ranh Giới Mạng (Perimeter Defense)
 - **Framework nền tảng:** Spring Security 6.3.4 trên nền tảng Spring Boot 3.3.5.
 - **Mô hình Session:** Thiết lập phiên không trạng thái hoàn toàn (`SessionCreationPolicy.STATELESS`), không sử dụng HTTP Session hay cookie để xác thực, tối ưu cho kiến trúc RESTful Microservices.
 - **CSRF Policy:** Vô hiệu hóa CSRF (`csrf.disable()`) theo đúng khuyến nghị của OWASP dành cho Token-based / Stateless REST APIs.
 - **Phòng chống Clickjacking:** Kích hoạt header an ninh `X-Frame-Options: SAMEORIGIN` bảo vệ các trang web console nội bộ khỏi các cuộc tấn công nhúng frame lừa đảo từ bên ngoài.
-- **Cơ chế Dual SecurityFilterChain:**
+- **Truy vết phân tán (Distributed Tracing):** `CorrelationIdFilter` gắn mã định danh UUID vào MDC log và response header `X-Correlation-Id`.
+- **Kiểm soát tần suất gọi (Rate Limiting):** `RateLimitingFilter` sử dụng Bucket4j giới hạn 10 write / 60 read req/min cho mỗi IP, tự động trả về HTTP 429 RFC 7807.
+- **Cơ chế Dual SecurityFilterChain & Đa Môi Trường:**
   * `h2ConsoleChain` (`@Order(1)`): Được bảo vệ bằng `@Profile("!prod")`, chỉ cho phép truy cập H2 Console trên môi trường phát triển (dev/local).
-  * `filterChain` (`@Order(2)`): Áp dụng cho mọi môi trường; trên profile `prod`, đường dẫn `/h2-console/**` yêu cầu quyền `hasRole('ADMIN')` và trả về HTTP 401 Unauthorized khi không có token.
+  * `filterChain` (`@Order(2)`): Áp dụng cho mọi môi trường; trên profile `prod`, kích hoạt OAuth2 Resource Server JWT với `JwtRoleConverter` (hỗ trợ Realm & Resource roles) và yêu cầu `ADMIN` cho `/h2-console/**` hoặc `/actuator/prometheus`. Trên profile `!prod`, sử dụng HTTP Basic Auth.
 
 ### 5.2 Ma Trận Phân Quyền Theo Vai Trò (RBAC Matrix)
 
@@ -270,18 +283,25 @@ Toàn bộ các URN định danh loại lỗi được quản lý tập trung d�
 | `GET` | `/api/v1/workorders` | `DISPATCHER`, `TECHNICIAN`, `ADMIN` | `@PreAuthorize("hasAnyRole('DISPATCHER', 'TECHNICIAN', 'ADMIN')")` | HTTP 401 (chưa auth) / HTTP 403 (sai role) |
 | `GET` | `/api/v1/workorders/{id}` | `DISPATCHER`, `TECHNICIAN`, `ADMIN` | `@PreAuthorize("hasAnyRole('DISPATCHER', 'TECHNICIAN', 'ADMIN')")` | HTTP 401 (chưa auth) / HTTP 403 (sai role) |
 | `PATCH` | `/api/v1/workorders/{id}/status` | `TECHNICIAN`, `ADMIN` | `@PreAuthorize("hasAnyRole('TECHNICIAN', 'ADMIN')")` | HTTP 403 Forbidden đối với `DISPATCHER` |
+| `GET` | `/actuator/health`, `/actuator/info` | Public (`permitAll`) | Cấu hình SecurityFilterChain | Cho phép kiểm tra trạng thái liveness/readiness |
+| `GET` | `/actuator/prometheus` | `ADMIN` | `@PreAuthorize("hasRole('ADMIN')")` | HTTP 401 (chưa auth) / HTTP 403 (sai role) |
 | `GET` | `/h2-console/**` | Dev/Test: Public; Prod: `ADMIN` | `h2ConsoleChain` (`!prod`) / `filterChain` (`prod`) | HTTP 401 Unauthorized trên Prod |
 
 ### 5.3 Chuẩn Hóa Lỗi An Ninh Theo RFC 7807 Problem Details
 Mọi vi phạm bảo mật đều được xuất ra định dạng JSON chuẩn `application/problem+json`:
 - **Chưa xác thực (HTTP 401 Unauthorized):** Xử lý tại `CustomAuthenticationEntryPoint`, trả về URN `urn:problem-type:unauthorized` kèm chi tiết `"Authentication token is missing or expired"`.
 - **Không đủ quyền hạn (HTTP 403 Forbidden):** Bắt giữ ngoại lệ `AccessDeniedException` tại `GlobalExceptionHandler`, trả về URN `urn:problem-type:forbidden` kèm thông điệp `"Access Denied"`.
+- **Vượt tần suất (HTTP 429 Too Many Requests):** Xử lý tại `RateLimitingFilter`, trả về URN `urn:problem-type:rate-limit-exceeded` kèm chi tiết `"Rate limit exceeded. Try again later."`.
 
-### 5.4 Kết Quả Khắc Phục Các Lỗ Hổng Bảo Mật P0 (Security Hardening Results)
-Toàn bộ 03 phát hiện mức Major/P0 đã được đội ngũ kỹ sư xử lý triệt để trên nhánh `main`:
+### 5.4 Kết Quả Khắc Phục Các Lỗ Hổng & Tăng Cường An Ninh (Security Hardening Results)
+Toàn bộ các phát hiện bảo mật và nhiệm vụ kiến trúc an ninh đã được đội ngũ kỹ sư hoàn thành và merge 100% trên nhánh `main`:
 1. **SEC-01 (CWE-200):** Tách `h2ConsoleChain` với `@Profile("!prod")` và kiểm thử tự động với `H2ConsoleSecurityTest.java` (Merged PR #36).
 2. **SEC-02 (CWE-400):** Cấu hình `spring.data.web.pageable.max-page-size: 100` phòng chống tấn công DoS phân trang và kiểm thử tự động với `WorkOrderControllerTest.list_sizeOverMax_isCappedTo100` (Merged PR #37).
 3. **SEC-04 (CWE-1059):** Tích hợp `flyway-core` và thiết lập `ddl-auto: validate` đảm bảo an toàn dịch chuyển cấu trúc CSDL (Merged PR #35).
+4. **SEC-03 (CWE-778):** Hiện thực hóa `CorrelationIdFilter` tích hợp MDC logging context và response header `X-Correlation-Id` (Merged PR #67).
+5. **SEC-05 (CWE-798):** Hiện thực hóa OAuth2 JWT Resource Server với `JwtRoleConverter` trên profile `prod` (Merged PR #68).
+6. **SEC-06 (CWE-770):** Hiện thực hóa Bucket4j `RateLimitingFilter` chống tấn công brute-force DoS (Merged PR #65).
+7. **OPS-01:** Mở rộng giám sát với `micrometer-registry-prometheus` tại `/actuator/prometheus` (Merged PR #64).
 
 ### 5.5 Danh Mục Tài Khoản Demo & Ranh Giới Cô Lập Môi Trường
 
@@ -292,11 +312,12 @@ Toàn bộ 03 phát hiện mức Major/P0 đã được đội ngũ kỹ sư x�
 | `technician` | `technician123` | `ROLE_TECHNICIAN` | Xem phiếu và chuyển trạng thái sửa chữa |
 
 > [!CAUTION]
-> **Cô Lập Môi Trường (Environment Boundary):** Bean `UserDetailsService` chứa các tài khoản trên được gắn `@Profile("!prod")`. Khi ứng dụng chạy trên Production với cờ `--spring.profiles.active=prod`, danh sách tài khoản này hoàn toàn không được khởi tạo vào bộ nhớ.
+> **Cô Lập Môi Trường (Environment Boundary):** Bean `UserDetailsService` chứa các tài khoản trên được gắn `@Profile("!prod")`. Khi ứng dụng chạy trên Production với cờ `--spring.profiles.active=prod`, danh sách tài khoản này hoàn toàn không được khởi tạo vào bộ nhớ, thay vào đó hệ thống xác thực token JWT thông qua Keycloak/IdP.
 
-### 5.6 Lộ Trình Tích Hợp An Ninh Doanh Nghiệp (Enterprise Security Roadmap)
-- **Giai đoạn chuyển giao (P1):** Hiện thực hóa `CorrelationIdFilter` phục vụ SOC/SRE điều tra truy vết phân tán ([Issue #31](https://github.com/duongbaphuc/ai-native-oms-api/issues/31)) và tích hợp Actuator/Prometheus metrics ([Issue #44](https://github.com/duongbaphuc/ai-native-oms-api/issues/44)).
-- **Giai đoạn mở rộng (P2):** Thay thế HTTP Basic bằng OAuth2 Resource Server xác thực JWT qua Keycloak/Azure AD ([Issue #33](https://github.com/duongbaphuc/ai-native-oms-api/issues/33)) và tích hợp bộ lọc Rate Limiting với Bucket4j ([Issue #34](https://github.com/duongbaphuc/ai-native-oms-api/issues/34)).
+### 5.6 Hoàn Thành Lộ Trình An Ninh Doanh Nghiệp (Enterprise Security Roadmap Status)
+- **Giai đoạn 1 (P0 Hardening):** Đã hoàn tất 100% (SEC-01, SEC-02, SEC-04).
+- **Giai đoạn 2 (P1 Observability):** Đã hoàn tất 100% (SEC-03 Correlation ID Tracing, OPS-01 Actuator Prometheus Metrics).
+- **Giai đoạn 3 (P2 Enterprise Scale):** Đã hoàn tất 100% (SEC-05 OAuth2 JWT Resource Server, SEC-06 Bucket4j Rate Limiting).
 
 ---
 
@@ -314,7 +335,7 @@ Toàn bộ 03 phát hiện mức Major/P0 đã được đội ngũ kỹ sư x�
 # 1. Làm sạch và biên dịch mã nguồn
 mvn clean compile
 
-# 2. Chạy toàn bộ 89 automated tests
+# 2. Chạy toàn bộ 117 automated tests
 mvn test
 
 # 3. Chạy kiểm tra toàn diện, build package và thẩm định JaCoCo Quality Gate (100% Coverage)
@@ -386,18 +407,18 @@ curl -X PATCH http://localhost:8080/api/v1/workorders/{WORK_ORDER_ID}/status \
 ## 7. HỒ SƠ CHẤT LƯỢNG & BÁO CÁO KIỂM THỬ TỰ ĐỘNG
 
 ### 7.1 Kim Tự Tháp Kiểm Thử (Testing Pyramid)
-Toàn bộ mã nguồn được bảo vệ bởi **89 bài kiểm thử tự động**, phân chia theo các tầng chuyên biệt của Testing Pyramid, đạt tỷ lệ thành công 100% (89/89 Green):
+Toàn bộ mã nguồn được bảo vệ bởi **117 bài kiểm thử tự động**, phân chia theo các tầng chuyên biệt của Testing Pyramid, đạt tỷ lệ thành công 100% (117/117 Green):
 
 ```
                           ▲
                          / \
                         /E2E\     WorkOrderIntegrationTest (7 tests)
                        /-----\    Full SpringBootTest Slice
-                      / Slice \   WorkOrderControllerTest (15 tests)
-                     /  Tests  \  WorkOrderRepositoryTest (4 tests)
-                    /-----------\ Security & Actuator Probe Tests (5 tests)
-                   / Unit Tests  \ WorkOrderTest (12), WorkOrderStatusTest (11), PriorityTest (2)
-                  /_______________\ DtoMappingTest (12), WorkOrderServiceTest (8), Exception Tests (9), Config (3)
+                      / Slice \   WorkOrderControllerTest (15), WorkOrderRepositoryTest (4)
+                     /  Tests  \  Security & Actuator Probe Tests (14 tests)
+                    /-----------\ [H2Console (2), Actuator (6), OAuth2Jwt (5), OmsApiApp (1)]
+                   / Unit Tests  \ WorkOrder (12), WorkOrderStatus (11), Priority (2), DtoMapping (12)
+                  /_______________\ Service (10), Exception (9), Config (3), Filters & Converters (18)
 ```
 
 | Tên Lớp Kiểm Thử | Tầng Kiểm Thử | Số Ca Test | Trạng Thái |
@@ -409,16 +430,20 @@ Toàn bộ mã nguồn được bảo vệ bởi **89 bài kiểm thử tự đ�
 | `ResourceNotFoundExceptionTest` | Exception Class Unit Test | 1 | PASS (100%) |
 | `ProblemTypesTest` | RFC 7807 Constants & Reflection Unit Test | 2 | PASS (100%) |
 | `StringToWorkOrderStatusConverterTest` | Web Config Converter Test | 3 | PASS (100%) |
-| `WorkOrderServiceTest` | Service Unit Test (Mockito + Fixtures) | 8 | PASS (100%) |
+| `WorkOrderServiceTest` | Service Unit Test (Mockito + Fixtures) | 10 | PASS (100%) |
 | `GlobalExceptionHandlerUnitTest` | Exception Advice Direct Unit Test | 6 | PASS (100%) |
+| `CorrelationIdFilterTest` | Filter Unit & Lifecycle Test (MDC & Headers - SEC-03) | 4 | PASS (100%) |
+| `RateLimitingFilterTest` | Bucket4j Rate Limiter Unit Test (Read/Write/IP - SEC-06) | 10 | PASS (100%) |
+| `JwtRoleConverterTest` | JWT Role Normalization Unit Test (SEC-05) | 4 | PASS (100%) |
 | `WorkOrderControllerTest` | Web Slice Test (`@WebMvcTest`) | 15 | PASS (100%) |
 | `WorkOrderRepositoryTest` | Persistence Slice Test (`@DataJpaTest`) | 4 | PASS (100%) |
-| `H2ConsoleDevAccessTest` | Security Slice Test (`!prod` public access) | 1 | PASS (100%) |
-| `H2ConsoleProdAccessTest` | Security Slice Test (`prod` admin authorization) | 1 | PASS (100%) |
-| `ActuatorSecurityTest` | Security Slice Test (Health/Info probe access & protection) | 3 | PASS (100%) |
+| `H2ConsoleDevAccessTest` | Security Slice Test (`!prod` public access - SEC-01) | 1 | PASS (100%) |
+| `H2ConsoleProdAccessTest` | Security Slice Test (`prod` admin authorization - SEC-01) | 1 | PASS (100%) |
+| `ActuatorSecurityTest` | Security Slice Test (Health/Info & Prometheus - OPS-01) | 6 | PASS (100%) |
+| `OAuth2JwtSecurityIntegrationTest` | Security Slice Test (OAuth2 JWT Resource Server - SEC-05) | 5 | PASS (100%) |
 | `OmsApiApplicationTests` | Spring Context Bootstrap Test | 1 | PASS (100%) |
 | `WorkOrderIntegrationTest` | End-to-End Integration Test (`@SpringBootTest`) | 7 | PASS (100%) |
-| **TỔNG CỘNG** | **Toàn bộ kim tự tháp kiểm thử** | **89** | **89/89 PASS (0 Failures, 0 Errors, 0 Skipped)** |
+| **TỔNG CỘNG** | **Toàn bộ kim tự tháp kiểm thử** | **117** | **117/117 PASS (0 Failures, 0 Errors, 0 Skipped)** |
 
 ### 7.2 Báo Cáo Đo Lường Độ Bao Phủ JaCoCo (JaCoCo Coverage Metrics)
 Dự án tích hợp cấu hình chốt chặn chất lượng (Quality Gate) nghiêm ngặt trong `pom.xml`. Mỗi khi thực hiện `mvn verify`, mã nguồn phải đạt:
@@ -444,11 +469,20 @@ Vị trí báo cáo chi tiết: `target/site/jacoco/index.html`.
 
 ### 8.1 Cấu Trúc Log & Ngữ Cảnh Truy Vết (Distributed Tracing)
 - Hệ thống ghi nhận mọi log thông qua SLF4J / Logback với định dạng tiêu chuẩn:
-  `[TIMESTAMP] [LEVEL] [PID] [THREAD] [LOGGER] [correlationId] MESSAGE`
-- Tệp `CorrelationIdFilter` tự động trích xuất header `X-Correlation-Id` từ client hoặc tự sinh chuỗi UUID ngẫu nhiên đưa vào MDC context.
+  `[TIMESTAMP] [LEVEL] [PID] [THREAD] [LOGGER] [traceId] MESSAGE`
+- Tệp `CorrelationIdFilter` tự động trích xuất header `X-Correlation-Id` từ client hoặc tự sinh chuỗi UUID ngẫu nhiên đưa vào MDC context (`traceId`) và response header.
 - Các thông tin bảo mật và nhạy cảm (như thiết bị định danh chi tiết) được băm (`hashCode()`) hoặc bảo vệ trong log theo quy định tại `docs/02-observability-and-logging.md`.
 
-### 8.2 Sổ Tay Xử Lý Sự Cố Thường Gặp (Incident Playbook)
+### 8.2 Giám Sát Hiệu Năng & Thu Thập Chỉ Số Prometheus
+- Hệ thống tích hợp sẵn Micrometer Prometheus Registry tại endpoint:
+  `GET /actuator/prometheus` (yêu cầu quyền `ROLE_ADMIN`).
+- Xuất số liệu chuẩn cho Prometheus / Grafana scraper:
+  * `http_server_requests_seconds`: Độ trễ và phân phối thời gian phản hồi theo endpoint, method, status.
+  * `jvm_memory_*`: Mức độ tiêu thụ Heap/Non-Heap memory.
+  * `process_cpu_usage`, `system_cpu_usage`: Tải bộ xử lý.
+  * `jdbc_connections_*`: Trạng thái connection pool.
+
+### 8.3 Sổ Tay Xử Lý Sự Cố Thường Gặp (Incident Playbook)
 
 #### Sự Cố 1: Lỗi Cổng Kết Nối Đã Bị Chiếm Dụng (`Port 8080 is already in use`)
 - **Triệu chứng:** `java.net.BindException: Address already in use: bind`
@@ -478,6 +512,11 @@ Vị trí báo cáo chi tiết: `target/site/jacoco/index.html`.
 - **Nguyên nhân:** Vi phạm quy tắc State Machine (ví dụ: chuyển từ `OPEN` trực tiếp sang `DONE`, hoặc cố gắng cập nhật một phiếu đã ở trạng thái `DONE`).
 - **Biện pháp xử lý:** Phiếu phải được tiếp nhận xử lý sang `IN_PROGRESS` trước khi nghiệm thu hoàn tất `DONE`.
 
+#### Sự Cố 5: Nhận Lỗi `429 Too Many Requests`
+- **Triệu chứng:** Phản hồi `{ "type": "urn:problem-type:rate-limit-exceeded", "status": 429 }`.
+- **Nguyên nhân:** Client gửi vượt quá 10 request ghi (POST/PATCH) hoặc 60 request đọc (GET) trong vòng 1 phút từ cùng một IP.
+- **Biện pháp xử lý:** Giãn cách tần suất gửi request hoặc sử dụng cơ chế exponential backoff retry.
+
 ---
 
 ## 9. QUY TRÌNH PHÁT TRIỂN MỞ RỘNG & KÝ NHẬN BÀN GIAO
@@ -503,7 +542,7 @@ Khi cần mở rộng thêm thực thể hoặc endpoint mới:
 | Tiêu Chí Nghiệm Thu | Kết Quả Đánh Giá | Tình Trạng |
 |---|---|---|
 | Mã nguồn biên dịch thành công không cảnh báo | `BUILD SUCCESS` | [x] ĐẠT |
-| Toàn bộ 89 automated test cases thực thi thành công | 89 Passed, 0 Failed, 0 Skipped | [x] ĐẠT |
+| Toàn bộ 117 automated test cases thực thi thành công | 117 Passed, 0 Failed, 0 Skipped | [x] ĐẠT |
 | JaCoCo Line và Branch Coverage đạt ngưỡng quy định | 100% Line, 100% Branch (12/12 classes) | [x] ĐẠT |
 | Cấu trúc bảng và chỉ mục DB đồng bộ qua Flyway | Schema V1 khởi tạo chính xác | [x] ĐẠT |
 | Giao diện Test Console hoạt động mượt mà trên browser | Đã kiểm chứng tại `http://localhost:8080/` | [x] ĐẠT |

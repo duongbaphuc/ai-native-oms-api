@@ -5,15 +5,16 @@ Context files: docs/00-security-rules.md, docs/00-api-rules.md, docs/00-coding-r
 Constraints: Spring Security 6.x (Spring Boot 3.3), Stateless REST, RFC 7807 for 401/403, zero-trust perimeter
 Target Files:
 - src/main/java/com/gpc/oms/config/SecurityConfig.java
-- src/main/java/com/gpc/oms/config/JwtAuthenticationConverter.java
-- src/main/java/com/gpc/oms/security/CustomAuthenticationEntryPoint.java
-- src/main/java/com/gpc/oms/security/CustomAccessDeniedHandler.java
+- src/main/java/com/gpc/oms/config/JwtRoleConverter.java
+- src/main/java/com/gpc/oms/config/RateLimitingFilter.java
+- src/main/java/com/gpc/oms/config/CorrelationIdFilter.java
+- src/main/java/com/gpc/oms/exception/GlobalExceptionHandler.java
 -->
 # Security, Authentication & Authorization Specification
 
 Tài liệu này đặc tả chi tiết kiến trúc an ninh, cơ chế xác thực (Authentication), phân quyền (Authorization - RBAC), và các biện pháp phòng vệ biên giới mạng (Network Boundary Hardening) cho Outage Work Order API.
 
-Tài liệu là kim chỉ nam để GitHub Copilot tự động sinh các lớp cấu hình `SecurityConfig`, `JwtAuthenticationFilter`, `CustomAccessDeniedHandler`, và các bộ kiểm thử bảo mật tầng WebMvcTest.
+Tài liệu là kim chỉ nam để duy trì và kiểm chứng tính toàn vẹn của các lớp cấu hình `SecurityConfig`, `JwtRoleConverter`, `RateLimitingFilter`, `CorrelationIdFilter`, và các bộ kiểm thử bảo mật tầng WebMvcTest.
 
 ---
 
@@ -21,20 +22,22 @@ Tài liệu là kim chỉ nam để GitHub Copilot tự động sinh các lớp 
 
 - **Framework:** Spring Security 6.3.4 tích hợp trên nền tảng Spring Boot 3.3.5.
 - **Mô hình xác thực:** Không trạng thái (Stateless Session - `SessionCreationPolicy.STATELESS`).
-- **Chiến lược xác thực theo giai đoạn:**
-  - **Hiện tại (Dev / Test / Staging):** HTTP Basic Authentication với phân định profile `@Profile("!prod")` cho danh sách tài khoản demo trong bộ nhớ (`InMemoryUserDetailsManager`).
-  - **Mục tiêu Production (Enterprise Roadmap - Issue #33):** OAuth2 Resource Server xác thực JWT qua HTTP Header `Authorization: Bearer <token>`.
+- **Chiến lược xác thực đa môi trường (Defense-in-Depth):**
+  - **Môi trường Non-Prod (Dev / Test / Staging - `@Profile("!prod")`):** HTTP Basic Authentication với danh sách tài khoản demo trong bộ nhớ (`InMemoryUserDetailsManager`).
+  - **Môi trường Production (`@Profile("prod")`):** OAuth2 Resource Server xác thực JWT qua HTTP Header `Authorization: Bearer <token>` tích hợp `JwtRoleConverter` (PR #68).
+- **Phòng chống DoS & Brute-force:** `RateLimitingFilter` sử dụng Bucket4j giới hạn 10 write / 60 read req/min cho mỗi IP, tự động trả về HTTP 429 RFC 7807 (PR #65).
+- **Truy vết phân tán (Distributed Tracing):** `CorrelationIdFilter` gán mã UUID truy vết vào MDC log context và response header `X-Correlation-Id` (PR #67).
 - **Cơ chế phân quyền:** Phân quyền theo vai trò (Role-Based Access Control - RBAC) sử dụng Method Security `@EnableMethodSecurity(prePostEnabled = true)`.
 - **Kiến trúc Dual SecurityFilterChain (SEC-01 Hardening):**
   - **`h2ConsoleChain` (`@Order(1)`, `@Profile("!prod")`):** Chỉ kích hoạt ở môi trường non-prod, cho phép truy cập `/h2-console/**` công khai phục vụ kiểm thử và debug cục bộ.
-  - **`filterChain` (`@Order(2)`):** Áp dụng cho toàn bộ endpoints nghiệp vụ. Cho phép truy cập công khai trang chủ (`/`, `/index.html`, `/favicon.ico`). Trên profile `prod`, đường dẫn `/h2-console/**` yêu cầu bắt buộc quyền `ROLE_ADMIN`. Toàn bộ request còn lại yêu cầu xác thực.
+  - **`filterChain` (`@Order(2)`):** Áp dụng cho toàn bộ endpoints nghiệp vụ. Cho phép truy cập công khai trang chủ (`/`, `/index.html`, `/favicon.ico`) và Actuator health/info. Trên profile `prod`, đường dẫn `/h2-console/**` và `/actuator/prometheus` yêu cầu bắt buộc quyền `ROLE_ADMIN`. Toàn bộ request còn lại yêu cầu xác thực.
 - **Định dạng lỗi:** Toàn bộ vi phạm an ninh (401, 403, 429) bắt buộc trả về định dạng **RFC 7807 Problem Details** (`application/problem+json`).
 
 ---
 
 ## 2. JWT Claims Schema & Token Parsing
 
-Hệ thống kỳ vọng JWT hợp lệ chứa các claims nghiệp vụ tối thiểu sau:
+Hệ thống hỗ trợ parse token JWT từ Keycloak / OIDC Identity Provider với cấu trúc claims sau:
 
 ### Bảng Cấu trúc JWT Claims
 
@@ -42,20 +45,27 @@ Hệ thống kỳ vọng JWT hợp lệ chứa các claims nghiệp vụ tối t
 |---|---|---|---|---|
 | `sub` | `String` | Có | `"user-dispatch-01"` | Định danh người dùng (User ID / Username) |
 | `iss` | `String` | Có | `"https://auth.gpc.com"` | Cơ quan phát hành Token (Token Issuer) |
-| `roles` | `List<String>` | Có | `["ROLE_DISPATCHER"]` | Danh sách quyền hạn. Bắt buộc có tiền tố `ROLE_` |
-| `tenant_id` | `String` | Tùy chọn | `"VN-EVN-01"` | Mã định danh đơn vị điện lực (Multi-tenancy) |
+| `roles` | `List<String>` | Tùy chọn | `["ROLE_DISPATCHER"]` | Mảng roles chuẩn mức gốc |
+| `realm_access.roles` | `List<String>` | Tùy chọn | `["DISPATCHER"]` | Mảng Realm roles từ Keycloak (tự động chuẩn hóa tiền tố `ROLE_`) |
+| `resource_access.*.roles` | `List<String>` | Tùy chọn | `["TECHNICIAN"]` | Mảng Resource/Client roles từ Keycloak |
 | `iat` | `Long` | Có | `1774340000` | Thời điểm phát hành token (Epoch seconds) |
 | `exp` | `Long` | Có | `1774343600` | Thời điểm hết hạn token (Epoch seconds) |
 
-### Cơ chế Chuyển đổi Quyền (JwtAuthenticationConverter)
+### Cơ chế Chuyển đổi Quyền (JwtRoleConverter)
 
-Khi trích xuất JWT, hệ thống phân tích mảng `roles` thành danh sách `GrantedAuthority`:
+Lớp `JwtRoleConverter` (cài đặt `Converter<Jwt, Collection<GrantedAuthority>>`) trích xuất và chuẩn hóa tất cả các vai trò từ cả 3 nguồn claim (`realm_access`, `resource_access`, và `roles`), đảm bảo tự động gắn tiền tố `ROLE_`:
 ```java
-// Logic chuyển đổi claims: mảng "roles" -> Collection<GrantedAuthority>
-List<String> roles = jwt.getClaimAsStringList("roles");
-Collection<GrantedAuthority> authorities = roles.stream()
-    .map(SimpleGrantedAuthority::new)
-    .collect(Collectors.toList());
+// JwtRoleConverter logic
+public Collection<GrantedAuthority> convert(Jwt jwt) {
+    Set<String> allRoles = new HashSet<>();
+    extractRealmRoles(jwt, allRoles);
+    extractResourceRoles(jwt, allRoles);
+    extractSimpleRoles(jwt, allRoles);
+    return allRoles.stream()
+        .map(role -> role.startsWith("ROLE_") ? role : "ROLE_" + role)
+        .map(SimpleGrantedAuthority::new)
+        .collect(Collectors.toUnmodifiableSet());
+}
 ```
 
 ---
@@ -100,20 +110,23 @@ Bắt buộc kích hoạt trên toàn bộ response:
 
 ---
 
-## 5. Chính sách Giới hạn Tần suất (Rate Limiting Policy)
+## 5. Chính sách Giới hạn Tần suất (Rate Limiting Policy - SEC-06)
 
-Nhằm ngăn ngừa tấn công Brute-force và quá tải hệ thống điều độ:
-- **Thuật toán:** Token Bucket (Bucket4j).
-- **Cấu hình theo đối tượng:**
-  - **Người dùng đã xác thực (Authenticated):** 100 requests / phút / User ID.
-  - **Người dùng chưa xác thực (Unauthenticated):** 20 requests / phút / IP Address.
-- **Xử lý khi vượt hạn mức:** Trả về HTTP `429 Too Many Requests` kèm RFC 7807:
+Nhằm ngăn ngừa tấn công DoS, Brute-force và kiểm soát mức độ tiêu thụ tài nguyên của API:
+- **Thuật toán:** Token Bucket (Bucket4j `io.github.bucket4j:bucket4j-core`).
+- **Phân giải định danh Client:** Dựa trên IP Address của client (`X-Forwarded-For` header hoặc `request.getRemoteAddr()`).
+- **Phân tách chính sách Read / Write:**
+  - **Thao tác Ghi (Write - `POST`, `PATCH`, `PUT`, `DELETE`):** 10 requests / phút / IP (nạp 1 token mỗi 6 giây).
+  - **Thao tác Đọc (Read - `GET`, `HEAD`, `OPTIONS`):** 60 requests / phút / IP (nạp 1 token mỗi giây).
+- **Ranh giới Bỏ qua Bộ lọc (`shouldNotFilter`):**
+  - Không áp dụng Rate Limiting cho `/actuator/**`, `/`, `/index.html`, `/favicon.ico`, `/h2-console/**`.
+- **Xử lý khi vượt hạn mức (Rate Limit Exceeded):** Trả về HTTP `429 Too Many Requests` dạng RFC 7807:
   ```json
   {
     "type": "urn:problem-type:rate-limit-exceeded",
     "title": "Too Many Requests",
     "status": 429,
-    "detail": "Bạn đã vượt quá giới hạn 100 requests/phút. Vui lòng thử lại sau.",
+    "detail": "Rate limit exceeded. Try again later.",
     "instance": "/api/v1/workorders"
   }
   ```
