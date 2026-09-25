@@ -43,7 +43,8 @@ public class SecurityConfig {
 
     @Bean
     @Order(2)
-    public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
+    public SecurityFilterChain filterChain(HttpSecurity http,
+                                           org.springframework.beans.factory.ObjectProvider<org.springframework.security.oauth2.jwt.JwtDecoder> jwtDecoderProvider) throws Exception {
         http
             .csrf(csrf -> csrf.disable())
             .headers(headers -> headers.frameOptions(frame -> frame.sameOrigin()))
@@ -64,9 +65,45 @@ public class SecurityConfig {
                         {"type":"%s","title":"Unauthorized","status":401,"detail":"Authentication token is missing or expired","instance":"%s"}"""
                         .formatted(com.gpc.oms.exception.ProblemTypes.UNAUTHORIZED, request.getRequestURI()));
                 })
+                .accessDeniedHandler((request, response, accessDeniedException) -> {
+                    response.setStatus(403);
+                    response.setContentType("application/problem+json");
+                    response.getWriter().write("""
+                        {"type":"%s","title":"Forbidden","status":403,"detail":"Access Denied: You do not have permission to access this resource","instance":"%s"}"""
+                        .formatted(com.gpc.oms.exception.ProblemTypes.FORBIDDEN, request.getRequestURI()));
+                })
             )
             .httpBasic(Customizer.withDefaults());
+
+        org.springframework.security.oauth2.jwt.JwtDecoder jwtDecoder = jwtDecoderProvider.getIfAvailable();
+        if (jwtDecoder != null) {
+            http.oauth2ResourceServer(oauth2 -> oauth2
+                .jwt(jwt -> jwt.decoder(jwtDecoder).jwtAuthenticationConverter(jwtAuthenticationConverter()))
+                .authenticationEntryPoint((request, response, authException) -> {
+                    response.setStatus(401);
+                    response.setContentType("application/problem+json");
+                    response.getWriter().write("""
+                        {"type":"%s","title":"Unauthorized","status":401,"detail":"%s","instance":"%s"}"""
+                        .formatted(com.gpc.oms.exception.ProblemTypes.UNAUTHORIZED,
+                                   authException.getMessage() != null ? authException.getMessage() : "Authentication token is missing or expired",
+                                   request.getRequestURI()));
+                })
+            );
+        }
         return http.build();
+    }
+
+    /**
+     * Configures the JWT authentication converter with custom role mapping and principal claim resolution.
+     *
+     * @return Configured {@link org.springframework.security.oauth2.server.resource.authentication.JwtAuthenticationConverter}
+     */
+    @Bean
+    public org.springframework.security.oauth2.server.resource.authentication.JwtAuthenticationConverter jwtAuthenticationConverter() {
+        var converter = new org.springframework.security.oauth2.server.resource.authentication.JwtAuthenticationConverter();
+        converter.setJwtGrantedAuthoritiesConverter(new JwtRoleConverter());
+        converter.setPrincipalClaimName("sub");
+        return converter;
     }
 
     /**
