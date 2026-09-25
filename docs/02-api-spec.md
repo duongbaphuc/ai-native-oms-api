@@ -125,7 +125,7 @@ Tài liệu này xác định các giao ước RESTful API chính thức của p
 ### Thuật toán Xử lý (Step-by-step Logic)
 
 1. Controller nhận `id` và payload `WorkOrderStatusRequest`.
-2. Controller ủy quyền cho `WorkOrderService.advanceStatus(id, request.status())`.
+2. Controller ủy quyền cho `WorkOrderService.updateStatus(id, request)`.
 3. Service tìm kiếm `WorkOrder` theo `id`. Nếu không thấy $\rightarrow$ ném `ResourceNotFoundException`.
 4. Service gọi `workOrder.advanceStatus(newStatus)` trên Entity.
 5. Entity kiểm tra `canTransitionTo()`. Nếu vi phạm $\rightarrow$ ném `IllegalStateException`.
@@ -197,3 +197,6 @@ Hệ thống cung cấp các endpoint thăm dò trạng thái phục vụ giám 
 
 - **Header `X-Correlation-Id`:** Client có thể chủ động gửi mã truy vết trong request. Nếu request không có header này, `CorrelationIdFilter` tự động sinh một UUID v4 ngẫu nhiên, đưa vào SLF4J MDC context (`traceId`) và luôn luôn trả về header `X-Correlation-Id` trong 100% response.
 - **Header `Location`:** Trả về khi tạo mới phiếu thành công (HTTP 201 Created), trỏ đến URI của tài nguyên vừa tạo: `/api/v1/workorders/{id}`.
+
+> [!NOTE]
+> `429 Too Many Requests` được sinh trực tiếp bởi `RateLimitingFilter` với URN `urn:problem-type:rate-limit-exceeded`; URN này hiện chưa nằm trong `ProblemTypes.java` (lớp này hiện có 7 hằng số).

@@ -461,7 +461,10 @@ Vị trí báo cáo chi tiết: `target/site/jacoco/index.html`.
 | `com.gpc.oms.dto` | 4 | 6 | 22/22 | n/a | 110/110 | **100.0%** |
 | `com.gpc.oms.service` | 1 | 8 | 24/24 | 2/2 | 109/109 | **100.0%** |
 | `com.gpc.oms.controller` | 1 | 6 | 17/17 | n/a | 87/87 | **100.0%** |
-| **TỔNG HỢP TOÀN DỰ ÁN** | **12** | **46** | **152/152 (100%)** | **17/17 (100%)** | **659/659 (100%)** | **100.0% (PERFECT)** |
+| **TỔNG HỢP TOÀN DỰ ÁN** | **12** | **46** | **158/158 (100%)** | **17/17 (100%)** | **718/718 (100%)** | **100.0% (PERFECT)** |
+
+> [!NOTE]
+> Số liệu trên được đọc từ `target/site/jacoco/jacoco.xml` sau `mvn clean verify` ngày 25/09/2026: 12 classes, 158 lines, 17 branches, 718 instructions, tất cả đều covered.
 
 ---
 

@@ -83,3 +83,9 @@ stateDiagram-v2
 2. **Trách nhiệm Tầng:**
    - Controller $\rightarrow$ Ủy quyền 100% cho `WorkOrderService`.
    - Service $\rightarrow$ Gọi Entity Domain để kiểm tra luật nghiệp vụ và lưu thông qua `WorkOrderRepository`.
+
+## 5. Bằng chứng đồng bộ (25/09/2026)
+
+- `WorkOrderStatus` hiện có đúng 3 giá trị JSON: `Open`, `InProgress`, `Done`.
+- `WorkOrder.advanceStatus(WorkOrderStatus)` gọi `canTransitionTo()` và ném `IllegalStateException` cho mọi chuyển đổi không hợp lệ.
+- `mvn clean verify` đã bao phủ toàn bộ 9 tổ hợp chuyển trạng thái; không phát hiện drift giữa domain model và implementation.

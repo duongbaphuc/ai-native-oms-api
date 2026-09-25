@@ -24,7 +24,7 @@ Tài liệu là kim chỉ nam để duy trì và kiểm chứng tính toàn vẹ
 - **Mô hình xác thực:** Không trạng thái (Stateless Session - `SessionCreationPolicy.STATELESS`).
 - **Chiến lược xác thực đa môi trường (Defense-in-Depth):**
   - **Môi trường Non-Prod (Dev / Test / Staging - `@Profile("!prod")`):** HTTP Basic Authentication với danh sách tài khoản demo trong bộ nhớ (`InMemoryUserDetailsManager`).
-  - **Môi trường Production (`@Profile("prod")`):** OAuth2 Resource Server xác thực JWT qua HTTP Header `Authorization: Bearer <token>` tích hợp `JwtRoleConverter` (PR #68).
+  - **Môi trường Production (khi có `JwtDecoder` bean):** OAuth2 Resource Server xác thực JWT qua HTTP Header `Authorization: Bearer <token>` tích hợp `JwtRoleConverter` (PR #68). `filterChain` không được gắn trực tiếp `@Profile("prod")`; việc bật JWT phụ thuộc vào bean decoder.
 - **Phòng chống DoS & Brute-force:** `RateLimitingFilter` sử dụng Bucket4j giới hạn 20 write / 60 read req/min cho mỗi IP, tự động trả về HTTP 429 RFC 7807 (PR #65).
 - **Truy vết phân tán (Distributed Tracing):** `CorrelationIdFilter` gán mã UUID truy vết vào MDC log context và response header `X-Correlation-Id` (PR #67).
 - **Cơ chế phân quyền:** Phân quyền theo vai trò (Role-Based Access Control - RBAC) sử dụng Method Security `@EnableMethodSecurity(prePostEnabled = true)`.
@@ -93,17 +93,12 @@ Dự án xác định 3 vai trò chính trong hệ thống điều hành mất �
 ## 4. Web Security & Phòng vệ Mạng (Network Boundary)
 
 ### 1. Cross-Origin Resource Sharing (CORS) Policy
-- Cấu hình qua biến môi trường: `APP_CORS_ALLOWED_ORIGINS` (mặc định: `http://localhost:3000,http://localhost:8080`).
-- **Allowed Methods:** `GET, POST, PATCH, OPTIONS`.
-- **Allowed Headers:** `Authorization, Content-Type, X-Correlation-Id`.
-- **Max Age:** `3600` giây (1 giờ).
+- **Trạng thái implementation:** Chưa có `CorsConfigurationSource` hoặc `http.cors(...)` trong `SecurityConfig`; biến `APP_CORS_ALLOWED_ORIGINS` chưa được đọc từ code.
+- Nếu bật CORS trong production, phải cấu hình origins/methods/headers qua secret-managed environment configuration trước khi nghiệm thu.
 
 ### 2. HTTP Security Headers
-Bắt buộc kích hoạt trên toàn bộ response:
-- `Content-Security-Policy: default-src 'self'`
-- `X-Content-Type-Options: nosniff`
-- `X-Frame-Options: DENY`
-- `Strict-Transport-Security: max-age=31536000; includeSubDomains`
+- **Đã triển khai:** `frameOptions().sameOrigin()` trong cả hai security chain để H2 Console hoạt động.
+- **Chưa được chứng minh trong implementation:** CSP, HSTS và `X-Content-Type-Options` không được cấu hình tường minh trong source hiện tại.
 
 ### 3. CSRF Policy
 - Vì API tuân thủ kiến trúc RESTful hoàn toàn Stateless (sử dụng Header JWT, không dùng Cookie Session), cấu hình `csrf.disable()` được phép áp dụng theo đúng chuẩn OWASP cho Token-based APIs.
@@ -138,7 +133,7 @@ Nhằm ngăn ngừa tấn công DoS, Brute-force và kiểm soát mức độ ti
  Các ngoại lệ bảo mật phát sinh tại tầng Filter hoặc Security Interceptor phải được chuyển đổi sang định dạng JSON chuẩn `application/problem+json`:
  
  ### 1. Chưa xác thực (HTTP 401 Unauthorized)
- - **Lớp cài đặt:** `CustomAuthenticationEntryPoint` (tại `SecurityConfig.filterChain`)
+ - **Lớp cài đặt:** lambda `authenticationEntryPoint` trong `SecurityConfig.filterChain`
  - **RFC 7807 Payload:**
    ```json
    {
@@ -151,7 +146,7 @@ Nhằm ngăn ngừa tấn công DoS, Brute-force và kiểm soát mức độ ti
    ```
  
  ### 2. Không có quyền truy cập (HTTP 403 Forbidden)
- - **Lớp cài đặt:** `GlobalExceptionHandler.handleAccessDenied` (bắt `org.springframework.security.access.AccessDeniedException`)
+ - **Lớp cài đặt:** lambda `accessDeniedHandler` trong `SecurityConfig.filterChain`; `GlobalExceptionHandler` xử lý `AccessDeniedException` ở tầng method security.
  - **RFC 7807 Payload:**
    ```json
    {
