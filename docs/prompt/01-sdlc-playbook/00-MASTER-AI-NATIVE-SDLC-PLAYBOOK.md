@@ -4,7 +4,7 @@ Tài liệu này tổng hợp toàn bộ chuỗi Prompt chuẩn mực theo cấu
 
 ---
 
-## 1. Sơ Đồ Quy Trình 17 Giai Đoạn Tuyến Tính (Pha 00 - 15 kèm 04B)
+## 1. Sơ Đồ Quy Trình 19 Giai Đoạn Tuyến Tính (Pha 00 - 17 kèm 04B)
 
 ```mermaid
 graph TD
@@ -39,6 +39,11 @@ graph TD
         P13 --> P14["Pha 14: Tối Ưu Cú Pháp, Hiệu Năng & Tái Sử Dụng Mã Nguồn (14-syntax-performance-and-code-reuse-optimization.prompt.md)"]
         P14 --> P15["Pha 15: Sinh Checklist Nghiêm Ngặt & Tự Động Xuất Bằng Chứng Kiểm Định (15-strict-checklist-and-automated-audit-generation.prompt.md)"]
     end
+
+    subgraph "Giai đoạn 16-17: Kiểm Toán Chất Lượng 13 Tiêu Chí & Khắc Phục Sau Kiểm Toán"
+        P15 --> P16["Pha 16: Kiểm Toán Toàn Diện Mã Nguồn 13 Tiêu Chí (16-comprehensive-quality-audit-13-criteria.prompt.md)"]
+        P16 --> P17["Pha 17: Khắc Phục Toàn Diện 13 Tiêu Chí Chất Lượng (17-remediation-13-criteria-quality-audit.prompt.md)"]
+    end
 ```
 
 ---
@@ -64,6 +69,8 @@ graph TD
 | **13** | [`13-coding-rules-and-design-patterns-enforcement.prompt.md`](13-coding-rules-and-design-patterns-enforcement.prompt.md) | Principal Java Software Architect & Code Quality Auditor | Kiểm tra và triển khai áp dụng bộ quy chuẩn Oracle Coding Rules & Design Patterns lên toàn bộ code và markdown | 100% code & docs tuân thủ chuẩn Oracle, JaCoCo 100% Green, Zero Regression |
 | **14** | [`14-syntax-performance-and-code-reuse-optimization.prompt.md`](14-syntax-performance-and-code-reuse-optimization.prompt.md) | Principal Java Performance Architect & Code Quality Specialist | Tối ưu hóa cú pháp Java 17, hiệu năng máy ảo (JVM / GC), và thúc đẩy tái sử dụng mã nguồn (DRY, Test Fixture Pattern) | Ma trận tối ưu hóa 100%, JaCoCo 100% Green, Zero Regression, PR Atomic |
 | **15** | [`15-strict-checklist-and-automated-audit-generation.prompt.md`](15-strict-checklist-and-automated-audit-generation.prompt.md) | Principal AI-Native SDLC Architect & Quality Gate Automation Lead | Chuyển hóa yêu cầu thành checklist dạng bảng/Boolean, tự động kiểm thử và xuất file `docs/audit-logs/checklist-[feature]-[date].md` | 100% tests pass, JaCoCo 100%, file checklist vật lý ghi nhận 100% `[x] PASS` với log evidence |
+| **16** | [`16-comprehensive-quality-audit-13-criteria.prompt.md`](16-comprehensive-quality-audit-13-criteria.prompt.md) | Principal Quality Assurance Architect & Lead Code Auditor | Kiểm toán toàn diện mã nguồn dự án theo 13 tiêu chí chất lượng (Triangulation SSOT) | Báo cáo kiểm toán Markdown ghi nhận PASS/FAIL cho từng tiêu chí kèm bằng chứng |
+| **17** | [`17-remediation-13-criteria-quality-audit.prompt.md`](17-remediation-13-criteria-quality-audit.prompt.md) | Principal Software Architect & Lead Remediation Engineer | Khắc phục toàn bộ các lỗi tồn đọng từ đợt kiểm toán 13 tiêu chí (Caffeine LRU, Clean Code, Javadoc) | 13/13 tiêu chí đạt PASS (100%), 117 tests Green, JaCoCo 100% Line & Branch |
 
 ---
 

@@ -69,9 +69,9 @@ Khi phát triển từng phần, lập trình viên/Copilot chỉ cần nạp c�
 ## 5. Trung Tâm Quản Trị Prompt AI (AI Prompt Repository)
 
 Thư mục [`docs/prompt/`](prompt/README.md) quản lý toàn bộ các câu lệnh Prompt được chuẩn hóa của dự án:
-- [`docs/prompt/01-sdlc-playbook/`](prompt/01-sdlc-playbook/00-MASTER-AI-NATIVE-SDLC-PLAYBOOK.md): Chuỗi 17 prompt quy trình AI-Native SDLC toàn diện từ Khởi tạo (Pha 00), Bản thảo kỹ thuật (Pha 04B) đến Tự động Thẩm định (Pha 15).
+- [`docs/prompt/01-sdlc-playbook/`](prompt/01-sdlc-playbook/00-MASTER-AI-NATIVE-SDLC-PLAYBOOK.md): Chuỗi 19 prompt quy trình AI-Native SDLC toàn diện từ Khởi tạo (Pha 00), Bản thảo kỹ thuật (Pha 04B) đến Kiểm toán chất lượng (Pha 16) và Khắc phục (Pha 17).
 - [`docs/prompt/02-copilot-slash-commands/`](prompt/02-copilot-slash-commands/README.md): Lệnh Slash Commands tích hợp trong IDE Copilot (`.github/prompts/`).
-- [`docs/prompt/03-module-task-prompts/`](prompt/03-module-task-prompts/README.md): 14 Bản thảo kỹ thuật & task prompts theo từng module và kiểm toán chất lượng 13 tiêu chí (Pha 16 & 17).
+- [`docs/prompt/03-module-task-prompts/`](prompt/03-module-task-prompts/README.md): 12 Bản thảo kỹ thuật & task prompts theo từng module nghiệp vụ (`docs/drafts/`).
 - [`docs/prompt/04-dev-contributions/`](prompt/04-dev-contributions/): Prompt đóng góp từ các developer khác (`tudtbis92`, `templates`).
 
 ---
