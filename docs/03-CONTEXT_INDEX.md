@@ -91,14 +91,14 @@ Bảng này cung cấp ước tính dung lượng và token của các tệp tà
 | [`docs/00-security-rules.md`](00-security-rules.md) | Pha 00: Governance & Rules | 34 | 2,841 | ~700 | OWASP API Top 10, Defense-in-depth guardrails |
 | [`docs/01-br-analysis-wo.md`](01-br-analysis-wo.md) | Pha 01: Business & Domain | 44 | 5,068 | ~1,250 | Phân tích bài toán nghiệp vụ sự cố lưới điện |
 | [`docs/01-domain-model.md`](01-domain-model.md) | Pha 01: Business & Domain | 64 | 4,876 | ~1,200 | Thực thể WorkOrder, Invariants, State Machine |
-| [`docs/02-api-spec.md`](02-api-spec.md) | Pha 02: Architecture & Specs | 149 | 11,460 | ~2,800 | Hợp đồng REST API, Schema Request/Response, Actuator Probes |
+| [`docs/02-api-spec.md`](02-api-spec.md) | Pha 02: Architecture & Specs | 199 | 12,588 | ~3,050 | Hợp đồng REST API, Schema Request/Response, RFC 7807 429, Actuator Probes |
 | [`docs/02-database-migration-spec.md`](02-database-migration-spec.md) | Pha 02: Architecture & Specs | 102 | 8,739 | ~2,100 | Flyway DDL `V1__...`, Indexing, Schema constraints |
-| [`docs/02-security-auth-spec.md`](02-security-auth-spec.md) | Pha 02: Architecture & Specs | 140 | 9,163 | ~2,250 | Dual SecurityFilterChain, RBAC matrix, Security headers |
-| [`docs/02-observability-and-logging.md`](02-observability-and-logging.md) | Pha 02: Architecture & Specs | 115 | 8,735 | ~2,150 | Tracing, MDC logging context, Metrics |
+| [`docs/02-security-auth-spec.md`](02-security-auth-spec.md) | Pha 02: Architecture & Specs | 196 | 10,575 | ~2,600 | Dual SecurityFilterChain, OAuth2 JWT, Bucket4j Rate Limiting, Correlation ID |
+| [`docs/02-observability-and-logging.md`](02-observability-and-logging.md) | Pha 02: Architecture & Specs | 148 | 8,735 | ~2,150 | Tracing, MDC logging context, Prometheus Metrics |
 | [`docs/02-ADR-001-use-h2-database.md`](02-ADR-001-use-h2-database.md) | Pha 02: Architecture & Specs | 20 | 2,058 | ~500 | Quyết định kiến trúc cơ sở dữ liệu H2 |
-| [`docs/03-CONTEXT_INDEX.md`](03-CONTEXT_INDEX.md) | Pha 03: AI Context Index | 79 | 9,940 | ~2,400 | Bản đồ điều hướng ngữ cảnh AI và công thức nạp Modular |
-| [`docs/08-SYSTEM_HANDOVER.md`](08-SYSTEM_HANDOVER.md) | Pha 08: System Handover | 420 | 36,574 | ~8,900 | Hồ sơ bàn giao kỹ thuật toàn diện, 89 tests, Runbook |
+| [`docs/03-CONTEXT_INDEX.md`](03-CONTEXT_INDEX.md) | Pha 03: AI Context Index | 105 | 10,047 | ~2,400 | Bản đồ điều hướng ngữ cảnh AI và công thức nạp Modular |
+| [`docs/08-SYSTEM_HANDOVER.md`](08-SYSTEM_HANDOVER.md) | Pha 08: System Handover | 545 | 40,489 | ~9,800 | Hồ sơ bàn giao kỹ thuật toàn diện, 117 tests, Runbook, Prometheus |
 | [`docs/08-ORACLE_JAVA_DOCUMENTATION.md`](08-ORACLE_JAVA_DOCUMENTATION.md) | Pha 08: System Handover | 233 | 16,335 | ~4,000 | Cẩm nang kiến trúc kỹ thuật Java Enterprise chuẩn Oracle |
-| [`docs/09-SECURITY_HANDOVER_REPORT.md`](09-SECURITY_HANDOVER_REPORT.md) | Pha 09: Security Audit | 260 | 28,992 | ~7,200 | Hồ sơ bàn giao an ninh, thẩm định OWASP, SEC-01..04 |
+| [`docs/09-SECURITY_HANDOVER_REPORT.md`](09-SECURITY_HANDOVER_REPORT.md) | Pha 09: Security Audit | 301 | 26,782 | ~6,500 | Hồ sơ bàn giao an ninh, thẩm định OWASP, SEC-01..06, 117 tests |
 | [`docs/10-devops-pipeline-spec.md`](10-devops-pipeline-spec.md) | Pha 10: DevOps & CI/CD | 166 | 8,272 | ~2,050 | Đặc tả Containerization, Docker Compose & GitHub Actions |
 

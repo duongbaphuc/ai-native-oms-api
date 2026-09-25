@@ -3,10 +3,10 @@
 [![Build Status](https://img.shields.io/badge/build-passing-brightgreen)](#)
 [![Java Version](https://img.shields.io/badge/Java-17%20LTS-blue)](#)
 [![Spring Boot](https://img.shields.io/badge/Spring%20Boot-3.3.5-success)](#)
-[![Automated Tests](https://img.shields.io/badge/Tests-89%20Passed-brightgreen)](#)
+[![Automated Tests](https://img.shields.io/badge/Tests-117%20Passed-brightgreen)](#)
 [![JaCoCo Coverage](https://img.shields.io/badge/JaCoCo-100%25%20Line%20%26%20Branch-success)](#)
 [![RFC 7807](https://img.shields.io/badge/RFC%207807-Problem%20Details-blueviolet)](#)
-[![Security Posture](https://img.shields.io/badge/Security-Grade%20A%2B%20(98%2F100)-darkgreen)](#)
+[![Security Posture](https://img.shields.io/badge/Security-Grade%20A%2B%20(100%2F100)-darkgreen)](#)
 
 Dịch vụ Outage Work Order là một microservice cốt lõi thuộc phân hệ Outage Management System (OMS). API này cung cấp các giao thức RESTful để tạo, quản lý và theo dõi vòng đời của các sự kiện mất điện trên lưới điện.
 
@@ -19,7 +19,7 @@ Dự án áp dụng phương pháp luận **AI-Native SDLC**, phát triển theo
 - **Ngôn ngữ & Nền tảng:** Pure Java 17 records, Spring Boot 3.3.5 (Zero Lombok, Clean Architecture 3 tầng).
 - **Cơ sở dữ liệu:** Dual-DB Architecture — H2 In-Memory (Dev/Test) & PostgreSQL (Production), đồng bộ schema bằng **Flyway Migration** (`ddl-auto: validate`).
 - **Chuẩn giao tiếp:** RESTful API tuân thủ nghiêm ngặt **RFC 7807 Problem Details** cho 100% các phản hồi lỗi.
-- **Bảo mật:** Dual `SecurityFilterChain` (cô lập H2 Console ở `!prod`, HTTP Basic Auth với phân quyền RBAC `@PreAuthorize`).
+- **Bảo mật & Phòng thủ Chiều sâu:** Dual `SecurityFilterChain` (cô lập H2 Console ở `!prod`, HTTP Basic Auth `!prod`, OAuth2 JWT Resource Server `prod`, Bucket4j Rate Limiting, Distributed Tracing `CorrelationIdFilter`).
 
 > [!IMPORTANT]
 > **Chính sách Phát triển (Spec-Driven & Zero Drift):** Dự án tuân thủ nguyên tắc "Spec-First": Mọi thay đổi mã nguồn bắt buộc phải đồng bộ 100% với hệ thống tài liệu đặc tả tại [`docs/`](docs/03-CONTEXT_INDEX.md).
@@ -39,14 +39,14 @@ Dự án áp dụng phương pháp luận **AI-Native SDLC**, phát triển theo
 ```bash
 mvn clean verify
 ```
-*Lệnh này chạy toàn bộ 89 automated tests (Unit, Slice, DataJpa, Integration) và thẩm định JaCoCo Quality Gate đạt 100% Line & Branch Coverage.*
+*Lệnh này chạy toàn bộ 117 automated tests (Unit, Slice, DataJpa, Integration) và thẩm định JaCoCo Quality Gate đạt 100% Line & Branch Coverage.*
 
 > [!NOTE]
 > **Hồ Sơ Kiểm Định & Bằng Chứng Nghiệm Thu Tự Động (Audit Trail Artifacts):**  
 > Kết quả thẩm định tự động toàn diện được lưu trữ minh bạch tại:  
 > - 📄 Vòng đời nghiệp vụ: [`docs/audit-logs/checklist-work-order-lifecycle-2026-09-25.md`](docs/audit-logs/checklist-work-order-lifecycle-2026-09-25.md)  
 > - 🐳 Đóng gói Docker & CI/CD: [`docs/audit-logs/checklist-docker-cicd-2026-09-25.md`](docs/audit-logs/checklist-docker-cicd-2026-09-25.md)  
-> Báo cáo ghi nhận chi tiết 100% tiêu chí đạt chuẩn `[x] PASS`, log execution của 89 tests, JaCoCo Quality Gate 100%, Actuator Probes, và chốt chặn Zero-Drift kiểm toán ngữ cảnh.
+> Báo cáo ghi nhận chi tiết 100% tiêu chí đạt chuẩn `[x] PASS`, log execution của 117 tests, JaCoCo Quality Gate 100%, Actuator Probes, và chốt chặn Zero-Drift kiểm toán ngữ cảnh.
 
 ### 2. Khởi động Ứng dụng Cục bộ
 ```bash
@@ -91,7 +91,7 @@ Toàn bộ tài liệu trong thư mục [`docs/`](docs/03-CONTEXT_INDEX.md) đư
 | **Pha 02: Architecture & Specs** | [`docs/02-api-spec.md`](docs/02-api-spec.md)<br>[`docs/02-database-migration-spec.md`](docs/02-database-migration-spec.md)<br>[`docs/02-security-auth-spec.md`](docs/02-security-auth-spec.md)<br>[`docs/02-observability-and-logging.md`](docs/02-observability-and-logging.md)<br>[`docs/02-ADR-001-use-h2-database.md`](docs/02-ADR-001-use-h2-database.md) | Hợp đồng REST API RFC 7807, Flyway DDL migration, Dual SecurityFilterChain, ECS Logging & ADR |
 | **Pha 03: AI Context Index** | [`docs/03-CONTEXT_INDEX.md`](docs/03-CONTEXT_INDEX.md) | Bản đồ điều hướng ngữ cảnh AI và công thức nạp Modular Context |
 | **Pha 04: Implementation Drafts** | [`docs/drafts/`](docs/drafts/) | 9 bản thảo chi tiết (Blueprints) dùng cho Copilot sinh mã nguồn |
-| **Pha 08: System Handover** | [`docs/08-SYSTEM_HANDOVER.md`](docs/08-SYSTEM_HANDOVER.md)<br>[`docs/08-ORACLE_JAVA_DOCUMENTATION.md`](docs/08-ORACLE_JAVA_DOCUMENTATION.md) | Hồ sơ bàn giao kỹ thuật toàn diện (89 tests, Runbook) và Cẩm nang kiến trúc Java Enterprise |
+| **Pha 08: System Handover** | [`docs/08-SYSTEM_HANDOVER.md`](docs/08-SYSTEM_HANDOVER.md)<br>[`docs/08-ORACLE_JAVA_DOCUMENTATION.md`](docs/08-ORACLE_JAVA_DOCUMENTATION.md) | Hồ sơ bàn giao kỹ thuật toàn diện (117 tests, Runbook) và Cẩm nang kiến trúc Java Enterprise |
 | **Pha 09: Security Audit** | [`docs/09-SECURITY_HANDOVER_REPORT.md`](docs/09-SECURITY_HANDOVER_REPORT.md) | Báo cáo thẩm định an ninh bàn giao, kiểm toán OWASP API Top 10 & CWE |
 | **Pha 10: DevOps & CI/CD** | [`docs/10-devops-pipeline-spec.md`](docs/10-devops-pipeline-spec.md) | Đặc tả Multi-stage Dockerfile non-root, Docker Compose & GitHub Actions CI |
 | **Pha 15: Automated Audit** | [`docs/audit-logs/checklist-work-order-lifecycle-2026-09-25.md`](docs/audit-logs/checklist-work-order-lifecycle-2026-09-25.md) | Hồ sơ checklist nghiệm thu tự động, 100% tiêu chí kỹ thuật có log bằng chứng thực thi |

@@ -173,6 +173,7 @@ Mọi lỗi trả về client bắt buộc tuân thủ schema JSON sau (`applica
 | `403 Forbidden` | `urn:problem-type:forbidden` | `Access Denied` | `handleAccessDenied` | Vi phạm phân quyền RBAC (`@PreAuthorize`) |
 | `404 Not Found` | `urn:problem-type:not-found` | *Message chi tiết* | `handleResourceNotFound` | Không tìm thấy bản ghi theo UUID chỉ định |
 | `422 Unprocessable Entity` | `urn:problem-type:invalid-state-transition` | *Message chi tiết* | `handleIllegalStateTransition` | Vi phạm quy tắc chuyển trạng thái của State Machine |
+| `429 Too Many Requests` | `urn:problem-type:rate-limit-exceeded` | `Too Many Requests` | `RateLimitingFilter` | Vượt ngưỡng tần suất gọi (10 write / 60 read req/min per IP) |
 | `500 Internal Server Error` | `urn:problem-type:internal-error` | `An unexpected error occurred` | `handleUnexpected` | Lỗi ngoại lệ không lường trước (che giấu stack trace) |
 
 ---
@@ -185,6 +186,14 @@ Hệ thống cung cấp các endpoint thăm dò trạng thái phục vụ giám 
 |---|---|---|---|---|
 | `/actuator/health` | `GET` | Public (`permitAll`) | Kiểm tra sức khỏe tổng thể và Kubernetes Liveness/Readiness probes | `200 OK` `{"status":"UP"}` |
 | `/actuator/info` | `GET` | Public (`permitAll`) | Cung cấp thông tin phiên bản và build metadata của ứng dụng | `200 OK` `{}` |
+| `/actuator/prometheus` | `GET` | `ADMIN` (`@PreAuthorize("hasRole('ADMIN')")`) | Thu thập số liệu đo lường Micrometer Prometheus cho SRE/Grafana | `200 OK` (Text format) |
 
 > [!NOTE]
 > Thuộc tính `management.endpoint.health.show-details: when-authorized` đảm bảo chi tiết thành phần nội bộ (DB, disk) chỉ hiển thị khi có chứng thực hợp lệ, ngăn chặn rò rỉ cấu trúc hạ tầng ra bên ngoài.
+
+---
+
+## 7. Giao Thức Quản Lý Header & Truy Vết Phân Tán (Headers & Distributed Tracing)
+
+- **Header `X-Correlation-Id`:** Client có thể chủ động gửi mã truy vết trong request. Nếu request không có header này, `CorrelationIdFilter` tự động sinh một UUID v4 ngẫu nhiên, đưa vào SLF4J MDC context (`traceId`) và luôn luôn trả về header `X-Correlation-Id` trong 100% response.
+- **Header `Location`:** Trả về khi tạo mới phiếu thành công (HTTP 201 Created), trỏ đến URI của tài nguyên vừa tạo: `/api/v1/workorders/{id}`.
