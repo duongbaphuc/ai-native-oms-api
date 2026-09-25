@@ -45,7 +45,8 @@ public class JwtRoleConverter implements Converter<Jwt, Collection<GrantedAuthor
      * Extracts and normalizes roles from the provided JWT token into granted authorities.
      *
      * @param jwt The decoded JSON Web Token
-     * @return An unmodifiable collection of normalized {@link GrantedAuthority} objects, or an empty collection if no roles are present
+     * @return An unmodifiable collection of normalized {@link GrantedAuthority} objects,
+     *         or an empty collection if no roles are present
      */
     @Override
     public Collection<GrantedAuthority> convert(Jwt jwt) {

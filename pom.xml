@@ -61,6 +61,12 @@
             <version>8.10.1</version>
         </dependency>
 
+        <!-- Caffeine High-Performance In-Memory Caching for Rate Limiting Eviction -->
+        <dependency>
+            <groupId>com.github.ben-manes.caffeine</groupId>
+            <artifactId>caffeine</artifactId>
+        </dependency>
+
         <!-- In-memory Database for Lab / Demo (ADR-001) -->
         <dependency>
             <groupId>com.h2database</groupId>
