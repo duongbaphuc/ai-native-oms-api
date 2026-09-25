@@ -528,6 +528,55 @@
             text-align: center;
             color: var(--text-muted);
         }
+
+        /* H2 Console Tooltip */
+        .h2-console-wrapper {
+            position: relative;
+        }
+
+        .h2-link {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            padding: 6px 14px;
+            background: rgba(59, 130, 246, 0.15);
+            color: #60a5fa;
+            border: 1px solid rgba(59, 130, 246, 0.3);
+            border-radius: var(--radius-md);
+            font-size: 12px;
+            font-weight: 600;
+            text-decoration: none;
+            transition: all 0.2s ease;
+        }
+
+        .h2-link:hover {
+            background: rgba(59, 130, 246, 0.25);
+            border-color: #3b82f6;
+            box-shadow: 0 0 15px rgba(59, 130, 246, 0.3);
+            color: #fff;
+        }
+
+        .h2-tooltip {
+            display: none;
+            position: absolute;
+            top: 100%;
+            right: 0;
+            margin-top: 8px;
+            background: #0f172a;
+            border: 1px solid var(--border-highlight);
+            border-radius: var(--radius-md);
+            padding: 10px 14px;
+            font-size: 11px;
+            font-family: 'JetBrains Mono', monospace;
+            white-space: nowrap;
+            z-index: 200;
+            box-shadow: 0 8px 24px rgba(0,0,0,0.5);
+            pointer-events: none;
+        }
+
+        .h2-console-wrapper:hover .h2-tooltip {
+            display: block;
+        }
     </style>
 </head>
 <body>
@@ -552,11 +601,19 @@
                 <button class="identity-btn" id="role-guest" onclick="switchRole('', '', 'ANONYMOUS')">No Auth</button>
             </div>
 
-            <!-- Database Console Link -->
-            <a href="/h2-console" target="_blank" class="h2-link" title="Open H2 Database Console">
-                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2v20M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg>
-                H2 Console
-            </a>
+            <!-- Database Console Link with Connection Parameters Tooltip -->
+            <div class="h2-console-wrapper">
+                <a href="/h2-console" target="_blank" class="h2-link" title="Open H2 Database Console">
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2v20M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg>
+                    H2 Console
+                </a>
+                <div class="h2-tooltip">
+                    <div style="font-weight: 600; color: #60a5fa; margin-bottom: 4px;">H2 Database Login:</div>
+                    <div>JDBC URL: <code style="color: #34d399; user-select: all;">jdbc:h2:mem:workorderdb</code></div>
+                    <div>User Name: <code style="color: #f59e0b; user-select: all;">sa</code></div>
+                    <div>Password: <span style="color: var(--text-muted);">(empty / để trống)</span></div>
+                </div>
+            </div>
         </div>
     </header>
 
