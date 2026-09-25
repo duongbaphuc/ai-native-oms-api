@@ -13,7 +13,7 @@
 
     <groupId>com.gpc.oms</groupId>
     <artifactId>oms-api-demo</artifactId>
-    <version>0.0.1-SNAPSHOT</version>
+    <version>1.0.0</version>
     <name>oms-api-demo</name>
     <description>Outage Work Order API - AI-Native OMS Microservice</description>
 
