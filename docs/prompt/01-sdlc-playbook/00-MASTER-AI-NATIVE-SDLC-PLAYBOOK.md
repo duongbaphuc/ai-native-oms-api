@@ -4,7 +4,7 @@ Tài liệu này tổng hợp toàn bộ chuỗi Prompt chuẩn mực theo cấu
 
 ---
 
-## 1. Sơ Đồ Quy Trình 19 Giai Đoạn Tuyến Tính (Pha 00 - 17 kèm 04B)
+## 1. Sơ Đồ Quy Trình 20 Giai Đoạn Tuyến Tính (Pha 00 - 18 kèm 04B)
 
 ```mermaid
 graph TD
@@ -40,9 +40,10 @@ graph TD
         P14 --> P15["Pha 15: Sinh Checklist Nghiêm Ngặt & Tự Động Xuất Bằng Chứng Kiểm Định (15-strict-checklist-and-automated-audit-generation.prompt.md)"]
     end
 
-    subgraph "Giai đoạn 16-17: Kiểm Toán Chất Lượng 13 Tiêu Chí & Khắc Phục Sau Kiểm Toán"
+    subgraph "Giai đoạn 16-18: Kiểm Toán Chất Lượng, Khắc Phục & Bản Địa Hóa Kỹ Thuật"
         P15 --> P16["Pha 16: Kiểm Toán Toàn Diện Mã Nguồn 13 Tiêu Chí (16-comprehensive-quality-audit-13-criteria.prompt.md)"]
         P16 --> P17["Pha 17: Khắc Phục Toàn Diện 13 Tiêu Chí Chất Lượng (17-remediation-13-criteria-quality-audit.prompt.md)"]
+        P17 --> P18["Pha 18: Bản Địa Hóa Tiếng Anh Sang Tiếng Việt Cho API Docs & Comments (18-vietnamese-localization-api-docs-and-comments.prompt.md)"]
     end
 ```
 
@@ -71,6 +72,7 @@ graph TD
 | **15** | [`15-strict-checklist-and-automated-audit-generation.prompt.md`](15-strict-checklist-and-automated-audit-generation.prompt.md) | Principal AI-Native SDLC Architect & Quality Gate Automation Lead | Chuyển hóa yêu cầu thành checklist dạng bảng/Boolean, tự động kiểm thử và xuất file `docs/audit-logs/checklist-[feature]-[date].md` | 100% tests pass, JaCoCo 100%, file checklist vật lý ghi nhận 100% `[x] PASS` với log evidence |
 | **16** | [`16-comprehensive-quality-audit-13-criteria.prompt.md`](16-comprehensive-quality-audit-13-criteria.prompt.md) | Principal Quality Assurance Architect & Lead Code Auditor | Kiểm toán toàn diện mã nguồn dự án theo 13 tiêu chí chất lượng (Triangulation SSOT) | Báo cáo kiểm toán Markdown ghi nhận PASS/FAIL cho từng tiêu chí kèm bằng chứng |
 | **17** | [`17-remediation-13-criteria-quality-audit.prompt.md`](17-remediation-13-criteria-quality-audit.prompt.md) | Principal Software Architect & Lead Remediation Engineer | Khắc phục toàn bộ các lỗi tồn đọng từ đợt kiểm toán 13 tiêu chí (Caffeine LRU, Clean Code, Javadoc) | 13/13 tiêu chí đạt PASS (100%), 117 tests Green, JaCoCo 100% Line & Branch |
+| **18** | [`18-vietnamese-localization-api-docs-and-comments.prompt.md`](18-vietnamese-localization-api-docs-and-comments.prompt.md) | Principal Technical Localization Architect & Java Documentation Specialist | Bản địa hóa 100% API docs, Javadoc và chú thích mã nguồn từ Tiếng Anh sang Tiếng Việt | 100% Javadoc & comments tiếng Việt chuẩn mực, dòng <= 120 ký tự, 117 tests Green |
 
 ---
 
