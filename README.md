@@ -1,6 +1,7 @@
 # Outage Work Order API ⚡
 
 [![Build Status](https://img.shields.io/badge/build-passing-brightgreen)](#)
+[![Release](https://img.shields.io/badge/Release-v1.0.0-blue)](https://github.com/duongbaphuc/ai-native-oms-api/releases/tag/v1.0.0)
 [![Java Version](https://img.shields.io/badge/Java-17%20LTS-blue)](#)
 [![Spring Boot](https://img.shields.io/badge/Spring%20Boot-3.3.5-success)](#)
 [![Automated Tests](https://img.shields.io/badge/Tests-117%20Passed-brightgreen)](#)
@@ -13,7 +14,7 @@ Dịch vụ Outage Work Order là một microservice cốt lõi thuộc phân h�
 Dự án áp dụng phương pháp luận **AI-Native SDLC**, phát triển theo mô hình **Spec-Driven Development** dưới sự ràng buộc chặt chẽ của kỹ thuật thiết kế ngữ cảnh (Context Engineering).
 
 > [!NOTE]
-> Không có GitHub Release/tag đang hoạt động sau khi `v1.0.0` được xóa. Các số liệu bên dưới phản ánh trạng thái `main` được kiểm định ngày 25/09/2026.
+> **Phiên bản Phát hành Chính thức (Official Release):** Phiên bản [`v1.0.0`](https://github.com/duongbaphuc/ai-native-oms-api/releases/tag/v1.0.0) là bản phát hành chính thức đầu tiên của Outage Work Order API, đạt chuẩn **100% Zero-Drift**, vượt qua toàn diện 117 automated tests cùng JaCoCo Quality Gate (100% Line & Branch Coverage). Xem chi tiết tại [`CHANGELOG.md`](CHANGELOG.md) và [`docs/11-RELEASE_NOTES_v1.0.0.md`](docs/11-RELEASE_NOTES_v1.0.0.md).
 
 ---
 
@@ -98,5 +99,6 @@ Toàn bộ tài liệu trong thư mục [`docs/`](docs/03-CONTEXT_INDEX.md) đư
 | **Pha 08: System Handover** | [`docs/08-SYSTEM_HANDOVER.md`](docs/08-SYSTEM_HANDOVER.md)<br>[`docs/08-ORACLE_JAVA_DOCUMENTATION.md`](docs/08-ORACLE_JAVA_DOCUMENTATION.md) | Hồ sơ bàn giao kỹ thuật toàn diện (117 tests, Runbook) và Cẩm nang kiến trúc Java Enterprise |
 | **Pha 09: Security Audit** | [`docs/09-SECURITY_HANDOVER_REPORT.md`](docs/09-SECURITY_HANDOVER_REPORT.md) | Báo cáo thẩm định an ninh bàn giao, kiểm toán OWASP API Top 10 & CWE |
 | **Pha 10: DevOps & CI/CD** | [`docs/10-devops-pipeline-spec.md`](docs/10-devops-pipeline-spec.md) | Đặc tả Multi-stage Dockerfile non-root, Docker Compose & GitHub Actions CI |
+| **Pha 11: Release Management** | [`CHANGELOG.md`](CHANGELOG.md)<br>[`docs/11-RELEASE_NOTES_v1.0.0.md`](docs/11-RELEASE_NOTES_v1.0.0.md) | Hồ sơ phát hành chính thức v1.0.0 và nhật ký thay đổi phiên bản |
 | **Pha 15: Automated Audit** | [`docs/audit-logs/checklist-work-order-lifecycle-2026-09-25.md`](docs/audit-logs/checklist-work-order-lifecycle-2026-09-25.md) | Hồ sơ checklist nghiệm thu tự động, 100% tiêu chí kỹ thuật có log bằng chứng thực thi |
 | **Playbook Trọn Gói** | [`docs/prompt/01-sdlc-playbook/00-MASTER-AI-NATIVE-SDLC-PLAYBOOK.md`](docs/prompt/01-sdlc-playbook/00-MASTER-AI-NATIVE-SDLC-PLAYBOOK.md) | Chuỗi 17 prompt chuẩn mực từ Pha 00 đến Pha 15 (kèm Pha 04B) phục vụ AI-Native SDLC |

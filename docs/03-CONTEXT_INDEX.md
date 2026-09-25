@@ -105,4 +105,5 @@ Bảng này cung cấp ước tính dung lượng và token của các tệp tà
 | [`docs/08-ORACLE_JAVA_DOCUMENTATION.md`](08-ORACLE_JAVA_DOCUMENTATION.md) | Pha 08: System Handover | 277 | 16,335 | ~4,000 | Cẩm nang kiến trúc kỹ thuật Java Enterprise chuẩn Oracle |
 | [`docs/09-SECURITY_HANDOVER_REPORT.md`](09-SECURITY_HANDOVER_REPORT.md) | Pha 09: Security Audit | 304 | 27,144 | ~6,790 | Hồ sơ bàn giao an ninh, thẩm định OWASP, SEC-01..06, 117 tests |
 | [`docs/10-devops-pipeline-spec.md`](10-devops-pipeline-spec.md) | Pha 10: DevOps & CI/CD | 216 | 8,272 | ~2,050 | Đặc tả Containerization, Docker Compose & GitHub Actions |
+| [`docs/11-RELEASE_NOTES_v1.0.0.md`](11-RELEASE_NOTES_v1.0.0.md) | Pha 11: Release Management | 78 | 4,500 | ~1,100 | Hồ sơ công bố phát hành chính thức v1.0.0, API contracts, Runbook |
 
