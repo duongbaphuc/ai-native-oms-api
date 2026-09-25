@@ -70,7 +70,7 @@ sequenceDiagram
     Client->>CIF: HTTP Request (Optional X-Correlation-Id)
     Note over CIF: Thiết lập MDC traceId & Gán Correlation ID
     CIF->>RLF: Forward Request
-    Note over RLF: Kiểm tra Token Bucket (10 write / 60 read req/min per IP)
+    Note over RLF: Kiểm tra Token Bucket (20 write / 60 read req/min per IP)
     alt Vượt quá Rate Limit
         RLF-->>Client: 429 Too Many Requests (RFC 7807)
     else Trong hạn mức
@@ -100,7 +100,7 @@ c:\ai-native-oms-api\src\main\java\com\gpc\oms
 ├── config/
 │   ├── CorrelationIdFilter.java              [Filter] OncePerRequestFilter gắn Correlation ID vào MDC và Response header (SEC-03)
 │   ├── JwtRoleConverter.java                 [Security] Converter trích xuất & chuẩn hóa role từ JWT claims sang GrantedAuthority (SEC-05)
-│   ├── RateLimitingFilter.java               [Security] Bucket4j Token Bucket rate limiter (10 write / 60 read req/min per IP) (SEC-06)
+│   ├── RateLimitingFilter.java               [Security] Bucket4j Token Bucket rate limiter (20 write / 60 read req/min per IP) (SEC-06)
 │   ├── SecurityConfig.java                   [Security] Dual SecurityFilterChain (h2ConsoleChain !prod & filterChain), RFC 7807 401
 │   └── StringToWorkOrderStatusConverter.java [Converter] Web conversion chuỗi query param sang WorkOrderStatus Enum (kèm cache values array)
 ├── controller/
@@ -252,7 +252,7 @@ Toàn bộ các URN định danh loại lỗi được quản lý tập trung d�
 | `403 Forbidden` | `urn:problem-type:forbidden` | `ProblemTypes.FORBIDDEN` | Access Denied (Tài khoản không có quyền hạn phù hợp trong RBAC) | `handleAccessDenied` |
 | `404 Not Found` | `urn:problem-type:not-found` | `ProblemTypes.NOT_FOUND` | Resource Not Found (Phiếu công tác không tồn tại với ID chỉ định) | `handleResourceNotFound` |
 | `422 Unprocessable Entity` | `urn:problem-type:invalid-state-transition` | `ProblemTypes.INVALID_STATE_TRANSITION` | Illegal State Transition (Vi phạm quy tắc máy trạng thái một chiều) | `handleIllegalStateTransition` |
-| `429 Too Many Requests` | `urn:problem-type:rate-limit-exceeded` | `ProblemTypes.RATE_LIMIT_EXCEEDED` | Too Many Requests (Vượt quá hạn mức 10 write / 60 read req/min per IP) | `RateLimitingFilter` |
+| `429 Too Many Requests` | `urn:problem-type:rate-limit-exceeded` | `ProblemTypes.RATE_LIMIT_EXCEEDED` | Too Many Requests (Vượt quá hạn mức 20 write / 60 read req/min per IP) | `RateLimitingFilter` |
 | `500 Internal Server Error` | `urn:problem-type:internal-error` | `ProblemTypes.INTERNAL_ERROR` | An unexpected error occurred (Lỗi hệ thống bất khả kháng, che giấu stacktrace) | `handleUnexpected` |
 
 ---
@@ -270,7 +270,7 @@ Toàn bộ các URN định danh loại lỗi được quản lý tập trung d�
 - **CSRF Policy:** Vô hiệu hóa CSRF (`csrf.disable()`) theo đúng khuyến nghị của OWASP dành cho Token-based / Stateless REST APIs.
 - **Phòng chống Clickjacking:** Kích hoạt header an ninh `X-Frame-Options: SAMEORIGIN` bảo vệ các trang web console nội bộ khỏi các cuộc tấn công nhúng frame lừa đảo từ bên ngoài.
 - **Truy vết phân tán (Distributed Tracing):** `CorrelationIdFilter` gắn mã định danh UUID vào MDC log và response header `X-Correlation-Id`.
-- **Kiểm soát tần suất gọi (Rate Limiting):** `RateLimitingFilter` sử dụng Bucket4j giới hạn 10 write / 60 read req/min cho mỗi IP, tự động trả về HTTP 429 RFC 7807.
+- **Kiểm soát tần suất gọi (Rate Limiting):** `RateLimitingFilter` sử dụng Bucket4j giới hạn 20 write / 60 read req/min cho mỗi IP, tự động trả về HTTP 429 RFC 7807.
 - **Cơ chế Dual SecurityFilterChain & Đa Môi Trường:**
   * `h2ConsoleChain` (`@Order(1)`): Được bảo vệ bằng `@Profile("!prod")`, chỉ cho phép truy cập H2 Console trên môi trường phát triển (dev/local).
   * `filterChain` (`@Order(2)`): Áp dụng cho mọi môi trường; trên profile `prod`, kích hoạt OAuth2 Resource Server JWT với `JwtRoleConverter` (hỗ trợ Realm & Resource roles) và yêu cầu `ADMIN` cho `/h2-console/**` hoặc `/actuator/prometheus`. Trên profile `!prod`, sử dụng HTTP Basic Auth.

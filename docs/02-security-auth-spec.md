@@ -25,7 +25,7 @@ Tài liệu là kim chỉ nam để duy trì và kiểm chứng tính toàn vẹ
 - **Chiến lược xác thực đa môi trường (Defense-in-Depth):**
   - **Môi trường Non-Prod (Dev / Test / Staging - `@Profile("!prod")`):** HTTP Basic Authentication với danh sách tài khoản demo trong bộ nhớ (`InMemoryUserDetailsManager`).
   - **Môi trường Production (`@Profile("prod")`):** OAuth2 Resource Server xác thực JWT qua HTTP Header `Authorization: Bearer <token>` tích hợp `JwtRoleConverter` (PR #68).
-- **Phòng chống DoS & Brute-force:** `RateLimitingFilter` sử dụng Bucket4j giới hạn 10 write / 60 read req/min cho mỗi IP, tự động trả về HTTP 429 RFC 7807 (PR #65).
+- **Phòng chống DoS & Brute-force:** `RateLimitingFilter` sử dụng Bucket4j giới hạn 20 write / 60 read req/min cho mỗi IP, tự động trả về HTTP 429 RFC 7807 (PR #65).
 - **Truy vết phân tán (Distributed Tracing):** `CorrelationIdFilter` gán mã UUID truy vết vào MDC log context và response header `X-Correlation-Id` (PR #67).
 - **Cơ chế phân quyền:** Phân quyền theo vai trò (Role-Based Access Control - RBAC) sử dụng Method Security `@EnableMethodSecurity(prePostEnabled = true)`.
 - **Kiến trúc Dual SecurityFilterChain (SEC-01 Hardening):**
@@ -116,7 +116,7 @@ Nhằm ngăn ngừa tấn công DoS, Brute-force và kiểm soát mức độ ti
 - **Thuật toán:** Token Bucket (Bucket4j `io.github.bucket4j:bucket4j-core`).
 - **Phân giải định danh Client:** Dựa trên IP Address của client (`X-Forwarded-For` header hoặc `request.getRemoteAddr()`).
 - **Phân tách chính sách Read / Write:**
-  - **Thao tác Ghi (Write - `POST`, `PATCH`, `PUT`, `DELETE`):** 10 requests / phút / IP (nạp 1 token mỗi 6 giây).
+  - **Thao tác Ghi (Write - `POST`, `PATCH`, `PUT`, `DELETE`):** 20 requests / phút / IP (nạp 1 token mỗi 3 giây).
   - **Thao tác Đọc (Read - `GET`, `HEAD`, `OPTIONS`):** 60 requests / phút / IP (nạp 1 token mỗi giây).
 - **Ranh giới Bỏ qua Bộ lọc (`shouldNotFilter`):**
   - Không áp dụng Rate Limiting cho `/actuator/**`, `/`, `/index.html`, `/favicon.ico`, `/h2-console/**`.

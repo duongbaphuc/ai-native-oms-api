@@ -89,20 +89,20 @@ Bảng này cung cấp ước tính dung lượng và token của các tệp tà
 
 | Tên Tệp Markdown | Giai Đoạn SDLC | Số Dòng | Kích Thước (Bytes) | Ước Tính Tokens | Mục Đích Chính |
 |---|---|---|---|---|---|
-| [`docs/00-coding-rules.md`](00-coding-rules.md) | Pha 00: Governance & Rules | 305 | 20,258 | ~4,900 | Chuẩn viết mã Oracle Core, Joshua Bloch, Design Patterns |
-| [`docs/00-internal-coding-standards.md`](00-internal-coding-standards.md) | Pha 00: Governance & Rules | 157 | 11,865 | ~2,900 | Chuẩn UTC Instant, PagedResponse, mapping thủ công |
-| [`docs/00-api-rules.md`](00-api-rules.md) | Pha 00: Governance & Rules | 48 | 3,941 | ~950 | Chuẩn RESTful, JSON schema, RFC 7807 Catalog |
-| [`docs/00-security-rules.md`](00-security-rules.md) | Pha 00: Governance & Rules | 34 | 2,841 | ~700 | OWASP API Top 10, Defense-in-depth guardrails |
-| [`docs/01-br-analysis-wo.md`](01-br-analysis-wo.md) | Pha 01: Business & Domain | 44 | 5,068 | ~1,250 | Phân tích bài toán nghiệp vụ sự cố lưới điện |
-| [`docs/01-domain-model.md`](01-domain-model.md) | Pha 01: Business & Domain | 64 | 4,876 | ~1,200 | Thực thể WorkOrder, Invariants, State Machine |
-| [`docs/02-api-spec.md`](02-api-spec.md) | Pha 02: Architecture & Specs | 199 | 12,588 | ~3,050 | Hợp đồng REST API, Schema Request/Response, RFC 7807 429, Actuator Probes |
-| [`docs/02-database-migration-spec.md`](02-database-migration-spec.md) | Pha 02: Architecture & Specs | 102 | 8,739 | ~2,100 | Flyway DDL `V1__...`, Indexing, Schema constraints |
-| [`docs/02-security-auth-spec.md`](02-security-auth-spec.md) | Pha 02: Architecture & Specs | 196 | 10,575 | ~2,600 | Dual SecurityFilterChain, OAuth2 JWT, Bucket4j Rate Limiting, Correlation ID |
+| [`docs/00-coding-rules.md`](00-coding-rules.md) | Pha 00: Governance & Rules | 370 | 20,258 | ~4,900 | Chuẩn viết mã Oracle Core, Joshua Bloch, Design Patterns |
+| [`docs/00-internal-coding-standards.md`](00-internal-coding-standards.md) | Pha 00: Governance & Rules | 196 | 11,865 | ~2,900 | Chuẩn UTC Instant, PagedResponse, mapping thủ công |
+| [`docs/00-api-rules.md`](00-api-rules.md) | Pha 00: Governance & Rules | 62 | 3,941 | ~950 | Chuẩn RESTful, JSON schema, RFC 7807 Catalog |
+| [`docs/00-security-rules.md`](00-security-rules.md) | Pha 00: Governance & Rules | 50 | 2,841 | ~700 | OWASP API Top 10, Defense-in-depth guardrails |
+| [`docs/01-br-analysis-wo.md`](01-br-analysis-wo.md) | Pha 01: Business & Domain | 59 | 5,068 | ~1,250 | Phân tích bài toán nghiệp vụ sự cố lưới điện |
+| [`docs/01-domain-model.md`](01-domain-model.md) | Pha 01: Business & Domain | 86 | 4,874 | ~1,200 | Thực thể WorkOrder, Invariants, State Machine |
+| [`docs/02-api-spec.md`](02-api-spec.md) | Pha 02: Architecture & Specs | 200 | 12,588 | ~3,050 | Hợp đồng REST API, Schema Request/Response, RFC 7807 429, Actuator Probes |
+| [`docs/02-database-migration-spec.md`](02-database-migration-spec.md) | Pha 02: Architecture & Specs | 137 | 8,739 | ~2,100 | Flyway DDL `V1__...`, Indexing, Schema constraints |
+| [`docs/02-security-auth-spec.md`](02-security-auth-spec.md) | Pha 02: Architecture & Specs | 187 | 10,575 | ~2,600 | Dual SecurityFilterChain, OAuth2 JWT, Bucket4j Rate Limiting, Correlation ID |
 | [`docs/02-observability-and-logging.md`](02-observability-and-logging.md) | Pha 02: Architecture & Specs | 148 | 8,735 | ~2,150 | Tracing, MDC logging context, Prometheus Metrics |
-| [`docs/02-ADR-001-use-h2-database.md`](02-ADR-001-use-h2-database.md) | Pha 02: Architecture & Specs | 20 | 2,058 | ~500 | Quyết định kiến trúc cơ sở dữ liệu H2 |
-| [`docs/03-CONTEXT_INDEX.md`](03-CONTEXT_INDEX.md) | Pha 03: AI Context Index | 105 | 10,047 | ~2,400 | Bản đồ điều hướng ngữ cảnh AI và công thức nạp Modular |
-| [`docs/08-SYSTEM_HANDOVER.md`](08-SYSTEM_HANDOVER.md) | Pha 08: System Handover | 545 | 40,489 | ~9,800 | Hồ sơ bàn giao kỹ thuật toàn diện, 117 tests, Runbook, Prometheus |
-| [`docs/08-ORACLE_JAVA_DOCUMENTATION.md`](08-ORACLE_JAVA_DOCUMENTATION.md) | Pha 08: System Handover | 233 | 16,335 | ~4,000 | Cẩm nang kiến trúc kỹ thuật Java Enterprise chuẩn Oracle |
-| [`docs/09-SECURITY_HANDOVER_REPORT.md`](09-SECURITY_HANDOVER_REPORT.md) | Pha 09: Security Audit | 301 | 26,782 | ~6,500 | Hồ sơ bàn giao an ninh, thẩm định OWASP, SEC-01..06, 117 tests |
-| [`docs/10-devops-pipeline-spec.md`](10-devops-pipeline-spec.md) | Pha 10: DevOps & CI/CD | 166 | 8,272 | ~2,050 | Đặc tả Containerization, Docker Compose & GitHub Actions |
+| [`docs/02-ADR-001-use-h2-database.md`](02-ADR-001-use-h2-database.md) | Pha 02: Architecture & Specs | 28 | 2,058 | ~500 | Quyết định kiến trúc cơ sở dữ liệu H2 |
+| [`docs/03-CONTEXT_INDEX.md`](03-CONTEXT_INDEX.md) | Pha 03: AI Context Index | 109 | 10,936 | ~2,600 | Bản đồ điều hướng ngữ cảnh AI và công thức nạp Modular |
+| [`docs/08-SYSTEM_HANDOVER.md`](08-SYSTEM_HANDOVER.md) | Pha 08: System Handover | 554 | 40,480 | ~9,800 | Hồ sơ bàn giao kỹ thuật toàn diện, 117 tests, Runbook, Prometheus |
+| [`docs/08-ORACLE_JAVA_DOCUMENTATION.md`](08-ORACLE_JAVA_DOCUMENTATION.md) | Pha 08: System Handover | 277 | 16,335 | ~4,000 | Cẩm nang kiến trúc kỹ thuật Java Enterprise chuẩn Oracle |
+| [`docs/09-SECURITY_HANDOVER_REPORT.md`](09-SECURITY_HANDOVER_REPORT.md) | Pha 09: Security Audit | 302 | 26,782 | ~6,500 | Hồ sơ bàn giao an ninh, thẩm định OWASP, SEC-01..06, 117 tests |
+| [`docs/10-devops-pipeline-spec.md`](10-devops-pipeline-spec.md) | Pha 10: DevOps & CI/CD | 216 | 8,272 | ~2,050 | Đặc tả Containerization, Docker Compose & GitHub Actions |
 

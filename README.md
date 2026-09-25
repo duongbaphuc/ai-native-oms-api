@@ -47,6 +47,7 @@ mvn clean verify
 > Kết quả thẩm định tự động toàn diện được lưu trữ minh bạch tại:  
 > - 📄 Vòng đời nghiệp vụ: [`docs/audit-logs/checklist-work-order-lifecycle-2026-09-25.md`](docs/audit-logs/checklist-work-order-lifecycle-2026-09-25.md)  
 > - 🐳 Đóng gói Docker & CI/CD: [`docs/audit-logs/checklist-docker-cicd-2026-09-25.md`](docs/audit-logs/checklist-docker-cicd-2026-09-25.md)  
+> - 📑 Đồng bộ bản thảo Zero-Draft-Drift: [`docs/audit-logs/checklist-drafts-synchronization-2026-09-25.md`](docs/audit-logs/checklist-drafts-synchronization-2026-09-25.md)  
 > Báo cáo ghi nhận chi tiết 100% tiêu chí đạt chuẩn `[x] PASS`, log execution của 117 tests, JaCoCo Quality Gate 100%, Actuator Probes, và chốt chặn Zero-Drift kiểm toán ngữ cảnh.
 
 ### 2. Khởi động Ứng dụng Cục bộ
@@ -91,9 +92,9 @@ Toàn bộ tài liệu trong thư mục [`docs/`](docs/03-CONTEXT_INDEX.md) đư
 | **Pha 01: Business & Domain** | [`docs/01-br-analysis-wo.md`](docs/01-br-analysis-wo.md)<br>[`docs/01-domain-model.md`](docs/01-domain-model.md) | Phân tích bài toán mất điện lưới, mô hình Aggregate Root, Value Objects và State Machine |
 | **Pha 02: Architecture & Specs** | [`docs/02-api-spec.md`](docs/02-api-spec.md)<br>[`docs/02-database-migration-spec.md`](docs/02-database-migration-spec.md)<br>[`docs/02-security-auth-spec.md`](docs/02-security-auth-spec.md)<br>[`docs/02-observability-and-logging.md`](docs/02-observability-and-logging.md)<br>[`docs/02-ADR-001-use-h2-database.md`](docs/02-ADR-001-use-h2-database.md) | Hợp đồng REST API RFC 7807, Flyway DDL migration, Dual SecurityFilterChain, ECS Logging & ADR |
 | **Pha 03: AI Context Index** | [`docs/03-CONTEXT_INDEX.md`](docs/03-CONTEXT_INDEX.md) | Bản đồ điều hướng ngữ cảnh AI và công thức nạp Modular Context |
-| **Pha 04: Implementation Drafts** | [`docs/drafts/`](docs/drafts/) | 9 bản thảo chi tiết (Blueprints) dùng cho Copilot sinh mã nguồn |
+| **Pha 04: Implementation Drafts** | [`docs/drafts/`](docs/drafts/) | 12 bản thảo kỹ thuật chi tiết (Blueprints) bao quát 39 tệp mã nguồn với tỷ lệ 100% Zero-Draft-Drift |
 | **Pha 08: System Handover** | [`docs/08-SYSTEM_HANDOVER.md`](docs/08-SYSTEM_HANDOVER.md)<br>[`docs/08-ORACLE_JAVA_DOCUMENTATION.md`](docs/08-ORACLE_JAVA_DOCUMENTATION.md) | Hồ sơ bàn giao kỹ thuật toàn diện (117 tests, Runbook) và Cẩm nang kiến trúc Java Enterprise |
 | **Pha 09: Security Audit** | [`docs/09-SECURITY_HANDOVER_REPORT.md`](docs/09-SECURITY_HANDOVER_REPORT.md) | Báo cáo thẩm định an ninh bàn giao, kiểm toán OWASP API Top 10 & CWE |
 | **Pha 10: DevOps & CI/CD** | [`docs/10-devops-pipeline-spec.md`](docs/10-devops-pipeline-spec.md) | Đặc tả Multi-stage Dockerfile non-root, Docker Compose & GitHub Actions CI |
 | **Pha 15: Automated Audit** | [`docs/audit-logs/checklist-work-order-lifecycle-2026-09-25.md`](docs/audit-logs/checklist-work-order-lifecycle-2026-09-25.md) | Hồ sơ checklist nghiệm thu tự động, 100% tiêu chí kỹ thuật có log bằng chứng thực thi |
-| **Playbook Trọn Gói** | [`docs/prompt/01-sdlc-playbook/00-MASTER-AI-NATIVE-SDLC-PLAYBOOK.md`](docs/prompt/01-sdlc-playbook/00-MASTER-AI-NATIVE-SDLC-PLAYBOOK.md) | Chuỗi 16 prompt chuẩn mực từ Pha 00 đến Pha 15 phục vụ AI-Native SDLC |
+| **Playbook Trọn Gói** | [`docs/prompt/01-sdlc-playbook/00-MASTER-AI-NATIVE-SDLC-PLAYBOOK.md`](docs/prompt/01-sdlc-playbook/00-MASTER-AI-NATIVE-SDLC-PLAYBOOK.md) | Chuỗi 17 prompt chuẩn mực từ Pha 00 đến Pha 15 (kèm Pha 04B) phục vụ AI-Native SDLC |

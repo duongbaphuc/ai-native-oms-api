@@ -57,7 +57,7 @@ Cuộc rà soát an ninh toàn diện và mô hình hóa mối đe dọa (Compre
 | **API1:2023** | Broken Object Level Authorization (BOLA / IDOR) | ⚠️ **LOW / MONITORED** | `GET /workorders/{id}` và `PATCH /status` kiểm soát bằng UUID ngẫu nhiên v4 (128-bit Entropy) chống tấn công duyệt tuần tự (ID Enumeration). Phân quyền RBAC qua `@PreAuthorize` đảm bảo chỉ người dùng nghiệp vụ hợp lệ mới được truy xuất. Lộ trình multi-tenancy sẽ bổ sung `tenant_id` khi tích hợp vùng điện lực. |
 | **API2:2023** | Broken Authentication | ✅ **PASS (SAFE)** | Hệ thống hỗ trợ cơ chế Stateless Session. Các tài khoản demo hardcoded đã được cô lập an toàn bằng `@Profile("!prod")` (PR #25 & #36). Khi chạy trên Production (`prod`), hệ thống kích hoạt OAuth2 JWT Resource Server và vô hiệu hóa hoàn toàn Basic Auth hardcoded (PR #68). |
 | **API3:2023** | Broken Object Property Level Authorization (Mass Assignment) | ✅ **PASS (SAFE)** | Triệt tiêu hoàn toàn rủi ro Mass Assignment: Request DTO `WorkOrderRequest` chỉ tiếp nhận 3 trường (`equipmentId`, `description`, `priority`). Cấu hình `fail-on-unknown-properties: true` kết hợp `@JsonIgnoreProperties(ignoreUnknown = false)` lập tức từ chối và trả về HTTP 400 nếu client gửi thừa trường. Trạng thái `OPEN` và `createdAt` được gán cố định tại Constructor của Aggregate Root. |
-| **API4:2023** | Unrestricted Resource Consumption (DoS / Large Payloads) | ✅ **PASS (SAFE)** | **ĐÃ KHẮC PHỤC (SEC-02 & SEC-06):** Giới hạn `max-page-size: 100` tại `application.yml` kết hợp Bucket4j Token Bucket `RateLimitingFilter` (10 write / 60 read req/min per IP), triệt tiêu hoàn toàn nguy cơ cạn kiệt CPU và JVM Heap. |
+| **API4:2023** | Unrestricted Resource Consumption (DoS / Large Payloads) | ✅ **PASS (SAFE)** | **ĐÃ KHẮC PHỤC (SEC-02 & SEC-06):** Giới hạn `max-page-size: 100` tại `application.yml` kết hợp Bucket4j Token Bucket `RateLimitingFilter` (20 write / 60 read req/min per IP), triệt tiêu hoàn toàn nguy cơ cạn kiệt CPU và JVM Heap. |
 | **API5:2023** | Broken Function Level Authorization | ✅ **PASS (SAFE)** | Thực thi kiểm soát phân quyền mức phương thức bằng `@EnableMethodSecurity(prePostEnabled = true)`. Ma trận phân quyền: `POST` và `GET` cho phép `DISPATCHER`, `TECHNICIAN`, `ADMIN`; thao tác `PATCH /status` chặn đứng hoàn toàn `DISPATCHER` và trả về HTTP 403 Forbidden kèm RFC 7807 `urn:problem-type:forbidden`. |
 | **API6:2023** | Unrestricted Access to Sensitive Business Flows | ✅ **PASS (SAFE)** | Máy trạng thái (State Machine) được đóng gói chặt chẽ bên trong Domain Aggregate Root `WorkOrder.java`. Phương thức `advanceStatus()` ủy quyền kiểm tra sang `WorkOrderStatus.canTransitionTo()`. Nghiêm cấm tuyệt đối nhảy cóc (`OPEN -> DONE`) hoặc lùi trạng thái, vi phạm sẽ lập tức kích hoạt HTTP 422 Unprocessable Entity kèm `urn:problem-type:invalid-state-transition`. |
 | **API7:2023** | Server Side Request Forgery (SSRF) | ✅ **PASS (SAFE)** | Microservice hoàn toàn độc lập, không thực hiện bất kỳ lệnh gọi HTTP Client ra ngoài dựa trên URL hoặc tài nguyên do người dùng cung cấp. |
@@ -120,7 +120,7 @@ pie title Phân loại tình trạng lỗ hổng & Issue an ninh
 #### ✅ SEC-06: Giới Hạn Tần Suất Gọi API Chống Tấn Công DoS (`RateLimitingFilter`)
 - **Mức độ:** `Minor / P2` (CWE-770 - CVSS: 3.7)
 - **Vị trí tệp mã nguồn:** [`src/main/java/com/gpc/oms/config/RateLimitingFilter.java`](file:///c:/ai-native-oms-api/src/main/java/com/gpc/oms/config/RateLimitingFilter.java)
-- **Biện pháp thực hiện (Merged PR #65):** Tích hợp Bucket4j Token Bucket với hạn mức 10 write / 60 read req/min per IP, trả về HTTP 429 RFC 7807 `urn:problem-type:rate-limit-exceeded`. Bộ test `RateLimitingFilterTest.java` (10 tests) kiểm chứng 100% các kịch bản.
+- **Biện pháp thực hiện (Merged PR #65):** Tích hợp Bucket4j Token Bucket với hạn mức 20 write / 60 read req/min per IP, trả về HTTP 429 RFC 7807 `urn:problem-type:rate-limit-exceeded`. Bộ test `RateLimitingFilterTest.java` (10 tests) kiểm chứng 100% các kịch bản.
 - **Trạng thái:** **CLOSED / RESOLVED ([Issue #34](https://github.com/duongbaphuc/ai-native-oms-api/issues/34))**.
 
 ---
@@ -255,7 +255,7 @@ gantt
 | **Phase 2: P1 Observability** | **SEC-03** | Hiện thực hóa `CorrelationIdFilter.java` kế thừa `OncePerRequestFilter` | `P1` | **ĐÃ HOÀN TẤT** (PR #67) | SRE / Backend Dev |
 | | **OPS-01** | Bổ sung `spring-boot-starter-actuator` và Prometheus registry | `P1` | **ĐÃ HOÀN TẤT** (PR #64) | SRE Engineer |
 | **Phase 3: P2 Enterprise Scale** | **SEC-05** | Tích hợp OAuth2 Resource Server xác thực JWT qua Keycloak/Azure AD | `P2` | **ĐÃ HOÀN TẤT** (PR #68) | Security Architect |
-| | **SEC-06** | Triển khai bộ lọc giới hạn tần suất gọi API với Bucket4j (10 write / 60 read req/min) | `P2` | **ĐÃ HOÀN TẤT** (PR #65) | Security Engineer |
+| | **SEC-06** | Triển khai bộ lọc giới hạn tần suất gọi API với Bucket4j (20 write / 60 read req/min) | `P2` | **ĐÃ HOÀN TẤT** (PR #65) | Security Engineer |
 
 ---
 
@@ -270,7 +270,7 @@ gantt
 | **RBAC Enforcement** | 100% REST endpoints được bảo vệ bởi `@PreAuthorize` | 4/4 Endpoints bảo vệ nghiêm ngặt | **PASSED** |
 | **Fail-Fast Mass Assignment Defense** | Chặn thuộc tính thừa, không cho client tự sửa trạng thái | `@JsonIgnoreProperties(ignoreUnknown=false)` | **PASSED** |
 | **Denial-of-Service Defense** | Giới hạn kích thước trang phân trang $\le 100$ | `max-page-size: 100` | **PASSED** |
-| **Rate Limiting Defense** | Bucket4j Token Bucket rate limiter per IP | 10 write / 60 read req/min | **PASSED** |
+| **Rate Limiting Defense** | Bucket4j Token Bucket rate limiter per IP | 20 write / 60 read req/min | **PASSED** |
 | **Distributed Tracing** | Tự động gán Correlation ID cho mọi request/response | `CorrelationIdFilter` + MDC | **PASSED** |
 | **Database Migration Integrity** | Quản lý schema bằng Flyway, cấm `ddl-auto: update` | `flyway-core` + `ddl-auto: validate` | **PASSED** |
 | **Automated Security & Unit Tests** | 100% Test suite thực thi thành công | 117/117 tests pass (100%) | **PASSED** |
