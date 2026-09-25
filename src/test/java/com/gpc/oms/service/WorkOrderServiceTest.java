@@ -11,11 +11,13 @@ import com.gpc.oms.dto.WorkOrderResponse;
 import com.gpc.oms.dto.WorkOrderStatusRequest;
 import com.gpc.oms.exception.ResourceNotFoundException;
 import com.gpc.oms.testutil.WorkOrderTestFixtures;
+import io.micrometer.core.instrument.MeterRegistry;
+import io.micrometer.core.instrument.simple.SimpleMeterRegistry;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.data.domain.Page;
@@ -39,8 +41,14 @@ class WorkOrderServiceTest {
     @Mock
     private WorkOrderRepository repo;
 
-    @InjectMocks
+    private MeterRegistry registry;
     private WorkOrderService service;
+
+    @BeforeEach
+    void setUp() {
+        registry = new SimpleMeterRegistry();
+        service = new WorkOrderService(repo, registry);
+    }
 
     @Nested
     @DisplayName("createWorkOrder")
@@ -61,6 +69,19 @@ class WorkOrderServiceTest {
             assertThat(response.priority()).isEqualTo(Priority.CRITICAL);
             assertThat(response.status()).isEqualTo(WorkOrderStatus.OPEN);
             verify(repo, times(1)).save(any(WorkOrder.class));
+        }
+
+        @Test
+        @DisplayName("createWorkOrder increments oms_workorders_created_total with priority and status tags")
+        void createWorkOrder_incrementsCreatedCounter() {
+            final WorkOrderRequest request = WorkOrderTestFixtures.createRequest("EQ-101", "Feeder pillar fault", Priority.HIGH);
+            final WorkOrder saved = WorkOrderTestFixtures.createEntity("EQ-101", "Feeder pillar fault", Priority.HIGH);
+            when(repo.save(any(WorkOrder.class))).thenReturn(saved);
+
+            service.createWorkOrder(request);
+
+            assertThat(registry.get("oms_workorders_created_total")
+                .tags("priority", "HIGH", "status", "OPEN").counter().count()).isEqualTo(1.0);
         }
     }
 
@@ -153,6 +174,20 @@ class WorkOrderServiceTest {
             assertThat(response.status()).isEqualTo(WorkOrderStatus.IN_PROGRESS);
             verify(repo, times(1)).findById(id);
             verify(repo, times(1)).save(wo);
+        }
+
+        @Test
+        @DisplayName("updateStatus increments oms_workorder_status_transitions_total with from and to tags")
+        void updateStatus_incrementsTransitionCounter() {
+            final UUID id = UUID.randomUUID();
+            final WorkOrder wo = WorkOrderTestFixtures.createEntity("EQ-401", "Pole mounted fault", Priority.MEDIUM);
+            when(repo.findById(id)).thenReturn(Optional.of(wo));
+            when(repo.save(wo)).thenReturn(wo);
+
+            service.updateStatus(id, WorkOrderTestFixtures.createStatusRequest(WorkOrderStatus.IN_PROGRESS));
+
+            assertThat(registry.get("oms_workorder_status_transitions_total")
+                .tags("from_status", "OPEN", "to_status", "IN_PROGRESS").counter().count()).isEqualTo(1.0);
         }
 
         @Test
