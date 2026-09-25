@@ -1,6 +1,7 @@
 # Outage Work Order API ⚡
 
 [![Build Status](https://img.shields.io/badge/build-passing-brightgreen)](#)
+[![Release](https://img.shields.io/badge/Release-v1.0.0-blue)](https://github.com/duongbaphuc/ai-native-oms-api/releases/tag/v1.0.0)
 [![Java Version](https://img.shields.io/badge/Java-17%20LTS-blue)](#)
 [![Spring Boot](https://img.shields.io/badge/Spring%20Boot-3.3.5-success)](#)
 [![Automated Tests](https://img.shields.io/badge/Tests-117%20Passed-brightgreen)](#)

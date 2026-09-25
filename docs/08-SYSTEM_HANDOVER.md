@@ -345,7 +345,7 @@ mvn clean verify
 mvn spring-boot:run
 
 # 5. Chạy file JAR đóng gói độc lập
-java -jar target/oms-api-demo-0.0.1-SNAPSHOT.jar
+java -jar target/oms-api-demo-1.0.0.jar
 
 # 6. Đóng gói Container Image bảo mật (Multi-stage Dockerfile, non-root user 10001)
 docker build -t oms-api-demo:latest .
