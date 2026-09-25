@@ -30,7 +30,10 @@ public class SecurityConfig {
     @Profile("!prod")
     public SecurityFilterChain h2ConsoleChain(HttpSecurity http) throws Exception {
         http
-            .securityMatcher("/h2-console/**")
+            .securityMatchers(matchers -> matchers.requestMatchers(
+                org.springframework.security.web.util.matcher.AntPathRequestMatcher.antMatcher("/h2-console/**"),
+                org.springframework.security.web.util.matcher.AntPathRequestMatcher.antMatcher("/h2-console")
+            ))
             .csrf(csrf -> csrf.disable())
             .headers(headers -> headers.frameOptions(frame -> frame.sameOrigin()))
             .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
@@ -47,7 +50,10 @@ public class SecurityConfig {
             .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
             .authorizeHttpRequests(auth -> auth
                 .requestMatchers("/", "/index.html", "/favicon.ico", "/actuator/health", "/actuator/info").permitAll()
-                .requestMatchers("/h2-console/**").hasRole("ADMIN")
+                .requestMatchers(
+                    org.springframework.security.web.util.matcher.AntPathRequestMatcher.antMatcher("/h2-console/**"),
+                    org.springframework.security.web.util.matcher.AntPathRequestMatcher.antMatcher("/h2-console")
+                ).hasRole("ADMIN")
                 .requestMatchers("/actuator/prometheus").hasRole("ADMIN")
                 .anyRequest().authenticated()
             )
