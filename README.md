@@ -42,14 +42,19 @@ mvn clean verify
 *Lệnh này chạy toàn bộ 89 automated tests (Unit, Slice, DataJpa, Integration) và thẩm định JaCoCo Quality Gate đạt 100% Line & Branch Coverage.*
 
 > [!NOTE]
-> **Hồ Sơ Kiểm Định & Bằng Chứng Nghiệm Thu Tự Động (Audit Trail Artifact):**  
+> **Hồ Sơ Kiểm Định & Bằng Chứng Nghiệm Thu Tự Động (Audit Trail Artifacts):**  
 > Kết quả thẩm định tự động toàn diện được lưu trữ minh bạch tại:  
-> 📄 [`docs/audit-logs/checklist-work-order-lifecycle-2026-09-25.md`](docs/audit-logs/checklist-work-order-lifecycle-2026-09-25.md)  
-> Báo cáo ghi nhận chi tiết 100% tiêu chí đạt chuẩn `[x] PASS`, log execution của 89 tests, JaCoCo Quality Gate 100% và các mẫu response vi phạm RFC 7807 (HTTP 422, 403, 401).
+> - 📄 Vòng đời nghiệp vụ: [`docs/audit-logs/checklist-work-order-lifecycle-2026-09-25.md`](docs/audit-logs/checklist-work-order-lifecycle-2026-09-25.md)  
+> - 🐳 Đóng gói Docker & CI/CD: [`docs/audit-logs/checklist-docker-cicd-2026-09-25.md`](docs/audit-logs/checklist-docker-cicd-2026-09-25.md)  
+> Báo cáo ghi nhận chi tiết 100% tiêu chí đạt chuẩn `[x] PASS`, log execution của 89 tests, JaCoCo Quality Gate 100%, Actuator Probes, và chốt chặn Zero-Drift kiểm toán ngữ cảnh.
 
 ### 2. Khởi động Ứng dụng Cục bộ
 ```bash
+# Cách 1: Chạy trực tiếp với Maven (H2 Database in-memory)
 mvn spring-boot:run
+
+# Cách 2: Khởi chạy cụm container tích hợp chuẩn Production (API + PostgreSQL)
+docker compose up -d
 ```
 
 ---
