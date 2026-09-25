@@ -59,6 +59,7 @@ public class SecurityConfig {
             .headers(headers -> headers.frameOptions(frame -> frame.sameOrigin()))
             .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
             .authorizeHttpRequests(auth -> auth.anyRequest().permitAll());
+
         return http.build();
     }
 
@@ -139,6 +140,7 @@ public class SecurityConfig {
                 })
             );
         }
+
         return http.build();
     }
 
@@ -153,6 +155,7 @@ public class SecurityConfig {
         final var converter = new JwtAuthenticationConverter();
         converter.setJwtGrantedAuthoritiesConverter(new JwtRoleConverter());
         converter.setPrincipalClaimName("sub");
+
         return converter;
     }
 
@@ -177,6 +180,7 @@ public class SecurityConfig {
             .password("{noop}technician123")
             .roles(RoleConstants.TECHNICIAN)
             .build();
+
         return new InMemoryUserDetailsManager(admin, dispatcher, technician);
     }
 }

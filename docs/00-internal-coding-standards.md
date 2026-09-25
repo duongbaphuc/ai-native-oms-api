@@ -278,4 +278,23 @@ Hệ thống áp dụng triệt để nguyên tắc **Zero Magic Values (Joshua 
 3. **Quy định về Media Types & HTTP Headers:**
    - Cấm viết chuỗi thô `"application/problem+json"` $\rightarrow$ dùng `MediaType.APPLICATION_PROBLEM_JSON_VALUE`.
    - Cấm viết chuỗi thô `"Retry-After"` $\rightarrow$ dùng `HttpHeaders.RETRY_AFTER`.
+4. **Quy định về Khoảng Trống Trước Lệnh Return (Blank Line Before Return Statement):**
+   - **Quy tắc cốt lõi:** Trong mọi phương thức (method) hoặc khối mã lệnh có từ 2 câu lệnh trở lên, câu lệnh `return` bắt buộc phải được ngăn cách với các dòng mã xử lý logic phía trên bằng **chính xác 1 dòng trống (blank line)**.
+   - **Mục đích:** Tách biệt rõ ràng giai đoạn xử lý/tính toán dữ liệu với thời điểm thoát hàm (execution boundary), tạo ranh giới thị giác rõ ràng giúp nâng cao tính trực quan và khả năng đọc mã (readability) cho kỹ sư cũng như AI review.
+   - **Ngoại lệ hợp lệ:**
+     * Phương thức chỉ chứa duy nhất một câu lệnh bên trong thân hàm (Single-line body statement, ví dụ getter đơn giản hoặc delegate trực tiếp `return service.call();`) thì không cần dòng trống phía trên.
+     * Khối lệnh ngắn trong `case -> return ...;` hoặc lambda expression 1 dòng.
+   - **Minh họa quy chuẩn:**
+     ```java
+     // ❌ BAD: Không có dòng trống ngăn cách trước lệnh return
+     final WorkOrderResponse response = workOrderService.createWorkOrder(request);
+     final URI location = URI.create(PATH_WORKORDERS + "/" + response.id());
+     return ResponseEntity.created(location).body(response);
+
+     // ✅ GOOD: Cách 1 dòng trống trước lệnh return
+     final WorkOrderResponse response = workOrderService.createWorkOrder(request);
+     final URI location = URI.create(PATH_WORKORDERS + "/" + response.id());
+
+     return ResponseEntity.created(location).body(response);
+     ```
 
