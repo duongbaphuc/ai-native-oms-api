@@ -3,8 +3,10 @@ package com.gpc.oms.config;
 
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.autoconfigure.actuate.observability.AutoConfigureObservability;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.test.web.servlet.MockMvc;
 
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
@@ -13,6 +15,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 
 @SpringBootTest
 @AutoConfigureMockMvc
+@AutoConfigureObservability
 class ActuatorSecurityTest {
 
     @Autowired
@@ -36,5 +39,26 @@ class ActuatorSecurityTest {
         mockMvc.perform(get("/actuator/env"))
             .andExpect(status().isUnauthorized())
             .andExpect(jsonPath("$.type").value("urn:problem-type:unauthorized"));
+    }
+
+    @Test
+    void prometheusEndpoint_anonymousAccess_returns401() throws Exception {
+        mockMvc.perform(get("/actuator/prometheus"))
+            .andExpect(status().isUnauthorized())
+            .andExpect(jsonPath("$.type").value("urn:problem-type:unauthorized"));
+    }
+
+    @Test
+    @WithMockUser(roles = "DISPATCHER")
+    void prometheusEndpoint_nonAdminRole_returns403() throws Exception {
+        mockMvc.perform(get("/actuator/prometheus"))
+            .andExpect(status().isForbidden());
+    }
+
+    @Test
+    @WithMockUser(roles = "ADMIN")
+    void prometheusEndpoint_adminRole_returns200() throws Exception {
+        mockMvc.perform(get("/actuator/prometheus"))
+            .andExpect(status().isOk());
     }
 }
