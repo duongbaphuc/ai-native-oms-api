@@ -25,20 +25,24 @@ Hiện thực hóa toàn diện hạ tầng đóng gói và đường ống phâ
      * Dịch vụ `postgres`: Image `postgres:15-alpine`, cấu hình persistent volume `pgdata`, thiết lập `POSTGRES_DB=workorderdb`, `POSTGRES_USER=postgres`, `POSTGRES_PASSWORD=postgres_dev_only`, kèm script healthcheck `pg_isready`.
      * Mạng nội bộ biệt lập: Khai báo bridge network `oms-network`.
 
-3. **Thiết Lập Đường Ống CI/CD Tự Động (`.github/workflows/ci.yml`):**
+3. **Thiết Lập Đường Ống CI/CD Tự Động Kèm Chốt Chặn Kiểm Toán Ngữ Cảnh (`.github/workflows/ci.yml`):**
    - Tạo file cấu hình GitHub Actions Workflow tại `.github/workflows/ci.yml`:
      * Kích hoạt tự động khi: `push` vào nhánh `main` hoặc mở `pull_request` vào `main`.
      * **Job 1 (`build-and-test`):**
        - Khởi tạo môi trường Ubuntu runner, cài đặt JDK 17 (Temurin).
-       - Chạy `mvn clean verify` kiểm tra toàn bộ 75 tests tự động.
+       - Chạy `mvn clean verify` kiểm tra toàn bộ 89 tests tự động.
        - Thẩm định chốt chặn **JaCoCo Quality Gate**: Tự động fail build nếu Line Coverage hoặc Branch Coverage dưới ngưỡng 100% trên các gói nghiệp vụ.
        - Upload báo cáo kiểm thử và artifact `jacoco-report` lưu trữ.
      * **Job 2 (`security-scan`):**
        - Quét mã nguồn và container image bằng công cụ bảo mật (Trivy Action).
        - Chặn đứng quy trình merge nếu phát hiện lỗ hổng nghiêm trọng mức `CRITICAL` hoặc `HIGH` (CVEs).
      * **Job 3 (`docker-build`):**
-       - Kiểm tra tính hợp lệ của Dockerfile bằng Hadolint.
        - Thực hiện `docker build` để xác nhận image đóng gói thành công mà không có lỗi.
+     * **Job 4 (`spec-drift-audit` - Chốt chặn chống trôi dạt ngữ cảnh AI-Native):**
+       - **Git Diff Boundary Guard:** Tự động kiểm tra nếu PR có thay đổi mã nguồn trong `src/main/` thì bắt buộc phải có cập nhật tương ứng trong `docs/` hoặc tạo mới file checklist trong `docs/audit-logs/`. Nếu chỉ sửa code mà bỏ quên docs ➔ Tự động FAIL build để bảo vệ tính nhất quán của tài liệu.
+       - **Enum Synchronization:** Trích xuất các giá trị Enum (`WorkOrderStatus`, `Priority`) từ mã nguồn Java và so khớp với bảng Markdown trong `docs/01-domain-model.md` và `docs/02-api-spec.md`. Thiếu bất kỳ giá trị nào ➔ FAIL build.
+       - **RFC 7807 Problem Types URN Audit:** Quét các hằng số URN trong `ProblemTypes.java` và kiểm tra đối chiếu 1-1 với bảng mã lỗi trong `docs/02-api-spec.md`.
+       - **Checklist Sign-off Verification:** Kiểm tra file checklist nghiệm thu gần nhất trong `docs/audit-logs/checklist-*.md`, bắt buộc 100% tiêu chí đạt `[x] PASS`, không cho phép tồn tại `[ ] FAIL`.
 
 4. **Tích Hợp Giám Sát Khả Dụng (Spring Boot Actuator):**
    - Đảm bảo dependency `spring-boot-starter-actuator` được khai báo trong `pom.xml`.
@@ -51,13 +55,14 @@ Hiện thực hóa toàn diện hạ tầng đóng gói và đường ống phâ
 2. **Kích Thước Image Tối Ưu:** Image thành phẩm ở giai đoạn runner không được vượt quá 200MB. Không giữ lại mã nguồn, Maven cache hay build tools trong image cuối.
 3. **Tính Độc Lập Hoàn Toàn Của CI:** Workflow trên GitHub Actions phải tự túc toàn bộ dependencies và chạy được trên clean runner, không phụ thuộc vào bất kỳ file cấu hình máy trạm local nào.
 4. **Vệ Sinh Secret Trong File Compose:** Mọi mật khẩu trong `docker-compose.yml` phải được ghi chú rõ ràng là chỉ dành cho môi trường Dev/Lab cục bộ, sẵn sàng thay thế bằng `.env` hoặc GitHub Secrets.
+5. **Zero-Drift Enforcement:** Mọi thay đổi logic bắt buộc phải đi kèm bằng chứng cập nhật tài liệu tương ứng, không được nới lỏng hay bypass các bước kiểm tra của Job `spec-drift-audit`.
 
 ---
 
-# DONE WHEN:
-1. Tệp `Dockerfile`, `docker-compose.yml`, và `.github/workflows/ci.yml` được tạo đầy đủ đúng vị trí.
+# DONE WHEN (TỰ ĐỘNG THẨM ĐỊNH & XUẤT FILE CHECKLIST):
+1. Tệp `Dockerfile`, `docker-compose.yml`, và `.github/workflows/ci.yml` được cấu hình đầy đủ đúng vị trí, bao gồm đầy đủ 4 jobs (`build-and-test`, `security-scan`, `docker-build`, `spec-drift-audit`).
 2. Lệnh `docker build -t oms-api-demo:latest .` biên dịch và đóng gói thành công image không phát sinh cảnh báo bảo mật.
-3. Lệnh `docker compose up -d` khởi động thành công cụm ứng dụng và cơ sở dữ liệu.
-4. Lệnh `curl http://localhost:8080/actuator/health` trả về `{"status":"UP"}`.
-5. GitHub Actions workflow hợp lệ cú pháp (`action-validator`) và sẵn sàng kích hoạt tự động trên remote repository.
+3. Lệnh `docker compose up -d` khởi động thành công cụm ứng dụng và cơ sở dữ liệu, `curl http://localhost:8080/actuator/health` trả về `{"status":"UP"}`.
+4. **Tự động xuất file Checklist nghiệm thu:** File `docs/audit-logs/checklist-docker-cicd-[YYYY-MM-DD].md` được sinh ra tự động, ghi nhận bằng chứng kiểm thử thực tế và đạt 100% `[x] PASS`.
+5. GitHub Actions workflow kiểm tra cú pháp hợp lệ và Job `spec-drift-audit` xác nhận trạng thái Zero-Drift giữa Code và Docs.
 ```

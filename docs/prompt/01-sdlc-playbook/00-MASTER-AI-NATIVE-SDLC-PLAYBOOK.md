@@ -4,7 +4,7 @@ Tài liệu này tổng hợp toàn bộ chuỗi Prompt chuẩn mực theo cấu
 
 ---
 
-## 1. Sơ Đồ Quy Trình 15 Giai Đoạn Tuyến Tính (Pha 00 - 14)
+## 1. Sơ Đồ Quy Trình 16 Giai Đoạn Tuyến Tính (Pha 00 - 15)
 
 ```mermaid
 graph TD
@@ -30,12 +30,13 @@ graph TD
         P8 --> P9["Pha 9: Kiểm Định Bảo Mật & Lập Hồ Sơ An Ninh Bàn Giao (09-security-audit-and-vulnerability-assessment.prompt.md)"]
     end
 
-    subgraph "Giai đoạn 10-14: Đóng gói Container, CI/CD & Vận hành Bền vững"
+    subgraph "Giai đoạn 10-15: Đóng gói Container, CI/CD, Tối ưu & Tự động Thẩm định"
         P9 --> P10["Pha 10: Đóng Gói Container & CI/CD Pipeline (10-docker-and-cicd-pipeline.prompt.md)"]
         P10 --> P11["Pha 11: Vòng Lặp Sửa Lỗi & Tiến Hóa Tính Năng (11-feature-evolution-and-bugfix.prompt.md)"]
         P11 --> P12["Pha 12: Đồng Bộ & Cập Nhật Tài Liệu Sau Khi Fix Code (12-post-fix-documentation-synchronization.prompt.md)"]
         P12 --> P13["Pha 13: Kiểm Tra & Triển Khai Coding Rules & Design Patterns (13-coding-rules-and-design-patterns-enforcement.prompt.md)"]
         P13 --> P14["Pha 14: Tối Ưu Cú Pháp, Hiệu Năng & Tái Sử Dụng Mã Nguồn (14-syntax-performance-and-code-reuse-optimization.prompt.md)"]
+        P14 --> P15["Pha 15: Sinh Checklist Nghiêm Ngặt & Tự Động Xuất Bằng Chứng Kiểm Định (15-strict-checklist-and-automated-audit-generation.prompt.md)"]
     end
 ```
 
@@ -60,6 +61,7 @@ graph TD
 | **12** | [`12-post-fix-documentation-synchronization.prompt.md`](12-post-fix-documentation-synchronization.prompt.md) | Principal Technical Documentation Architect & Quality Compliance Auditor | Rà soát Git diff sau khi fix code, dò quét độ lệch và cập nhật đồng bộ toàn bộ tài liệu Markdown | Ma trận Spec Drift 100% resolved, docs/ và code đồng bộ tuyệt đối |
 | **13** | [`13-coding-rules-and-design-patterns-enforcement.prompt.md`](13-coding-rules-and-design-patterns-enforcement.prompt.md) | Principal Java Software Architect & Code Quality Auditor | Kiểm tra và triển khai áp dụng bộ quy chuẩn Oracle Coding Rules & Design Patterns lên toàn bộ code và markdown | 100% code & docs tuân thủ chuẩn Oracle, JaCoCo 100% Green, Zero Regression |
 | **14** | [`14-syntax-performance-and-code-reuse-optimization.prompt.md`](14-syntax-performance-and-code-reuse-optimization.prompt.md) | Principal Java Performance Architect & Code Quality Specialist | Tối ưu hóa cú pháp Java 17, hiệu năng máy ảo (JVM / GC), và thúc đẩy tái sử dụng mã nguồn (DRY, Test Fixture Pattern) | Ma trận tối ưu hóa 100%, JaCoCo 100% Green, Zero Regression, PR Atomic |
+| **15** | [`15-strict-checklist-and-automated-audit-generation.prompt.md`](15-strict-checklist-and-automated-audit-generation.prompt.md) | Principal AI-Native SDLC Architect & Quality Gate Automation Lead | Chuyển hóa yêu cầu thành checklist dạng bảng/Boolean, tự động kiểm thử và xuất file `docs/audit-logs/checklist-[feature]-[date].md` | 100% tests pass, JaCoCo 100%, file checklist vật lý ghi nhận 100% `[x] PASS` với log evidence |
 
 ---
 

@@ -16,7 +16,7 @@ Dự án áp dụng phương pháp luận **AI-Native SDLC**, phát triển theo
 
 ## Kiến trúc Tổng quan (Architecture Overview)
 
-- **Ngôn ngữ & Nền tảng:** Pure Java 17 records, Spring Boot 3.3.4 (Zero Lombok, Clean Architecture 3 tầng).
+- **Ngôn ngữ & Nền tảng:** Pure Java 17 records, Spring Boot 3.3.5 (Zero Lombok, Clean Architecture 3 tầng).
 - **Cơ sở dữ liệu:** Dual-DB Architecture — H2 In-Memory (Dev/Test) & PostgreSQL (Production), đồng bộ schema bằng **Flyway Migration** (`ddl-auto: validate`).
 - **Chuẩn giao tiếp:** RESTful API tuân thủ nghiêm ngặt **RFC 7807 Problem Details** cho 100% các phản hồi lỗi.
 - **Bảo mật:** Dual `SecurityFilterChain` (cô lập H2 Console ở `!prod`, HTTP Basic Auth với phân quyền RBAC `@PreAuthorize`).
@@ -39,11 +39,22 @@ Dự án áp dụng phương pháp luận **AI-Native SDLC**, phát triển theo
 ```bash
 mvn clean verify
 ```
-*Lệnh này chạy toàn bộ 78 automated tests (Unit, Slice, DataJpa, Integration) và thẩm định JaCoCo Quality Gate đạt 100% Line & Branch Coverage.*
+*Lệnh này chạy toàn bộ 89 automated tests (Unit, Slice, DataJpa, Integration) và thẩm định JaCoCo Quality Gate đạt 100% Line & Branch Coverage.*
+
+> [!NOTE]
+> **Hồ Sơ Kiểm Định & Bằng Chứng Nghiệm Thu Tự Động (Audit Trail Artifacts):**  
+> Kết quả thẩm định tự động toàn diện được lưu trữ minh bạch tại:  
+> - 📄 Vòng đời nghiệp vụ: [`docs/audit-logs/checklist-work-order-lifecycle-2026-09-25.md`](docs/audit-logs/checklist-work-order-lifecycle-2026-09-25.md)  
+> - 🐳 Đóng gói Docker & CI/CD: [`docs/audit-logs/checklist-docker-cicd-2026-09-25.md`](docs/audit-logs/checklist-docker-cicd-2026-09-25.md)  
+> Báo cáo ghi nhận chi tiết 100% tiêu chí đạt chuẩn `[x] PASS`, log execution của 89 tests, JaCoCo Quality Gate 100%, Actuator Probes, và chốt chặn Zero-Drift kiểm toán ngữ cảnh.
 
 ### 2. Khởi động Ứng dụng Cục bộ
 ```bash
+# Cách 1: Chạy trực tiếp với Maven (H2 Database in-memory)
 mvn spring-boot:run
+
+# Cách 2: Khởi chạy cụm container tích hợp chuẩn Production (API + PostgreSQL)
+docker compose up -d
 ```
 
 ---
@@ -83,4 +94,5 @@ Toàn bộ tài liệu trong thư mục [`docs/`](docs/03-CONTEXT_INDEX.md) đư
 | **Pha 08: System Handover** | [`docs/08-SYSTEM_HANDOVER.md`](docs/08-SYSTEM_HANDOVER.md)<br>[`docs/08-ORACLE_JAVA_DOCUMENTATION.md`](docs/08-ORACLE_JAVA_DOCUMENTATION.md) | Hồ sơ bàn giao kỹ thuật toàn diện (89 tests, Runbook) và Cẩm nang kiến trúc Java Enterprise |
 | **Pha 09: Security Audit** | [`docs/09-SECURITY_HANDOVER_REPORT.md`](docs/09-SECURITY_HANDOVER_REPORT.md) | Báo cáo thẩm định an ninh bàn giao, kiểm toán OWASP API Top 10 & CWE |
 | **Pha 10: DevOps & CI/CD** | [`docs/10-devops-pipeline-spec.md`](docs/10-devops-pipeline-spec.md) | Đặc tả Multi-stage Dockerfile non-root, Docker Compose & GitHub Actions CI |
-| **Playbook Trọn Gói** | [`docs/prompt/01-sdlc-playbook/00-MASTER-AI-NATIVE-SDLC-PLAYBOOK.md`](docs/prompt/01-sdlc-playbook/00-MASTER-AI-NATIVE-SDLC-PLAYBOOK.md) | Chuỗi 15 prompt chuẩn mực từ Pha 00 đến Pha 14 |
+| **Pha 15: Automated Audit** | [`docs/audit-logs/checklist-work-order-lifecycle-2026-09-25.md`](docs/audit-logs/checklist-work-order-lifecycle-2026-09-25.md) | Hồ sơ checklist nghiệm thu tự động, 100% tiêu chí kỹ thuật có log bằng chứng thực thi |
+| **Playbook Trọn Gói** | [`docs/prompt/01-sdlc-playbook/00-MASTER-AI-NATIVE-SDLC-PLAYBOOK.md`](docs/prompt/01-sdlc-playbook/00-MASTER-AI-NATIVE-SDLC-PLAYBOOK.md) | Chuỗi 16 prompt chuẩn mực từ Pha 00 đến Pha 15 phục vụ AI-Native SDLC |

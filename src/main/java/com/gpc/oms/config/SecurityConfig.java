@@ -55,6 +55,7 @@ public class SecurityConfig {
                     org.springframework.security.web.util.matcher.AntPathRequestMatcher.antMatcher("/h2-console/**"),
                     org.springframework.security.web.util.matcher.AntPathRequestMatcher.antMatcher("/h2-console")
                 ).hasRole("ADMIN")
+                .requestMatchers("/actuator/prometheus").hasRole("ADMIN")
                 .anyRequest().authenticated()
             )
             .exceptionHandling(exceptions -> exceptions
