@@ -100,7 +100,7 @@ c:\ai-native-oms-api\src\main\java\com\gpc\oms
 ├── config/
 │   ├── CorrelationIdFilter.java              [Filter] OncePerRequestFilter gắn Correlation ID vào MDC và Response header (SEC-03)
 │   ├── JwtRoleConverter.java                 [Security] Converter trích xuất & chuẩn hóa role từ JWT claims sang GrantedAuthority (SEC-05)
-│   ├── RateLimitingFilter.java               [Security] Bucket4j Token Bucket rate limiter (20 write / 60 read req/min per IP) (SEC-06)
+│   ├── RateLimitingFilter.java               [Security] Bucket4j Token Bucket rate limiter kèm Caffeine Cache LRU eviction (20 write / 60 read req/min per IP) (SEC-06)
 │   ├── SecurityConfig.java                   [Security] Dual SecurityFilterChain (h2ConsoleChain !prod & filterChain), RFC 7807 401
 │   └── StringToWorkOrderStatusConverter.java [Converter] Web conversion chuỗi query param sang WorkOrderStatus Enum (kèm cache values array)
 ├── controller/
@@ -456,15 +456,15 @@ Vị trí báo cáo chi tiết: `target/site/jacoco/index.html`.
 
 | Package | Số Lớp | Methods | Lines | Branches | Instructions | Độ Bao Phủ |
 |---|---|---|---|---|---|---|
-| `com.gpc.oms.exception` | 3 | 11 | 50/50 | 4/4 | 191/191 | **100.0%** |
+| `com.gpc.oms.exception` | 3 | 11 | 51/51 | 4/4 | 191/191 | **100.0%** |
+| `com.gpc.oms.service` | 1 | 8 | 27/27 | 2/2 | 164/164 | **100.0%** |
 | `com.gpc.oms.domain` | 3 | 15 | 39/39 | 11/11 | 162/162 | **100.0%** |
 | `com.gpc.oms.dto` | 4 | 6 | 22/22 | n/a | 110/110 | **100.0%** |
-| `com.gpc.oms.service` | 1 | 8 | 24/24 | 2/2 | 109/109 | **100.0%** |
 | `com.gpc.oms.controller` | 1 | 6 | 17/17 | n/a | 87/87 | **100.0%** |
-| **TỔNG HỢP TOÀN DỰ ÁN** | **12** | **46** | **158/158 (100%)** | **17/17 (100%)** | **718/718 (100%)** | **100.0% (PERFECT)** |
+| **TỔNG HỢP TOÀN DỰ ÁN** | **12** | **46** | **156/156 (100%)** | **17/17 (100%)** | **714/714 (100%)** | **100.0% (PERFECT)** |
 
 > [!NOTE]
-> Số liệu trên được đọc từ `target/site/jacoco/jacoco.xml` sau `mvn clean verify` ngày 25/09/2026: 12 classes, 158 lines, 17 branches, 718 instructions, tất cả đều covered.
+> Số liệu trên được đọc trực tiếp từ `target/site/jacoco/index.html` và `jacoco.xml` sau `mvn clean verify` ngày 25/09/2026: 12 classes, 156 lines, 17 branches, 714 instructions, 46 methods — 100% covered.
 
 ---
 

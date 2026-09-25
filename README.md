@@ -7,7 +7,7 @@
 [![Automated Tests](https://img.shields.io/badge/Tests-117%20Passed-brightgreen)](#)
 [![JaCoCo Coverage](https://img.shields.io/badge/JaCoCo-100%25%20Line%20%26%20Branch-success)](#)
 [![RFC 7807](https://img.shields.io/badge/RFC%207807-Problem%20Details-blueviolet)](#)
-[![Security Posture](https://img.shields.io/badge/Security-Review%20Pending-yellow)](#)
+[![Security Posture](https://img.shields.io/badge/Security-Hardened%20%26%20Audited-brightgreen)](#)
 
 Dịch vụ Outage Work Order là một microservice cốt lõi thuộc phân hệ Outage Management System (OMS). API này cung cấp các giao thức RESTful để tạo, quản lý và theo dõi vòng đời của các sự kiện mất điện trên lưới điện.
 
@@ -23,7 +23,7 @@ Dự án áp dụng phương pháp luận **AI-Native SDLC**, phát triển theo
 - **Ngôn ngữ & Nền tảng:** Pure Java 17 records, Spring Boot 3.3.5 (Zero Lombok, Clean Architecture 3 tầng).
 - **Cơ sở dữ liệu:** Dual-DB Architecture — H2 In-Memory (Dev/Test) & PostgreSQL (Production), đồng bộ schema bằng **Flyway Migration** (`ddl-auto: validate`).
 - **Chuẩn giao tiếp:** RESTful API tuân thủ nghiêm ngặt **RFC 7807 Problem Details** cho 100% các phản hồi lỗi.
-- **Bảo mật & Phòng thủ Chiều sâu:** Dual `SecurityFilterChain` (cô lập H2 Console ở `!prod`, HTTP Basic Auth `!prod`, OAuth2 JWT Resource Server `prod`, Bucket4j Rate Limiting, Distributed Tracing `CorrelationIdFilter`).
+- **Bảo mật & Phòng thủ Chiều sâu:** Dual `SecurityFilterChain` (cô lập H2 Console ở `!prod`, HTTP Basic Auth `!prod`, OAuth2 JWT Resource Server `prod`, Bucket4j Token Bucket kèm Caffeine Cache LRU eviction (SEC-06), Distributed Tracing `CorrelationIdFilter`).
 
 > [!IMPORTANT]
 > **Chính sách Phát triển (Spec-Driven & Zero Drift):** Dự án tuân thủ nguyên tắc "Spec-First": Mọi thay đổi mã nguồn bắt buộc phải đồng bộ 100% với hệ thống tài liệu đặc tả tại [`docs/`](docs/03-CONTEXT_INDEX.md).

@@ -15,6 +15,19 @@ Phiên bản phát hành chính thức đầu tiên của microservice **Outage 
 
 ---
 
+### 🔧 Fixed & Hardened (Post-Release Remediation - PR #79 / Issue #78)
+- **Security & DoS Hardening (SEC-06 / CWE-770 & CWE-400):** Thay thế cơ chế `buckets.clear()` trong `RateLimitingFilter.java` bằng **Caffeine Cache** (`maximumSize=10,000`, `expireAfterAccess=10m`) với thuật toán trục xuất Window TinyLFU / LRU, triệt tiêu hoàn toàn nguy cơ un-throttling và cạn kiệt bộ nhớ DoS.
+- **Refactoring & Clean Architecture:** Loại bỏ khối `try-catch` bắt và ném lại `IllegalStateException` dư thừa tại `WorkOrderService.java:updateStatus`.
+- **Code Standards & Javadoc Compliance:**
+  - Loại bỏ hoàn toàn wildcard imports trong `WorkOrder.java` và `WorkOrderController.java`, chuyển sang import tường minh.
+  - Bổ sung Javadoc chuẩn hóa cho 100% phương thức public trong `WorkOrderController.java` và `WorkOrderService.java`.
+  - Wrap dòng code dài đảm bảo 0 dòng nào vượt quá 120 ký tự trong toàn bộ thư mục `src/main/java`.
+- **Workspace Hygiene:** Xóa bỏ thư mục dư thừa không thuộc phạm vi dự án `csv-vat-calculator/`.
+- **Zero-Draft-Drift:** Đồng bộ hóa 100% các bản thảo `draft-observability-filters.md`, `draft-workorder-service.md`, `draft-workorder-domain.md`, `draft-workorder-create.md`.
+- **Quality Gate:** Đạt 117/117 automated tests PASS (100%), JaCoCo 100% Line (156/156) & Branch (17/17) Coverage.
+
+---
+
 ### ✨ Added (Tính năng mới)
 
 #### 1. Core Outage Work Order RESTful API

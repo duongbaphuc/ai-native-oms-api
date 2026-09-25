@@ -43,7 +43,7 @@ Các tệp trong `docs/drafts/` chứa mã giả (pseudo-code), chữ ký phươ
 - [`docs/drafts/draft-workorder-patch.md`](drafts/draft-workorder-patch.md): `PATCH /api/v1/workorders/{id}/status` (422 invalid transition).
 - [`docs/drafts/draft-global-exception-handler.md`](drafts/draft-global-exception-handler.md): `GlobalExceptionHandler` (7 RFC 7807 handlers).
 - [`docs/drafts/draft-security-config.md`](drafts/draft-security-config.md): `SecurityConfig`, `JwtRoleConverter`, Dual SecurityFilterChain và kiểm thử bảo mật.
-- [`docs/drafts/draft-observability-filters.md`](drafts/draft-observability-filters.md): `CorrelationIdFilter`, `RateLimitingFilter` (Bucket4j Token Bucket).
+- [`docs/drafts/draft-observability-filters.md`](drafts/draft-observability-filters.md): `CorrelationIdFilter`, `RateLimitingFilter` (Bucket4j Token Bucket + Caffeine Cache LRU eviction).
 - [`docs/drafts/draft-shared-components.md`](drafts/draft-shared-components.md): `ProblemTypes`, `StringToWorkOrderStatusConverter`, `WorkOrderTestFixtures` (Object Mother).
 - [`docs/drafts/draft-workorder-tests.md`](drafts/draft-workorder-tests.md): Kim tự tháp kiểm thử 20 test classes (117 test cases) và ma trận chấp nhận đầy đủ.
 
@@ -71,7 +71,7 @@ Khi phát triển từng phần, lập trình viên/Copilot chỉ cần nạp c�
 Thư mục [`docs/prompt/`](prompt/README.md) quản lý toàn bộ các câu lệnh Prompt được chuẩn hóa của dự án:
 - [`docs/prompt/01-sdlc-playbook/`](prompt/01-sdlc-playbook/00-MASTER-AI-NATIVE-SDLC-PLAYBOOK.md): Chuỗi 17 prompt quy trình AI-Native SDLC toàn diện từ Khởi tạo (Pha 00), Bản thảo kỹ thuật (Pha 04B) đến Tự động Thẩm định (Pha 15).
 - [`docs/prompt/02-copilot-slash-commands/`](prompt/02-copilot-slash-commands/README.md): Lệnh Slash Commands tích hợp trong IDE Copilot (`.github/prompts/`).
-- [`docs/prompt/03-module-task-prompts/`](prompt/03-module-task-prompts/README.md): Bản thảo kỹ thuật theo từng module (`docs/drafts/`).
+- [`docs/prompt/03-module-task-prompts/`](prompt/03-module-task-prompts/README.md): 14 Bản thảo kỹ thuật & task prompts theo từng module và kiểm toán chất lượng 13 tiêu chí (Pha 16 & 17).
 - [`docs/prompt/04-dev-contributions/`](prompt/04-dev-contributions/): Prompt đóng góp từ các developer khác (`tudtbis92`, `templates`).
 
 ---
@@ -97,13 +97,13 @@ Bảng này cung cấp ước tính dung lượng và token của các tệp tà
 | [`docs/01-domain-model.md`](01-domain-model.md) | Pha 01: Business & Domain | 91 | 5,309 | ~1,330 | Thực thể WorkOrder, Invariants, State Machine |
 | [`docs/02-api-spec.md`](02-api-spec.md) | Pha 02: Architecture & Specs | 202 | 12,813 | ~3,200 | Hợp đồng REST API, Schema Request/Response, RFC 7807 429, Actuator Probes |
 | [`docs/02-database-migration-spec.md`](02-database-migration-spec.md) | Pha 02: Architecture & Specs | 140 | 9,072 | ~2,270 | Flyway DDL `V1__...`, Indexing, Schema constraints |
-| [`docs/02-security-auth-spec.md`](02-security-auth-spec.md) | Pha 02: Architecture & Specs | 181 | 10,836 | ~2,710 | Dual SecurityFilterChain, OAuth2 JWT, Bucket4j Rate Limiting, Correlation ID |
-| [`docs/02-observability-and-logging.md`](02-observability-and-logging.md) | Pha 02: Architecture & Specs | 148 | 8,735 | ~2,150 | Tracing, MDC logging context, Prometheus Metrics |
+| [`docs/02-security-auth-spec.md`](02-security-auth-spec.md) | Pha 02: Architecture & Specs | 185 | 11,679 | ~2,920 | Dual SecurityFilterChain, OAuth2 JWT, Bucket4j Rate Limiting + Caffeine Cache, Correlation ID |
+| [`docs/02-observability-and-logging.md`](02-observability-and-logging.md) | Pha 02: Architecture & Specs | 147 | 8,735 | ~2,150 | Tracing, MDC logging context, Prometheus Metrics |
 | [`docs/02-ADR-001-use-h2-database.md`](02-ADR-001-use-h2-database.md) | Pha 02: Architecture & Specs | 28 | 2,058 | ~500 | Quyết định kiến trúc cơ sở dữ liệu H2 |
-| [`docs/03-CONTEXT_INDEX.md`](03-CONTEXT_INDEX.md) | Pha 03: AI Context Index | 108 | 10,937 | ~2,600 | Bản đồ điều hướng ngữ cảnh AI và công thức nạp Modular |
-| [`docs/08-SYSTEM_HANDOVER.md`](08-SYSTEM_HANDOVER.md) | Pha 08: System Handover | 556 | 40,686 | ~10,170 | Hồ sơ bàn giao kỹ thuật toàn diện, 117 tests, Runbook, Prometheus |
+| [`docs/03-CONTEXT_INDEX.md`](03-CONTEXT_INDEX.md) | Pha 03: AI Context Index | 110 | 11,250 | ~2,800 | Bản đồ điều hướng ngữ cảnh AI và công thức nạp Modular |
+| [`docs/08-SYSTEM_HANDOVER.md`](08-SYSTEM_HANDOVER.md) | Pha 08: System Handover | 556 | 40,752 | ~10,200 | Hồ sơ bàn giao kỹ thuật toàn diện, 117 tests, Runbook, Prometheus |
 | [`docs/08-ORACLE_JAVA_DOCUMENTATION.md`](08-ORACLE_JAVA_DOCUMENTATION.md) | Pha 08: System Handover | 277 | 16,335 | ~4,000 | Cẩm nang kiến trúc kỹ thuật Java Enterprise chuẩn Oracle |
-| [`docs/09-SECURITY_HANDOVER_REPORT.md`](09-SECURITY_HANDOVER_REPORT.md) | Pha 09: Security Audit | 304 | 27,144 | ~6,790 | Hồ sơ bàn giao an ninh, thẩm định OWASP, SEC-01..06, 117 tests |
+| [`docs/09-SECURITY_HANDOVER_REPORT.md`](09-SECURITY_HANDOVER_REPORT.md) | Pha 09: Security Audit | 314 | 28,635 | ~7,150 | Hồ sơ bàn giao an ninh, thẩm định OWASP, SEC-01..06, 117 tests |
 | [`docs/10-devops-pipeline-spec.md`](10-devops-pipeline-spec.md) | Pha 10: DevOps & CI/CD | 216 | 8,272 | ~2,050 | Đặc tả Containerization, Docker Compose & GitHub Actions |
-| [`docs/11-RELEASE_NOTES_v1.0.0.md`](11-RELEASE_NOTES_v1.0.0.md) | Pha 11: Release Management | 78 | 4,500 | ~1,100 | Hồ sơ công bố phát hành chính thức v1.0.0, API contracts, Runbook |
+| [`docs/11-RELEASE_NOTES_v1.0.0.md`](11-RELEASE_NOTES_v1.0.0.md) | Pha 11: Release Management | 103 | 6,123 | ~1,530 | Hồ sơ công bố phát hành chính thức v1.0.0, API contracts, Runbook |
 

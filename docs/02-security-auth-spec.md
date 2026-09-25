@@ -107,21 +107,25 @@ Dự án xác định 3 vai trò chính trong hệ thống điều hành mất �
 
 ## 5. Chính sách Giới hạn Tần suất (Rate Limiting Policy - SEC-06)
 
-Nhằm ngăn ngừa tấn công DoS, Brute-force và kiểm soát mức độ tiêu thụ tài nguyên của API:
-- **Thuật toán:** Token Bucket (Bucket4j `io.github.bucket4j:bucket4j-core`).
+Nhằm ngăn ngừa tấn công DoS, Brute-force và kiểm soát mức độ tiêu thụ tài nguyên của API (CWE-770 & CWE-400):
+- **Thuật toán cốt lõi:** Token Bucket (Bucket4j `com.bucket4j:bucket4j-core`).
+- **Bộ nhớ đệm & Chiến lược Eviction:** Tích hợp **Caffeine Cache** (`com.github.ben-manes.caffeine:caffeine`) với cấu trúc `Cache<String, Bucket>` sở hữu chính sách Window TinyLFU / LRU eviction tự động:
+  - Ngưỡng dung lượng tối đa: `MAX_CACHE_ENTRIES = 10,000`.
+  - Thời gian hết hạn truy cập: `expireAfterAccess(Duration.ofMinutes(10))`.
+  - **Triệt tiêu lỗ hổng DoS:** Tuyệt đối không sử dụng lệnh xóa toàn bộ `clear()`. Khi chạm ngưỡng dung lượng, Caffeine tự động loại bỏ các bucket không hoạt động của client cũ mà không ảnh hưởng hoặc "ân xá" cho các IP vi phạm đang bị chặn (throttled).
 - **Phân giải định danh Client:** Dựa trên IP Address của client (`X-Forwarded-For` header hoặc `request.getRemoteAddr()`).
 - **Phân tách chính sách Read / Write:**
-  - **Thao tác Ghi (Write - `POST`, `PATCH`, `PUT`, `DELETE`):** 20 requests / phút / IP (nạp 1 token mỗi 3 giây).
-  - **Thao tác Đọc (Read - `GET`, `HEAD`, `OPTIONS`):** 60 requests / phút / IP (nạp 1 token mỗi giây).
+  - **Thao tác Ghi (Write - `POST`, `PATCH`, `PUT`, `DELETE`):** 20 requests / phút / IP (nạp 20 tokens mỗi phút).
+  - **Thao tác Đọc (Read - `GET`, `HEAD`, `OPTIONS`):** 60 requests / phút / IP (nạp 60 tokens mỗi phút).
 - **Ranh giới Bỏ qua Bộ lọc (`shouldNotFilter`):**
   - Không áp dụng Rate Limiting cho `/actuator/**`, `/`, `/index.html`, `/favicon.ico`, `/h2-console/**`.
-- **Xử lý khi vượt hạn mức (Rate Limit Exceeded):** Trả về HTTP `429 Too Many Requests` dạng RFC 7807:
+- **Xử lý khi vượt hạn mức (Rate Limit Exceeded):** Trả về HTTP `429 Too Many Requests` dạng RFC 7807 kèm Header `Retry-After`:
   ```json
   {
     "type": "urn:problem-type:rate-limit-exceeded",
     "title": "Too Many Requests",
     "status": 429,
-    "detail": "Rate limit exceeded. Try again later.",
+    "detail": "Bạn đã vượt quá giới hạn tần suất gọi API. Vui lòng thử lại sau {retryAfterSeconds} giây.",
     "instance": "/api/v1/workorders"
   }
   ```
