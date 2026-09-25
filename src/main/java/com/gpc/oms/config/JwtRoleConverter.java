@@ -9,7 +9,6 @@ import org.springframework.security.oauth2.jwt.Jwt;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
-import java.util.stream.Collectors;
 
 /**
  * Bộ chuyển đổi tùy chỉnh trích xuất và chuẩn hóa quyền vai trò RBAC từ JSON Web Tokens (JWT).
@@ -33,7 +32,6 @@ import java.util.stream.Collectors;
 public class JwtRoleConverter implements Converter<Jwt, Collection<GrantedAuthority>> {
 
     private static final String ROLES_CLAIM = "roles";
-    private static final String ROLE_PREFIX = "ROLE_";
 
     /**
      * Constructor mặc định phục vụ việc khởi tạo bộ chuyển đổi.
@@ -50,8 +48,8 @@ public class JwtRoleConverter implements Converter<Jwt, Collection<GrantedAuthor
      *         hoặc tập hợp rỗng nếu không tồn tại claim vai trò
      */
     @Override
-    public Collection<GrantedAuthority> convert(Jwt jwt) {
-        List<String> roles = jwt.getClaimAsStringList(ROLES_CLAIM);
+    public Collection<GrantedAuthority> convert(final Jwt jwt) {
+        final List<String> roles = jwt.getClaimAsStringList(ROLES_CLAIM);
         if (roles == null || roles.isEmpty()) {
             return Collections.emptyList();
         }
@@ -59,8 +57,10 @@ public class JwtRoleConverter implements Converter<Jwt, Collection<GrantedAuthor
         return roles.stream()
                 .filter(role -> role != null && !role.isBlank())
                 .map(String::trim)
-                .map(role -> role.startsWith(ROLE_PREFIX) ? role : ROLE_PREFIX + role.toUpperCase())
-                .map(SimpleGrantedAuthority::new)
-                .collect(Collectors.toUnmodifiableList());
+                .map(role -> role.startsWith(RoleConstants.ROLE_PREFIX)
+                        ? role
+                        : RoleConstants.ROLE_PREFIX + role.toUpperCase())
+                .<GrantedAuthority>map(SimpleGrantedAuthority::new)
+                .toList();
     }
 }

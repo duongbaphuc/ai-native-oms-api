@@ -47,7 +47,7 @@ public class WorkOrderController {
 
     private final WorkOrderService workOrderService;
 
-    public WorkOrderController(WorkOrderService workOrderService) {
+    public WorkOrderController(final WorkOrderService workOrderService) {
         this.workOrderService = workOrderService;
     }
 

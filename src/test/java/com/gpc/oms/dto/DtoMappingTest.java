@@ -4,6 +4,7 @@ package com.gpc.oms.dto;
 import com.gpc.oms.domain.Priority;
 import com.gpc.oms.domain.WorkOrder;
 import com.gpc.oms.domain.WorkOrderStatus;
+import com.gpc.oms.testutil.WorkOrderTestFixtures;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.data.domain.Page;
@@ -27,9 +28,10 @@ class DtoMappingTest {
     @Test
     @DisplayName("WorkOrderResponse.from(entity) ánh xạ chính xác mọi trường bao gồm resolvedAt null")
     void workOrderResponse_from_openEntity() {
-        WorkOrder entity = new WorkOrder("EQ-01", "Transformer inspection", Priority.HIGH);
+        final WorkOrder entity = WorkOrderTestFixtures.createEntity(
+                "EQ-01", "Transformer inspection", Priority.HIGH);
 
-        WorkOrderResponse dto = WorkOrderResponse.from(entity);
+        final WorkOrderResponse dto = WorkOrderResponse.from(entity);
 
         assertThat(dto.id()).isEqualTo(entity.getId());
         assertThat(dto.equipmentId()).isEqualTo("EQ-01");
@@ -43,11 +45,10 @@ class DtoMappingTest {
     @Test
     @DisplayName("WorkOrderResponse.from(entity) ánh xạ đúng resolvedAt khi trạng thái là DONE")
     void workOrderResponse_from_doneEntity() {
-        WorkOrder entity = new WorkOrder("EQ-02", "Line maintenance", Priority.CRITICAL);
-        entity.advanceStatus(WorkOrderStatus.IN_PROGRESS);
-        entity.advanceStatus(WorkOrderStatus.DONE);
+        final WorkOrder entity = WorkOrderTestFixtures.createDoneEntity(
+                "EQ-02", "Line maintenance", Priority.CRITICAL);
 
-        WorkOrderResponse dto = WorkOrderResponse.from(entity);
+        final WorkOrderResponse dto = WorkOrderResponse.from(entity);
 
         assertThat(dto.status()).isEqualTo(WorkOrderStatus.DONE);
         assertThat(dto.resolvedAt()).isNotNull();

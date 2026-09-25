@@ -38,7 +38,7 @@ public record PagedResponse<T>(
      * @param page Đối tượng trang của Spring Data
      * @return Đối tượng {@link PagedResponse} chuẩn hóa
      */
-    public static <T> PagedResponse<T> from(Page<T> page) {
+    public static <T> PagedResponse<T> from(final Page<T> page) {
         Objects.requireNonNull(page, "page must not be null");
         return new PagedResponse<>(
             page.getContent(),

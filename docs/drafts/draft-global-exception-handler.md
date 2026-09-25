@@ -66,17 +66,17 @@ public class GlobalExceptionHandler {
     @ExceptionHandler(MethodArgumentNotValidException.class)
     public ProblemDetail handleValidationErrors(final MethodArgumentNotValidException ex) {
         log.warn("Validation failed: {}", ex.getMessage());
-        final ProblemDetail problem = ProblemDetail.forStatusAndDetail(HttpStatus.BAD_REQUEST, "Validation Failed");
+        final ProblemDetail problem = ProblemDetail.forStatusAndDetail(HttpStatus.BAD_REQUEST, ProblemTypes.TITLE_VALIDATION_FAILED);
         problem.setType(ProblemTypes.VALIDATION_ERROR);
         
         final List<org.springframework.validation.FieldError> fieldErrors = ex.getBindingResult().getFieldErrors();
         final List<Map<String, String>> invalidParams = new java.util.ArrayList<>(fieldErrors.size());
         for (final org.springframework.validation.FieldError error : fieldErrors) {
             final String reason = error.getDefaultMessage() != null ? error.getDefaultMessage() : "Invalid value";
-            invalidParams.add(Map.of("name", error.getField(), "reason", reason));
+            invalidParams.add(Map.of(ProblemTypes.KEY_NAME, error.getField(), ProblemTypes.KEY_REASON, reason));
         }
             
-        problem.setProperty("invalidParams", invalidParams);
+        problem.setProperty(ProblemTypes.KEY_INVALID_PARAMS, invalidParams);
         return problem;
     }
 
@@ -88,8 +88,8 @@ public class GlobalExceptionHandler {
         log.warn("Malformed request body");
         final ProblemDetail problem = ProblemDetail.forStatusAndDetail(HttpStatus.BAD_REQUEST, "Malformed Request Body");
         problem.setType(ProblemTypes.MALFORMED_JSON);
-        problem.setProperty("invalidParams",
-            List.of(Map.of("name", "body", "reason", "Request body is malformed or contains an invalid enum value")));
+        problem.setProperty(ProblemTypes.KEY_INVALID_PARAMS,
+            List.of(Map.of(ProblemTypes.KEY_NAME, "body", ProblemTypes.KEY_REASON, "Request body is malformed or contains an invalid enum value")));
         return problem;
     }
 
@@ -100,10 +100,10 @@ public class GlobalExceptionHandler {
     @ExceptionHandler(MethodArgumentTypeMismatchException.class)
     public ProblemDetail handleQueryParamTypeMismatch(final MethodArgumentTypeMismatchException ex) {
         log.warn("Query parameter type mismatch: {}", ex.getName());
-        final ProblemDetail problem = ProblemDetail.forStatusAndDetail(HttpStatus.BAD_REQUEST, "Validation Failed");
+        final ProblemDetail problem = ProblemDetail.forStatusAndDetail(HttpStatus.BAD_REQUEST, ProblemTypes.TITLE_VALIDATION_FAILED);
         problem.setType(ProblemTypes.VALIDATION_ERROR);
-        problem.setProperty("invalidParams",
-            List.of(Map.of("name", ex.getName(), "reason", "Invalid value for parameter '" + ex.getName() + "'")));
+        problem.setProperty(ProblemTypes.KEY_INVALID_PARAMS,
+            List.of(Map.of(ProblemTypes.KEY_NAME, ex.getName(), ProblemTypes.KEY_REASON, "Invalid value for parameter '" + ex.getName() + "'")));
         return problem;
     }
 

@@ -82,7 +82,7 @@ public record WorkOrderResponse(
     Instant resolvedAt
 ) {
     // Static Factory Method đóng gói logic mapping, null-safety và tăng tính biểu đạt
-    public static WorkOrderResponse from(WorkOrder workOrder) {
+    public static WorkOrderResponse from(final WorkOrder workOrder) {
         Objects.requireNonNull(workOrder, "workOrder must not be null");
         return new WorkOrderResponse(
             workOrder.getId(),
@@ -199,7 +199,7 @@ WorkOrderResponse res = mapper.map(workOrder, WorkOrderResponse.class);
 #### ✅ GOOD PRACTICE (Oracle Standard - Type-Safe Explicit Mapping):
 ```java
 // GOOD: Trình biên dịch kiểm tra kiểu tĩnh (Static Type Checking), tốc độ microsecond, zero-allocation overhead
-public static WorkOrderResponse from(WorkOrder entity) {
+public static WorkOrderResponse from(final WorkOrder entity) {
     Objects.requireNonNull(entity, "Entity cannot be null");
     return new WorkOrderResponse(
         entity.getId(),
@@ -229,29 +229,29 @@ public class GlobalExceptionHandler {
 
     // Mắt xích #1: Bắt lỗi Validation đầu vào (HTTP 400)
     @ExceptionHandler(MethodArgumentNotValidException.class)
-    public ProblemDetail handleValidationErrors(MethodArgumentNotValidException ex) {
+    public ProblemDetail handleValidationErrors(final MethodArgumentNotValidException ex) {
         log.warn("Validation failed: {}", ex.getMessage());
-        ProblemDetail problem = ProblemDetail.forStatusAndDetail(HttpStatus.BAD_REQUEST, "Validation Failed");
-        problem.setType(URI.create("urn:problem-type:validation-error"));
+        final ProblemDetail problem = ProblemDetail.forStatusAndDetail(HttpStatus.BAD_REQUEST, "Validation Failed");
+        problem.setType(ProblemTypes.VALIDATION_ERROR);
         // Trích xuất invalidParams[] tường minh
         return problem;
     }
 
     // Mắt xích #2: Bắt lỗi vi phạm State Machine (HTTP 422)
     @ExceptionHandler(IllegalStateException.class)
-    public ProblemDetail handleIllegalState(IllegalStateException ex) {
+    public ProblemDetail handleIllegalState(final IllegalStateException ex) {
         log.warn("Illegal state transition: {}", ex.getMessage());
-        ProblemDetail problem = ProblemDetail.forStatusAndDetail(HttpStatus.UNPROCESSABLE_ENTITY, ex.getMessage());
-        problem.setType(URI.create("urn:problem-type:invalid-state-transition"));
+        final ProblemDetail problem = ProblemDetail.forStatusAndDetail(HttpStatus.UNPROCESSABLE_ENTITY, ex.getMessage());
+        problem.setType(ProblemTypes.INVALID_STATE_TRANSITION);
         return problem;
     }
 
     // Mắt xích #3: Chốt chặn an toàn cuối cùng (HTTP 500 - Che giấu stack trace)
     @ExceptionHandler(Exception.class)
-    public ProblemDetail handleUnexpected(Exception ex) {
+    public ProblemDetail handleUnexpected(final Exception ex) {
         log.error("Unexpected system error", ex); // Log full stacktrace CHỈ ở server
-        ProblemDetail problem = ProblemDetail.forStatusAndDetail(HttpStatus.INTERNAL_SERVER_ERROR, "An unexpected error occurred");
-        problem.setType(URI.create("urn:problem-type:internal-error"));
+        final ProblemDetail problem = ProblemDetail.forStatusAndDetail(HttpStatus.INTERNAL_SERVER_ERROR, "An unexpected error occurred");
+        problem.setType(ProblemTypes.INTERNAL_ERROR);
         return problem;
     }
 }
@@ -277,9 +277,9 @@ public class WorkOrderService {
         this.repository = repository;
     }
 
-    public WorkOrderResponse updateStatus(UUID id, WorkOrderStatus targetStatus) {
+    public WorkOrderResponse updateStatus(final UUID id, final WorkOrderStatus targetStatus) {
         // 1. Orchestrate: Tìm kiếm entity
-        WorkOrder workOrder = repository.findById(id)
+        final WorkOrder workOrder = repository.findById(id)
             .orElseThrow(() -> new ResourceNotFoundException("WorkOrder not found with id: " + id));
 
         // 2. Delegate: Ủy quyền kiểm tra invariant và chuyển đổi cho Domain Model

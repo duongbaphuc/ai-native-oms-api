@@ -44,7 +44,7 @@ public record WorkOrderResponse(
      * @param entity Thực thể {@link WorkOrder} trong cơ sở dữ liệu
      * @return Đối tượng {@link WorkOrderResponse} tương ứng
      */
-    public static WorkOrderResponse from(WorkOrder entity) {
+    public static WorkOrderResponse from(final WorkOrder entity) {
         Objects.requireNonNull(entity, "workOrder must not be null");
         return new WorkOrderResponse(
             entity.getId(),

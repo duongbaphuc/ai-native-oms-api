@@ -32,7 +32,7 @@ public enum WorkOrderStatus {
 
     private final String value;
 
-    WorkOrderStatus(String value) {
+    WorkOrderStatus(final String value) {
         this.value = value;
     }
 
@@ -54,7 +54,7 @@ public enum WorkOrderStatus {
      * @param next Trạng thái đích cần chuyển tới
      * @return {@code true} nếu chuyển đổi hợp lệ; {@code false} nếu không hợp lệ
      */
-    public boolean canTransitionTo(WorkOrderStatus next) {
+    public boolean canTransitionTo(final WorkOrderStatus next) {
         return switch (this) {
             case OPEN        -> next == IN_PROGRESS;
             case IN_PROGRESS -> next == DONE;

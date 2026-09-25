@@ -207,7 +207,7 @@ public record WorkOrderResponse(
      * 2. Extract tất cả 7 fields qua getter
      * 3. Return new WorkOrderResponse record
      */
-    public static WorkOrderResponse from(WorkOrder entity) {
+    public static WorkOrderResponse from(final WorkOrder entity) {
         java.util.Objects.requireNonNull(entity, "workOrder must not be null");
         return new WorkOrderResponse(
             entity.getId(),
@@ -268,7 +268,7 @@ public record PagedResponse<T>(
     boolean isFirst,
     boolean isLast
 ) {
-    public static <T> PagedResponse<T> from(Page<T> page) {
+    public static <T> PagedResponse<T> from(final Page<T> page) {
         java.util.Objects.requireNonNull(page, "page must not be null");
         return new PagedResponse<>(
             page.getContent(),

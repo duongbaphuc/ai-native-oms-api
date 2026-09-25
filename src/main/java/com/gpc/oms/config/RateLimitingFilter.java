@@ -92,8 +92,8 @@ public class RateLimitingFilter extends OncePerRequestFilter {
      * @return {@code true} nếu URI không thuộc phạm vi {@code /api/v1/workorders/**}; {@code false} nếu cần lọc
      */
     @Override
-    protected boolean shouldNotFilter(HttpServletRequest request) {
-        String path = request.getRequestURI();
+    protected boolean shouldNotFilter(final HttpServletRequest request) {
+        final String path = request.getRequestURI();
         return path == null || !path.startsWith(TARGET_PATH_PREFIX);
     }
 
@@ -108,24 +108,24 @@ public class RateLimitingFilter extends OncePerRequestFilter {
      * @throws IOException nếu phát sinh lỗi I/O khi ghi phản hồi lỗi
      */
     @Override
-    protected void doFilterInternal(HttpServletRequest request,
-                                    HttpServletResponse response,
-                                    FilterChain filterChain) throws ServletException, IOException {
+    protected void doFilterInternal(final HttpServletRequest request,
+                                    final HttpServletResponse response,
+                                    final FilterChain filterChain) throws ServletException, IOException {
 
-        String clientIp = resolveClientIp(request);
-        boolean isRead = HttpMethod.GET.matches(request.getMethod());
-        String cacheKey = clientIp + ":" + (isRead ? "READ" : "WRITE");
+        final String clientIp = resolveClientIp(request);
+        final boolean isRead = HttpMethod.GET.matches(request.getMethod());
+        final String cacheKey = clientIp + ":" + (isRead ? "READ" : "WRITE");
 
-        Bucket bucket = buckets.get(cacheKey, key -> createNewBucket(isRead));
-        ConsumptionProbe probe = bucket.tryConsumeAndReturnRemaining(1);
+        final Bucket bucket = buckets.get(cacheKey, key -> createNewBucket(isRead));
+        final ConsumptionProbe probe = bucket.tryConsumeAndReturnRemaining(1);
 
         if (probe.isConsumed()) {
             filterChain.doFilter(request, response);
             return;
         }
 
-        long waitForRefillNanos = probe.getNanosToWaitForRefill();
-        long retryAfterSeconds = Math.max(1L, TimeUnit.NANOSECONDS.toSeconds(waitForRefillNanos));
+        final long waitForRefillNanos = probe.getNanosToWaitForRefill();
+        final long retryAfterSeconds = Math.max(1L, TimeUnit.NANOSECONDS.toSeconds(waitForRefillNanos));
 
         log.warn("Rate limit exceeded for client [ip={}, method={}, uri={}, retryAfterSeconds={}]",
                 clientIp, request.getMethod(), request.getRequestURI(), retryAfterSeconds);
@@ -134,7 +134,7 @@ public class RateLimitingFilter extends OncePerRequestFilter {
         response.setHeader(RETRY_AFTER_HEADER, String.valueOf(retryAfterSeconds));
         response.setContentType(PROBLEM_JSON_CONTENT_TYPE);
 
-        String problemJson = """
+        final String problemJson = """
             {"type":"%s",\
             "title":"%s",\
             "status":%d,\
@@ -154,13 +154,13 @@ Vui lòng thử lại sau %d giây.",\
      * @param request Yêu cầu HTTP hiện tại
      * @return Chuỗi địa chỉ IP chuẩn hóa
      */
-    private String resolveClientIp(HttpServletRequest request) {
-        String xForwardedFor = request.getHeader(HEADER_X_FORWARDED_FOR);
+    private String resolveClientIp(final HttpServletRequest request) {
+        final String xForwardedFor = request.getHeader(HEADER_X_FORWARDED_FOR);
         if (xForwardedFor != null && !xForwardedFor.isBlank()) {
-            String[] ips = xForwardedFor.split(",");
+            final String[] ips = xForwardedFor.split(",");
             return ips[0].trim();
         }
-        String remoteAddr = request.getRemoteAddr();
+        final String remoteAddr = request.getRemoteAddr();
         return (remoteAddr != null && !remoteAddr.isBlank()) ? remoteAddr.trim() : UNKNOWN_CLIENT;
     }
 
@@ -170,9 +170,9 @@ Vui lòng thử lại sau %d giây.",\
      * @param isRead {@code true} cho thao tác đọc (60 req/phút), {@code false} cho thao tác ghi (20 req/phút)
      * @return Đối tượng {@link Bucket} an toàn luồng
      */
-    private Bucket createNewBucket(boolean isRead) {
-        long capacity = isRead ? properties.readCapacity() : properties.writeCapacity();
-        Bandwidth bandwidth = Bandwidth.builder()
+    private Bucket createNewBucket(final boolean isRead) {
+        final long capacity = isRead ? properties.readCapacity() : properties.writeCapacity();
+        final Bandwidth bandwidth = Bandwidth.builder()
                 .capacity(capacity)
                 .refillGreedy(capacity, properties.refillDuration())
                 .build();

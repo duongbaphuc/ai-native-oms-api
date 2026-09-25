@@ -1,6 +1,7 @@
 // Nguồn gốc AI: sinh từ docs/01-domain-model.md §Invariants, docs/00-coding-rules.md
 package com.gpc.oms.domain;
 
+import com.gpc.oms.testutil.WorkOrderTestFixtures;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
@@ -16,7 +17,7 @@ class WorkOrderTest {
     @Test
     @DisplayName("Constructor mặc định không tham số tạo đối tượng non-null phục vụ JPA proxying")
     void noArgConstructor_forJpa() {
-        WorkOrder wo = new WorkOrder();
+        final WorkOrder wo = new WorkOrder();
         assertThat(wo).isNotNull();
         assertThat(wo.getId()).isNull();
         assertThat(wo.getEquipmentId()).isNull();
@@ -30,12 +31,12 @@ class WorkOrderTest {
     @Test
     @DisplayName("Constructor có tham số khởi tạo đúng các bất biến mặc định: status=OPEN, resolvedAt=null, createdAt!=null")
     void constructor_setsDefaultValuesAndAllGetters() {
-        WorkOrder wo = new WorkOrder("EQ-77", "Quá tải máy biến áp", Priority.HIGH);
+        final WorkOrder wo = WorkOrderTestFixtures.createDefaultEntity();
 
         assertThat(wo.getId()).isNull(); // Được tự sinh khi lưu vào CSDL
-        assertThat(wo.getEquipmentId()).isEqualTo("EQ-77");
-        assertThat(wo.getDescription()).isEqualTo("Quá tải máy biến áp");
-        assertThat(wo.getPriority()).isEqualTo(Priority.HIGH);
+        assertThat(wo.getEquipmentId()).isEqualTo(WorkOrderTestFixtures.DEFAULT_EQUIPMENT_ID);
+        assertThat(wo.getDescription()).isEqualTo(WorkOrderTestFixtures.DEFAULT_DESCRIPTION);
+        assertThat(wo.getPriority()).isEqualTo(WorkOrderTestFixtures.DEFAULT_PRIORITY);
         assertThat(wo.getStatus()).isEqualTo(WorkOrderStatus.OPEN);
         assertThat(wo.getCreatedAt()).isNotNull();
         assertThat(wo.getResolvedAt()).isNull();
@@ -44,7 +45,7 @@ class WorkOrderTest {
     @Test
     @DisplayName("advanceStatus() cho phép luồng chuyển trạng thái tuyến tính: OPEN -> IN_PROGRESS -> DONE và gán resolvedAt")
     void advanceStatus_allowsLinearFlow_andSetsResolvedAtOnDone() {
-        WorkOrder wo = new WorkOrder("EQ-77", "Quá tải máy biến áp", Priority.HIGH);
+        final WorkOrder wo = WorkOrderTestFixtures.createDefaultEntity();
 
         // Bước 1: Chuyển OPEN -> IN_PROGRESS
         wo.advanceStatus(WorkOrderStatus.IN_PROGRESS);
@@ -60,7 +61,7 @@ class WorkOrderTest {
     @Test
     @DisplayName("advanceStatus() từ chối nhảy cóc trạng thái: OPEN -> DONE ném IllegalStateException")
     void advanceStatus_rejectsSkip_openToDone() {
-        WorkOrder wo = new WorkOrder("EQ-77", "Quá tải máy biến áp", Priority.HIGH);
+        final WorkOrder wo = WorkOrderTestFixtures.createDefaultEntity();
 
         assertThatThrownBy(() -> wo.advanceStatus(WorkOrderStatus.DONE))
             .isInstanceOf(IllegalStateException.class)
@@ -70,7 +71,7 @@ class WorkOrderTest {
     @Test
     @DisplayName("advanceStatus() từ chối tự chuyển đổi sang chính trạng thái hiện tại: OPEN -> OPEN")
     void advanceStatus_rejectsSelfTransition_openToOpen() {
-        WorkOrder wo = new WorkOrder("EQ-77", "Quá tải máy biến áp", Priority.HIGH);
+        final WorkOrder wo = WorkOrderTestFixtures.createDefaultEntity();
 
         assertThatThrownBy(() -> wo.advanceStatus(WorkOrderStatus.OPEN))
             .isInstanceOf(IllegalStateException.class)
@@ -80,7 +81,7 @@ class WorkOrderTest {
     @Test
     @DisplayName("advanceStatus() từ chối quay lui trạng thái: IN_PROGRESS -> OPEN")
     void advanceStatus_rejectsRollback_inProgressToOpen() {
-        WorkOrder wo = new WorkOrder("EQ-77", "Quá tải máy biến áp", Priority.HIGH);
+        final WorkOrder wo = WorkOrderTestFixtures.createDefaultEntity();
         wo.advanceStatus(WorkOrderStatus.IN_PROGRESS);
 
         assertThatThrownBy(() -> wo.advanceStatus(WorkOrderStatus.OPEN))
@@ -91,7 +92,7 @@ class WorkOrderTest {
     @Test
     @DisplayName("advanceStatus() từ chối quay lui trạng thái: DONE -> IN_PROGRESS")
     void advanceStatus_rejectsRollback_doneToInProgress() {
-        WorkOrder wo = new WorkOrder("EQ-77", "Quá tải máy biến áp", Priority.HIGH);
+        final WorkOrder wo = WorkOrderTestFixtures.createDefaultEntity();
         wo.advanceStatus(WorkOrderStatus.IN_PROGRESS);
         wo.advanceStatus(WorkOrderStatus.DONE);
 
@@ -103,7 +104,7 @@ class WorkOrderTest {
     @Test
     @DisplayName("advanceStatus() từ chối quay lui trạng thái: DONE -> OPEN")
     void advanceStatus_rejectsRollback_doneToOpen() {
-        WorkOrder wo = new WorkOrder("EQ-77", "Quá tải máy biến áp", Priority.HIGH);
+        final WorkOrder wo = WorkOrderTestFixtures.createDefaultEntity();
         wo.advanceStatus(WorkOrderStatus.IN_PROGRESS);
         wo.advanceStatus(WorkOrderStatus.DONE);
 

@@ -70,16 +70,14 @@ public class CorrelationIdFilter extends OncePerRequestFilter {
      * @throws IOException nếu phát sinh lỗi I/O khi ghi hoặc truyền dữ liệu phản hồi
      */
     @Override
-    protected void doFilterInternal(HttpServletRequest request,
-                                    HttpServletResponse response,
-                                    FilterChain filterChain) throws ServletException, IOException {
+    protected void doFilterInternal(final HttpServletRequest request,
+                                    final HttpServletResponse response,
+                                    final FilterChain filterChain) throws ServletException, IOException {
 
-        String correlationId = request.getHeader(CORRELATION_ID_HEADER);
-        if (correlationId == null || correlationId.isBlank()) {
-            correlationId = UUID.randomUUID().toString();
-        } else {
-            correlationId = correlationId.trim();
-        }
+        final String rawCorrelationId = request.getHeader(CORRELATION_ID_HEADER);
+        final String correlationId = (rawCorrelationId == null || rawCorrelationId.isBlank())
+                ? UUID.randomUUID().toString()
+                : rawCorrelationId.trim();
 
         try {
             MDC.put(TRACE_ID_MDC_KEY, correlationId);
