@@ -98,7 +98,6 @@ import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.provisioning.InMemoryUserDetailsManager;
 import org.springframework.security.web.SecurityFilterChain;
-import org.springframework.security.web.util.matcher.AntPathRequestMatcher;
 
 @Configuration
 @EnableWebSecurity
@@ -108,11 +107,11 @@ public class SecurityConfig {
     @Bean
     @Order(1)
     @Profile("!prod")
-    public SecurityFilterChain h2ConsoleChain(final HttpSecurity http) throws Exception {
+    public SecurityFilterChain h2ConsoleChain(HttpSecurity http) throws Exception {
         http
             .securityMatchers(matchers -> matchers.requestMatchers(
-                AntPathRequestMatcher.antMatcher("/h2-console/**"),
-                AntPathRequestMatcher.antMatcher("/h2-console")
+                org.springframework.security.web.util.matcher.AntPathRequestMatcher.antMatcher("/h2-console/**"),
+                org.springframework.security.web.util.matcher.AntPathRequestMatcher.antMatcher("/h2-console")
             ))
             .csrf(csrf -> csrf.disable())
             .headers(headers -> headers.frameOptions(frame -> frame.sameOrigin()))
@@ -123,9 +122,8 @@ public class SecurityConfig {
 
     @Bean
     @Order(2)
-    public SecurityFilterChain filterChain(
-            final HttpSecurity http,
-            final org.springframework.beans.factory.ObjectProvider<org.springframework.security.oauth2.jwt.JwtDecoder> jwtDecoderProvider) throws Exception {
+    public SecurityFilterChain filterChain(HttpSecurity http,
+                                           org.springframework.beans.factory.ObjectProvider<org.springframework.security.oauth2.jwt.JwtDecoder> jwtDecoderProvider) throws Exception {
         
         http
             .csrf(csrf -> csrf.disable())
@@ -134,8 +132,8 @@ public class SecurityConfig {
             .authorizeHttpRequests(auth -> auth
                 .requestMatchers("/", "/index.html", "/favicon.ico", "/actuator/health", "/actuator/info").permitAll()
                 .requestMatchers(
-                    AntPathRequestMatcher.antMatcher("/h2-console/**"),
-                    AntPathRequestMatcher.antMatcher("/h2-console")
+                    org.springframework.security.web.util.matcher.AntPathRequestMatcher.antMatcher("/h2-console/**"),
+                    org.springframework.security.web.util.matcher.AntPathRequestMatcher.antMatcher("/h2-console")
                 ).hasRole("ADMIN")
                 .requestMatchers("/actuator/prometheus").hasRole("ADMIN")
                 .anyRequest().authenticated()
@@ -158,7 +156,7 @@ public class SecurityConfig {
             )
             .httpBasic(Customizer.withDefaults());
 
-        final org.springframework.security.oauth2.jwt.JwtDecoder jwtDecoder = jwtDecoderProvider.getIfAvailable();
+        org.springframework.security.oauth2.jwt.JwtDecoder jwtDecoder = jwtDecoderProvider.getIfAvailable();
         if (jwtDecoder != null) {
             http.oauth2ResourceServer(oauth2 -> oauth2
                 .jwt(jwt -> jwt.decoder(jwtDecoder).jwtAuthenticationConverter(jwtAuthenticationConverter()))
@@ -178,7 +176,7 @@ public class SecurityConfig {
 
     @Bean
     public org.springframework.security.oauth2.server.resource.authentication.JwtAuthenticationConverter jwtAuthenticationConverter() {
-        final var converter = new org.springframework.security.oauth2.server.resource.authentication.JwtAuthenticationConverter();
+        var converter = new org.springframework.security.oauth2.server.resource.authentication.JwtAuthenticationConverter();
         converter.setJwtGrantedAuthoritiesConverter(new JwtRoleConverter());
         converter.setPrincipalClaimName("sub");
         return converter;
@@ -187,15 +185,15 @@ public class SecurityConfig {
     @Bean
     @Profile("!prod")
     public UserDetailsService userDetailsService() {
-        final UserDetails admin = User.withUsername("admin")
+        UserDetails admin = User.withUsername("admin")
             .password("{noop}admin123")
             .roles("ADMIN", "DISPATCHER", "TECHNICIAN")
             .build();
-        final UserDetails dispatcher = User.withUsername("dispatcher")
+        UserDetails dispatcher = User.withUsername("dispatcher")
             .password("{noop}dispatcher123")
             .roles("DISPATCHER")
             .build();
-        final UserDetails technician = User.withUsername("technician")
+        UserDetails technician = User.withUsername("technician")
             .password("{noop}technician123")
             .roles("TECHNICIAN")
             .build();
@@ -232,8 +230,8 @@ public class JwtRoleConverter implements Converter<Jwt, Collection<GrantedAuthor
     }
 
     @Override
-    public Collection<GrantedAuthority> convert(final Jwt jwt) {
-        final List<String> roles = jwt.getClaimAsStringList(ROLES_CLAIM);
+    public Collection<GrantedAuthority> convert(Jwt jwt) {
+        List<String> roles = jwt.getClaimAsStringList(ROLES_CLAIM);
         if (roles == null || roles.isEmpty()) {
             return Collections.emptyList();
         }
@@ -243,7 +241,7 @@ public class JwtRoleConverter implements Converter<Jwt, Collection<GrantedAuthor
                 .map(String::trim)
                 .map(role -> role.startsWith(ROLE_PREFIX) ? role : ROLE_PREFIX + role.toUpperCase())
                 .map(SimpleGrantedAuthority::new)
-                .collect(Collectors.collectingAndThen(Collectors.toList(), Collections::unmodifiableList));
+                .collect(Collectors.toUnmodifiableList());
     }
 }
 ```

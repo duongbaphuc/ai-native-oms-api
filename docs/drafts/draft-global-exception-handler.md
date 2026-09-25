@@ -39,10 +39,9 @@ DRAFT ONLY — scoring target, never wired into app.
 ## Handler Code
 
 ```java
-// AI Provenance: generated from docs/00-api-rules.md §2, docs/00-security-rules.md §4, docs/00-coding-rules.md
+// AI Provenance: generated from docs/00-api-rules.md §2, docs/00-security-rules.md §4, docs/drafts/draft-global-exception-handler.md
 package com.gpc.oms.exception;
 
-import com.gpc.oms.exception.ResourceNotFoundException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpStatus;
@@ -54,7 +53,6 @@ import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 import org.springframework.web.method.annotation.MethodArgumentTypeMismatchException;
 
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
@@ -72,7 +70,7 @@ public class GlobalExceptionHandler {
         problem.setType(ProblemTypes.VALIDATION_ERROR);
         
         final List<org.springframework.validation.FieldError> fieldErrors = ex.getBindingResult().getFieldErrors();
-        final List<Map<String, String>> invalidParams = new ArrayList<>(fieldErrors.size());
+        final List<Map<String, String>> invalidParams = new java.util.ArrayList<>(fieldErrors.size());
         for (final org.springframework.validation.FieldError error : fieldErrors) {
             final String reason = error.getDefaultMessage() != null ? error.getDefaultMessage() : "Invalid value";
             invalidParams.add(Map.of("name", error.getField(), "reason", reason));

@@ -70,10 +70,11 @@ public class WorkOrderController {
 
     @PostMapping
     @PreAuthorize("hasAnyRole('DISPATCHER', 'TECHNICIAN', 'ADMIN')")
-    public ResponseEntity<WorkOrderResponse> create(@Valid @RequestBody WorkOrderRequest req) {
-        log.info("create workorder equipmentIdHash={}", req.equipmentId().hashCode());
-        WorkOrderResponse response = workOrderService.createWorkOrder(req);
-        return ResponseEntity.created(URI.create("/api/v1/workorders/" + response.id())).body(response);
+    public ResponseEntity<WorkOrderResponse> createWorkOrder(@Valid @RequestBody final WorkOrderRequest request) {
+        log.info("create workorder equipmentId={}", request.equipmentId().hashCode());
+        final WorkOrderResponse response = workOrderService.createWorkOrder(request);
+        final URI location = URI.create("/api/v1/workorders/" + response.id());
+        return ResponseEntity.created(location).body(response);
     }
 }
 ```

@@ -66,24 +66,25 @@ public class WorkOrder {
     private String description;
     
     @Enumerated(EnumType.STRING)
-    @Column(nullable = false)
+    @Column(nullable = false, length = 20)
     private Priority priority;
     
     @Enumerated(EnumType.STRING)
-    @Column(nullable = false)
+    @Column(nullable = false, length = 20)
     private WorkOrderStatus status;
     
-    @Column(nullable = false)
+    @Column(nullable = false, updatable = false)
     private Instant createdAt;
     
+    @Column(nullable = true)
     private Instant resolvedAt;
 
     protected WorkOrder() {} // JPA only — không gọi từ application code
 
-    public WorkOrder(String equipmentId, String description, Priority priority) {
-        this.equipmentId = equipmentId;
-        this.description = description;
-        this.priority = priority;
+    public WorkOrder(final String equipmentId, final String description, final Priority priority) {
+        this.equipmentId = java.util.Objects.requireNonNull(equipmentId, "equipmentId must not be null");
+        this.description = java.util.Objects.requireNonNull(description, "description must not be null");
+        this.priority = java.util.Objects.requireNonNull(priority, "priority must not be null");
         this.status = WorkOrderStatus.OPEN;
         this.createdAt = Instant.now();
     }
@@ -101,7 +102,8 @@ public class WorkOrder {
      * Chuyển trạng thái theo quy tắc bất biến (one-way state machine).
      * Delegate validation sang WorkOrderStatus.canTransitionTo().
      */
-    public void advanceStatus(WorkOrderStatus newStatus) {
+    public void advanceStatus(final WorkOrderStatus newStatus) {
+        java.util.Objects.requireNonNull(newStatus, "newStatus must not be null");
         if (!this.status.canTransitionTo(newStatus)) {
             throw new IllegalStateException(
                 "Invalid state transition from " + this.status + " to " + newStatus);

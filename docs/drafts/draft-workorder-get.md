@@ -44,10 +44,10 @@ DRAFT ONLY — scoring target, never wired into app.
     @GetMapping
     @PreAuthorize("hasAnyRole('DISPATCHER', 'TECHNICIAN', 'ADMIN')")
     public ResponseEntity<PagedResponse<WorkOrderResponse>> getWorkOrders(
-            @PageableDefault(size = 20, sort = "createdAt", direction = Sort.Direction.DESC) Pageable pageable,
-            @RequestParam(required = false) WorkOrderStatus status) {
+            @PageableDefault(size = 20, sort = "createdAt", direction = Sort.Direction.DESC) final Pageable pageable,
+            @RequestParam(required = false) final WorkOrderStatus status) {
         log.info("get workorders page={} size={} status={}", pageable.getPageNumber(), pageable.getPageSize(), status);
-        PagedResponse<WorkOrderResponse> response = workOrderService.getWorkOrders(pageable, status);
+        final PagedResponse<WorkOrderResponse> response = workOrderService.getWorkOrders(pageable, status);
         return ResponseEntity.ok(response);
     }
 ```
@@ -58,9 +58,9 @@ DRAFT ONLY — scoring target, never wired into app.
 
 ### Step-by-step Logic
 
-**Controller (`getById`):**
+**Controller (`getWorkOrderById`):**
 1. Annotation: `@GetMapping("/{id}")` + `@PreAuthorize("hasAnyRole('DISPATCHER', 'TECHNICIAN', 'ADMIN')")`
-2. Nhận `@PathVariable UUID id`
+2. Nhận `@PathVariable final UUID id`
 3. Log: `log.info("get workorder by id={}", id)` — UUID không phải PII, an toàn để log
 4. Delegate: gọi `workOrderService.getWorkOrderById(id)`
 5. Return `ResponseEntity.ok(response)`
@@ -81,9 +81,9 @@ DRAFT ONLY — scoring target, never wired into app.
 ```java
     @GetMapping("/{id}")
     @PreAuthorize("hasAnyRole('DISPATCHER', 'TECHNICIAN', 'ADMIN')")
-    public ResponseEntity<WorkOrderResponse> getById(@PathVariable UUID id) {
+    public ResponseEntity<WorkOrderResponse> getWorkOrderById(@PathVariable final UUID id) {
         log.info("get workorder by id={}", id);
-        WorkOrderResponse response = workOrderService.getWorkOrderById(id);
+        final WorkOrderResponse response = workOrderService.getWorkOrderById(id);
         return ResponseEntity.ok(response);
     }
 ```
