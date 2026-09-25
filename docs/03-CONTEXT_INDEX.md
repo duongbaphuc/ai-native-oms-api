@@ -12,6 +12,7 @@
 | [`docs/01-br-analysis-wo.md`](01-br-analysis-wo.md) | **Đặc tả Nghiệp vụ Gốc (Baseline SSOT)** | Bắt buộc đọc khi bắt đầu bất kỳ tác vụ nào liên quan đến logic, phân quyền hoặc luồng sự kiện |
 | [`docs/01-domain-model.md`](01-domain-model.md) | Mô hình Thực thể, Thuộc tính, Invariants & State Machine | Sinh code Entity JPA, Enums, Logic chuyển đổi trạng thái |
 | [`docs/02-api-spec.md`](02-api-spec.md) | Hợp đồng REST API, Schema Request/Response, RBAC, Edge Cases | Sinh code Controller, DTOs, cấu hình Method Security |
+| [`docs/02-technical-requirements-and-review-matrix.md`](02-technical-requirements-and-review-matrix.md) | **Đặc tả Yêu cầu Kỹ thuật & Ma trận Review (TRTM)** | Đối soát toàn diện 100% tính năng từ CHANGELOG, 8 trụ cột kỹ thuật, review checklist 3 cấp độ |
 | [`docs/02-database-migration-spec.md`](02-database-migration-spec.md) | CSDL vật lý, Flyway Script (`V1__...sql`), Indexes | Viết SQL migration, cấu hình Flyway, Entity JPA columns |
 | [`docs/02-security-auth-spec.md`](02-security-auth-spec.md) | JWT Claims, RBAC Matrix, CORS, Rate Limit, Web Security | Viết `SecurityConfig`, Token converter, Security tests |
 
@@ -96,6 +97,7 @@ Bảng này cung cấp ước tính dung lượng và token của các tệp tà
 | [`docs/01-br-analysis-wo.md`](01-br-analysis-wo.md) | Pha 01: Business & Domain | 59 | 5,068 | ~1,250 | Phân tích bài toán nghiệp vụ sự cố lưới điện |
 | [`docs/01-domain-model.md`](01-domain-model.md) | Pha 01: Business & Domain | 91 | 5,309 | ~1,330 | Thực thể WorkOrder, Invariants, State Machine |
 | [`docs/02-api-spec.md`](02-api-spec.md) | Pha 02: Architecture & Specs | 202 | 12,813 | ~3,200 | Hợp đồng REST API, Schema Request/Response, RFC 7807 429, Actuator Probes |
+| [`docs/02-technical-requirements-and-review-matrix.md`](02-technical-requirements-and-review-matrix.md) | Pha 19: Requirements & Review | 278 | 26,500 | ~6,600 | Đặc tả 8 trụ cột kỹ thuật từ CHANGELOG, TRTM và 3-tier review checklist |
 | [`docs/02-database-migration-spec.md`](02-database-migration-spec.md) | Pha 02: Architecture & Specs | 140 | 9,072 | ~2,270 | Flyway DDL `V1__...`, Indexing, Schema constraints |
 | [`docs/02-security-auth-spec.md`](02-security-auth-spec.md) | Pha 02: Architecture & Specs | 185 | 11,679 | ~2,920 | Dual SecurityFilterChain, OAuth2 JWT, Bucket4j Rate Limiting + Caffeine Cache, Correlation ID |
 | [`docs/02-observability-and-logging.md`](02-observability-and-logging.md) | Pha 02: Architecture & Specs | 147 | 8,735 | ~2,150 | Tracing, MDC logging context, Prometheus Metrics |

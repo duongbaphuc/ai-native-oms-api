@@ -54,6 +54,11 @@ Dự án đạt mốc kiểm thử hoàn hảo: **117/117 automated tests PASS (
   - Xây dựng tệp prompt `docs/prompt/01-sdlc-playbook/19-technical-requirements-and-review-matrix.prompt.md` trích xuất 100% các yêu cầu kỹ thuật từ `CHANGELOG.md` theo 8 trụ cột kỹ thuật chuẩn mực doanh nghiệp (Domain, API, Security, Resilience, Code Standards, Testing, DevOps, SDLC Governance).
   - Thiết lập khung Ma trận Truy vết Yêu cầu Kỹ thuật (TRTM) và bộ checklist kiểm định review 3 cấp độ (Code Reviewer, Software Architect, Security & QA Auditor) làm căn cứ khách quan phục vụ nghiệm thu dự án.
   - Tích hợp Pha 19 vào quy trình 21 giai đoạn tuyến tính trong `00-MASTER-AI-NATIVE-SDLC-PLAYBOOK.md` và `docs/03-CONTEXT_INDEX.md`.
+- **Hiện thực hóa Đặc tả Yêu cầu Kỹ thuật & Khung Ma Trận Kiểm Định Review Dự Án - Pha 19 ([PR #93](https://github.com/duongbaphuc/ai-native-oms-api/pull/93) - Closes [Issue #92](https://github.com/duongbaphuc/ai-native-oms-api/issues/92)):**
+  - Khởi tạo tệp đặc tả chuẩn mực doanh nghiệp `docs/02-technical-requirements-and-review-matrix.md` bao phủ trọn vẹn 8 trụ cột kỹ thuật với 34 yêu cầu kỹ thuật chi tiết (`REQ-DOM-01..04`, `REQ-API-01..06`, `REQ-SEC-01..06`, `REQ-OPS-01..03`, `REQ-CODE-01..05`, `REQ-TST-01..04`, `REQ-OPS-04..06`, `REQ-GOV-01..04`).
+  - Xây dựng bảng Ma trận Truy vết Yêu cầu Kỹ thuật (TRTM) thiết lập mối liên kết xác thực 1:1 từ từng Req ID sang vị trí mã nguồn (`src/main/java`), kiểm thử tự động (`src/test/java`), cột mốc CHANGELOG và tiêu chí nghiệm thu.
+  - Thiết lập bộ tiêu chí kiểm định review 3 cấp độ (Tier 1: Code Reviewer, Tier 2: Software Architect, Tier 3: Security & QA Auditor) phục vụ đánh giá và nghiệm thu toàn diện microservice.
+  - Cập nhật bản đồ điều hướng ngữ cảnh `docs/03-CONTEXT_INDEX.md` (SSOT và Inventory).
 
 ---
 
@@ -228,7 +233,9 @@ Dự án đạt mốc kiểm thử hoàn hảo: **117/117 automated tests PASS (
 | 88 | [Issue #88](https://github.com/duongbaphuc/ai-native-oms-api/issues/88) | feat(localization): localize Javadoc, code comments and API docs to Vietnamese (Phase 18) | Core / Docs | Pha 18 | Closed |
 | 89 | [PR #89](https://github.com/duongbaphuc/ai-native-oms-api/pull/89) | feat(localization): standardize Javadoc, comments and API docs to Vietnamese (closes #88) | Core / Docs | Pha 18 | Merged |
 | 90 | [Issue #90](https://github.com/duongbaphuc/ai-native-oms-api/issues/90) | docs(playbook): add Phase 19 Technical Requirements Specification & Review Matrix prompt | Playbook | Pha 19 | Closed |
-| 91 | [PR #91](https://github.com/duongbaphuc/ai-native-oms-api/pull/91) | docs(playbook): add Phase 19 Technical Requirements Specification & Review Matrix prompt (closes #90) | Playbook | Pha 19 | Open |
+| 91 | [PR #91](https://github.com/duongbaphuc/ai-native-oms-api/pull/91) | docs(playbook): add Phase 19 Technical Requirements Specification & Review Matrix prompt (closes #90) | Playbook | Pha 19 | Merged |
+| 92 | [Issue #92](https://github.com/duongbaphuc/ai-native-oms-api/issues/92) | docs(spec): generate Technical Requirements Specification & Review Matrix based on CHANGELOG (Phase 19) | Specs | Pha 19 | Closed |
+| 93 | [PR #93](https://github.com/duongbaphuc/ai-native-oms-api/pull/93) | docs(spec): generate Technical Requirements Specification & Review Matrix (closes #92) | Specs | Pha 19 | Open |
 
 ---
 
@@ -242,6 +249,7 @@ Dự án đạt mốc kiểm thử hoàn hảo: **117/117 automated tests PASS (
 
 ### 🔗 Related Documentation (Hồ Sơ Tài Liệu Liên Quan)
 - [Bản Đồ Điều Hướng Ngữ Cảnh AI (`docs/03-CONTEXT_INDEX.md`)](docs/03-CONTEXT_INDEX.md)
+- [Đặc Tả Yêu Cầu Kỹ Thuật & Ma Trận Kiểm Định Review (`docs/02-technical-requirements-and-review-matrix.md`)](docs/02-technical-requirements-and-review-matrix.md)
 - [Hồ Sơ Bàn Giao Kỹ Thuật & Vận Hành Hệ Thống (`docs/08-SYSTEM_HANDOVER.md`)](docs/08-SYSTEM_HANDOVER.md)
 - [Hồ Sơ Đánh Giá An Ninh & Bàn Giao Bảo Mật (`docs/09-SECURITY_HANDOVER_REPORT.md`)](docs/09-SECURITY_HANDOVER_REPORT.md)
 - [Cẩm Nang Kiến Trúc & Tiêu Chuẩn Java Enterprise (`docs/08-ORACLE_JAVA_DOCUMENTATION.md`)](docs/08-ORACLE_JAVA_DOCUMENTATION.md)
