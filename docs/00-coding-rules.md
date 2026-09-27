@@ -403,6 +403,32 @@ public record RateLimitProperties(
 5. Static Factory Methods / Helpers
 6. Private Internal Helper Methods
 
+### Quy Chuẩn Khoảng Trống Cho Lệnh Return (Blank Line Before Return Statement):
+- **Nguyên tắc Oracle Clean Code:** Mọi câu lệnh `return` trong các phương thức (method) hoặc khối mã lệnh có từ 2 câu lệnh trở lên bắt buộc phải được phân cách với khối code tính toán/chuẩn bị phía trên bằng **chính xác 1 dòng trống (blank line)**.
+- **Mục tiêu:** Tạo ranh giới thị giác rõ ràng (visual boundary) giữa phần xử lý logic và câu lệnh kết thúc/thoát hàm, tránh tình trạng mã nguồn dính liền nhau gây khó đọc khi review hoặc kiểm toán mã nguồn.
+- **Ngoại lệ hợp lệ:** Phương thức chỉ có duy nhất một dòng lệnh trong thân hàm (ví dụ: simple getter hoặc delegate gọi 1 dòng duy nhất `return service.call();`) không bắt buộc dòng trống phía trên.
+
+#### ❌ BAD PRACTICE (Return dính liền với câu lệnh phía trước):
+```java
+public WorkOrderResponse createWorkOrder(final WorkOrderRequest request) {
+    log.info("create workorder equipmentId={}", request.equipmentId().hashCode());
+    final WorkOrderResponse response = workOrderService.createWorkOrder(request);
+    final URI location = URI.create(PATH_WORKORDERS + "/" + response.id());
+    return ResponseEntity.created(location).body(response);
+}
+```
+
+#### ✅ GOOD PRACTICE (Cách 1 dòng trống trước lệnh return):
+```java
+public WorkOrderResponse createWorkOrder(final WorkOrderRequest request) {
+    log.info("create workorder equipmentId={}", request.equipmentId().hashCode());
+    final WorkOrderResponse response = workOrderService.createWorkOrder(request);
+    final URI location = URI.create(PATH_WORKORDERS + "/" + response.id());
+
+    return ResponseEntity.created(location).body(response);
+}
+```
+
 ---
 
 ## 6. Chính Sách Nhật Ký Hệ Thống & Bảo Mật Dữ Liệu (Secure Logging)

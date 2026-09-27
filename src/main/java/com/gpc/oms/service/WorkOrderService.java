@@ -52,6 +52,7 @@ public class WorkOrderService {
             WorkOrderMetrics.TAG_PRIORITY, saved.getPriority().name(),
             WorkOrderMetrics.TAG_STATUS, saved.getStatus().name()).increment();
         log.info("created workorder id={}", saved.getId());
+
         return WorkOrderResponse.from(saved);
     }
 
@@ -67,6 +68,7 @@ public class WorkOrderService {
         final Page<WorkOrder> page = (status != null)
                 ? repo.findByStatus(status, pageable)
                 : repo.findAll(pageable);
+
         return PagedResponse.from(page.map(WorkOrderResponse::from));
     }
 
@@ -81,6 +83,7 @@ public class WorkOrderService {
         Objects.requireNonNull(id, "id must not be null");
         final WorkOrder entity = repo.findById(id)
                 .orElseThrow(() -> ResourceNotFoundException.forWorkOrder(id));
+
         return WorkOrderResponse.from(entity);
     }
 
@@ -107,6 +110,7 @@ public class WorkOrderService {
             WorkOrderMetrics.TAG_FROM_STATUS, fromStatus.name(),
             WorkOrderMetrics.TAG_TO_STATUS, saved.getStatus().name()).increment();
         log.info("updated workorder id={} status={}", saved.getId(), saved.getStatus());
+
         return WorkOrderResponse.from(saved);
     }
 }

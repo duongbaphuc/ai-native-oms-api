@@ -55,6 +55,7 @@ public class GlobalExceptionHandler {
         }
             
         problem.setProperty(ProblemTypes.PROPERTY_INVALID_PARAMS, invalidParams);
+
         return problem;
     }
 
@@ -71,6 +72,7 @@ public class GlobalExceptionHandler {
             List.of(Map.of(
                     ProblemTypes.KEY_NAME, ProblemTypes.FIELD_BODY,
                     ProblemTypes.KEY_REASON, ProblemTypes.DETAIL_MALFORMED_BODY)));
+
         return problem;
     }
 
@@ -88,6 +90,7 @@ public class GlobalExceptionHandler {
             List.of(Map.of(
                     ProblemTypes.KEY_NAME, ex.getName(),
                     ProblemTypes.KEY_REASON, "Invalid value for parameter '" + ex.getName() + "'")));
+
         return problem;
     }
 
@@ -100,6 +103,7 @@ public class GlobalExceptionHandler {
         final ProblemDetail problem = ProblemDetail.forStatusAndDetail(
                 HttpStatus.FORBIDDEN, ProblemTypes.TITLE_ACCESS_DENIED);
         problem.setType(ProblemTypes.FORBIDDEN);
+
         return problem;
     }
 
@@ -110,6 +114,7 @@ public class GlobalExceptionHandler {
         log.warn("Resource not found: {}", ex.getMessage());
         final ProblemDetail problem = ProblemDetail.forStatusAndDetail(HttpStatus.NOT_FOUND, ex.getMessage());
         problem.setType(ProblemTypes.NOT_FOUND);
+
         return problem;
     }
 
@@ -121,6 +126,7 @@ public class GlobalExceptionHandler {
         final ProblemDetail problem = ProblemDetail.forStatusAndDetail(
                 HttpStatus.UNPROCESSABLE_ENTITY, ex.getMessage());
         problem.setType(ProblemTypes.INVALID_STATE_TRANSITION);
+
         return problem;
     }
 
@@ -133,6 +139,7 @@ public class GlobalExceptionHandler {
         final ProblemDetail problem = ProblemDetail.forStatusAndDetail(
             HttpStatus.INTERNAL_SERVER_ERROR, ProblemTypes.DETAIL_INTERNAL_ERROR);
         problem.setType(ProblemTypes.INTERNAL_ERROR);
+
         return problem;
     }
 }

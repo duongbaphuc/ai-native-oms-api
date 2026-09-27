@@ -46,6 +46,7 @@ public record WorkOrderResponse(
      */
     public static WorkOrderResponse from(final WorkOrder entity) {
         Objects.requireNonNull(entity, "workOrder must not be null");
+
         return new WorkOrderResponse(
             entity.getId(),
             entity.getEquipmentId(),

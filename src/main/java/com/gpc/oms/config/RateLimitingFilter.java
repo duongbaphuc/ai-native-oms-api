@@ -94,6 +94,7 @@ public class RateLimitingFilter extends OncePerRequestFilter {
     @Override
     protected boolean shouldNotFilter(final HttpServletRequest request) {
         final String path = request.getRequestURI();
+
         return path == null || !path.startsWith(TARGET_PATH_PREFIX);
     }
 
@@ -158,9 +159,11 @@ Vui lòng thử lại sau %d giây.",\
         final String xForwardedFor = request.getHeader(HEADER_X_FORWARDED_FOR);
         if (xForwardedFor != null && !xForwardedFor.isBlank()) {
             final String[] ips = xForwardedFor.split(",");
+
             return ips[0].trim();
         }
         final String remoteAddr = request.getRemoteAddr();
+
         return (remoteAddr != null && !remoteAddr.isBlank()) ? remoteAddr.trim() : UNKNOWN_CLIENT;
     }
 
@@ -176,6 +179,7 @@ Vui lòng thử lại sau %d giây.",\
                 .capacity(capacity)
                 .refillGreedy(capacity, properties.refillDuration())
                 .build();
+
         return Bucket.builder()
                 .addLimit(bandwidth)
                 .build();

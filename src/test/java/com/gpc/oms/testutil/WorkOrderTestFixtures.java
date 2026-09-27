@@ -54,6 +54,7 @@ public final class WorkOrderTestFixtures {
         final WorkOrder wo = new WorkOrder(equipmentId, description, priority);
         wo.advanceStatus(WorkOrderStatus.IN_PROGRESS);
         wo.advanceStatus(WorkOrderStatus.DONE);
+
         return wo;
     }
 
@@ -104,6 +105,7 @@ public final class WorkOrderTestFixtures {
      */
     public static WorkOrderResponse createResponse(final UUID id, final WorkOrderStatus status) {
         final Instant now = Instant.now();
+
         return createResponse(id, DEFAULT_EQUIPMENT_ID, DEFAULT_DESCRIPTION, DEFAULT_PRIORITY,
                 status, now, status == WorkOrderStatus.DONE ? now : null);
     }

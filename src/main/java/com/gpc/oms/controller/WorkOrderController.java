@@ -31,8 +31,11 @@ import java.util.UUID;
 /**
  * REST Controller tiếp nhận các yêu cầu quản lý vòng đời Outage Work Order.
  *
- * <p>Cung cấp các endpoints RESTful tiêu chuẩn cho phép tạo mới, tra cứu danh sách có phân trang,
- * xem chi tiết và chuyển đổi trạng thái phiếu sự cố lưới điện.</p>
+ * <p>
+ * Cung cấp các endpoints RESTful tiêu chuẩn cho phép tạo mới, tra cứu danh sách
+ * có phân trang,
+ * xem chi tiết và chuyển đổi trạng thái phiếu sự cố lưới điện.
+ * </p>
  */
 @RestController
 @RequestMapping(WorkOrderController.PATH_WORKORDERS)
@@ -55,7 +58,8 @@ public class WorkOrderController {
      * Tiếp nhận và tạo mới một phiếu sự cố mất điện (Outage Work Order).
      *
      * @param request DTO chứa thông tin mã thiết bị, mô tả sự cố và độ ưu tiên
-     * @return HTTP 201 Created cùng Header {@code Location} và thông tin phiếu sự cố vừa tạo
+     * @return HTTP 201 Created cùng Header {@code Location} và thông tin phiếu sự
+     *         cố vừa tạo
      */
     @PostMapping
     @PreAuthorize(RoleConstants.HAS_ROLE_DISPATCHER_TECHNICIAN_OR_ADMIN)
@@ -63,14 +67,16 @@ public class WorkOrderController {
         log.info("create workorder equipmentId={}", request.equipmentId().hashCode());
         final WorkOrderResponse response = workOrderService.createWorkOrder(request);
         final URI location = URI.create(PATH_WORKORDERS + "/" + response.id());
+
         return ResponseEntity.created(location).body(response);
     }
 
     /**
      * Tra cứu danh sách phiếu sự cố có phân trang và tùy chọn lọc theo trạng thái.
      *
-     * @param pageable Tham số phân trang và sắp xếp (mặc định size=20, sort=createdAt DESC)
-     * @param status Trạng thái phiếu sự cố cần lọc (OPEN, IN_PROGRESS, DONE)
+     * @param pageable Tham số phân trang và sắp xếp (mặc định size=20,
+     *                 sort=createdAt DESC)
+     * @param status   Trạng thái phiếu sự cố cần lọc (OPEN, IN_PROGRESS, DONE)
      * @return HTTP 200 OK cùng {@link PagedResponse} danh sách phiếu sự cố
      */
     @GetMapping
@@ -80,6 +86,7 @@ public class WorkOrderController {
             @RequestParam(required = false) final WorkOrderStatus status) {
         log.info("get workorders page={} size={} status={}", pageable.getPageNumber(), pageable.getPageSize(), status);
         final PagedResponse<WorkOrderResponse> response = workOrderService.getWorkOrders(pageable, status);
+
         return ResponseEntity.ok(response);
     }
 
@@ -94,13 +101,15 @@ public class WorkOrderController {
     public ResponseEntity<WorkOrderResponse> getWorkOrderById(@PathVariable final UUID id) {
         log.info("get workorder by id={}", id);
         final WorkOrderResponse response = workOrderService.getWorkOrderById(id);
+
         return ResponseEntity.ok(response);
     }
 
     /**
-     * Cập nhật chuyển trạng thái vòng đời của phiếu sự cố theo máy trạng thái đơn hướng.
+     * Cập nhật chuyển trạng thái vòng đời của phiếu sự cố theo máy trạng thái đơn
+     * hướng.
      *
-     * @param id Khóa chính UUID của phiếu sự cố cần cập nhật
+     * @param id      Khóa chính UUID của phiếu sự cố cần cập nhật
      * @param request DTO chứa trạng thái mới cần chuyển tiếp
      * @return HTTP 200 OK cùng thông tin phiếu sự cố sau khi cập nhật
      */
@@ -111,6 +120,7 @@ public class WorkOrderController {
             @Valid @RequestBody final WorkOrderStatusRequest request) {
         log.info("update status workorderId={}", id);
         final WorkOrderResponse response = workOrderService.updateStatus(id, request);
+
         return ResponseEntity.ok(response);
     }
 }
